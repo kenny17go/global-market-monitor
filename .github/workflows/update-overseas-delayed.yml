@@ -1,0 +1,41 @@
+name: Update overseas delayed data
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'scripts/fetch-overseas-delayed.mjs'
+      - '.github/workflows/update-overseas-delayed.yml'
+  schedule:
+    - cron: '*/15 * * * 1-5'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-overseas-delayed
+  cancel-in-progress: true
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Fetch Yahoo / Investing delayed futures
+        run: node scripts/fetch-overseas-delayed.mjs
+      - name: Validate JSON
+        run: node -e "JSON.parse(require('fs').readFileSync('data/overseas-delayed.json','utf8'))"
+      - name: Commit delayed data
+        run: |
+          if git diff --quiet -- data/overseas-delayed.json; then
+            echo "No delayed-data changes"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/overseas-delayed.json
+          git commit -m "data: refresh overseas delayed futures"
+          git push
