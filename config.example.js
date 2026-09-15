@@ -9,7 +9,9 @@ window.addEventListener('load',()=>{
   const addScript=(src,key)=>{if(document.querySelector(`script[data-${key}]`))return;const s=document.createElement('script');s.src=src;s.setAttribute(`data-${key}`,'1');document.body.appendChild(s)};
   addCss('v1.4.css','gmm-v14');
   addCss('v1.5.css','gmm-v15');
+  addCss('v1.6.css','gmm-v16');
   addScript('contract-specs.js','gmm-v14');
   setTimeout(()=>addScript('contract-months.js','gmm-v15'),100);
   setTimeout(()=>addScript('display-format.js','gmm-format'),220);
+  setTimeout(()=>addScript('custom-products.js','gmm-v16'),320);
 });
