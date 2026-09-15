@@ -1,4 +1,12 @@
-# Global Market Monitor v1.3
+# Global Market Monitor v1.4
+
+## v1.4
+- Contract & Cost Lab 現在會依選定商品自動帶入交易所官方規格預設。
+- 自動欄位：合約乘數、交易幣別、Tick、掛牌/到期週期、部分報價方向。
+- 內建 TWD 換算：USD、JPY、CNH、GBP、EUR、AUD 會由 Dashboard FX 示範資料換算。
+- USD/JPY vs CME 6J 會自動以倒數正規化價格方向。
+- TGF vs COMEX Gold 與 BRF vs ICE Brent 會自動套入價格單位/幣別換算。
+- 所有規格仍可手動覆寫，以方便測試特殊月份或券商實際成本。
 
 GitHub Pages ready market dashboard prototype.
 
@@ -18,8 +26,8 @@ Energy: BRF.
 
 RTF (CNT fixing) is not treated as identical to offshore CNH for direct cross-exchange comparison.
 
-### Contract & Cost Lab
-- 到期月份、Bid/Ask/Last、合約乘數、口數、單位換算、FX 換算。
+## v1.3 cost lab
+- 新增 Contract & Cost Lab：到期月份、Bid/Ask/Last、合約乘數、口數、單位換算、FX 換算。
 - 可輸入台期所成本、海外成本、稅/FX/其他成本。
 - 顯示換算後價格價差、每點價值避險比、雙邊名目金額與成本後名目差額。
 - Formula Lab 保留，可與成本工具並用。
