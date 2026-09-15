@@ -520,7 +520,7 @@
   "crossMarketCatalog": [
     {
       "category": "台灣指數",
-      "name": "臺指期 TX / 小型臺指 MTX",
+      "name": "臺指期",
       "underlying": "TAIEX",
       "tw": {
         "id": "TAIFEX_TX",
