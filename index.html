@@ -30,18 +30,33 @@
 
       <section id="spreadView" class="view">
         <section class="spread-hero panel">
-          <div><h2>跨交易所價差比較</h2><p>台灣期貨交易所 vs 海外主要交易所。以同標的、同到期月份、近似同步報價計算兩個可交易方向的價差。</p></div>
-          <div class="spread-controls"><label>顯示 <select id="spreadFilter"><option value="all">全部</option><option value="equity">股價指數</option><option value="commodity">商品</option></select></label><label class="chip"><input id="onlyOpportunity" type="checkbox">只看有正價差</label></div>
+          <div><h2>跨市場商品庫 & 自訂比較</h2><p>列出台灣期貨交易所中，在海外主要交易所也有相同或可直接對應標的的商品。報價保留原始 Bid / Ask / Last，不限制比較方式；下方公式工具可自行決定換算、價差、比率、百分比或多商品組合。</p></div>
+          <div class="spread-controls"><label>分類 <select id="catalogFilter"><option value="all">全部</option><option value="股價指數">股價指數</option><option value="外匯">外匯</option><option value="貴金屬">貴金屬</option><option value="能源">能源</option></select></label></div>
         </section>
-        <section class="spread-kpis" id="spreadKpis"></section>
-        <article class="panel spread-table-panel"><h3>TAIFEX vs Overseas Futures <small>Demo：Bid/Ask executable spread</small></h3><div class="table-wrap spread-table-wrap"><table><thead><tr><th>標的</th><th>到期月</th><th>台期所</th><th>Bid</th><th>Ask</th><th>海外交易所</th><th>Bid</th><th>Ask</th><th>賣台 / 買海外</th><th>買台 / 賣海外</th><th>較佳方向</th><th>同步差</th></tr></thead><tbody id="spreadBody"></tbody></table></div></article>
+        <section id="catalogSummary" class="spread-kpis"></section>
+        <article class="panel spread-table-panel"><h3>可比較商品 / Comparable Products <small>TAIFEX × Overseas</small></h3><div class="table-wrap spread-table-wrap"><table><thead><tr><th>分類</th><th>標的</th><th>台期所</th><th>Bid</th><th>Ask</th><th>Last</th><th>海外市場</th><th>商品</th><th>Bid</th><th>Ask</th><th>Last</th><th>比較注意</th></tr></thead><tbody id="catalogBody"></tbody></table></div></article>
+
+        <section class="formula-lab panel">
+          <div class="formula-lab-head"><div><h3>自訂比較公式 / Formula Lab</h3><p>任意插入商品欄位與運算符號。支援 + − × ÷、括號與 &gt; &lt; &gt;= &lt;= ==。公式只使用你選的原始行情，不預設比較邏輯。</p></div><button id="clearFormula" class="secondary-btn">清除</button></div>
+          <div class="formula-tools">
+            <select id="tokenSelect"><option value="">選擇報價欄位…</option></select><button id="insertToken">插入欄位</button>
+            <button data-op=" + ">＋</button><button data-op=" - ">−</button><button data-op=" * ">×</button><button data-op=" / ">÷</button><button data-op="(">(</button><button data-op=")">)</button>
+            <button data-op=" > ">&gt;</button><button data-op=" < ">&lt;</button><button data-op=" >= ">&gt;=</button><button data-op=" <= ">&lt;=</button>
+          </div>
+          <textarea id="spreadFormula" rows="3" placeholder="例 1：TAIFEX_SPF.BID - CME_ES.ASK
+例 2：(TAIFEX_XJF.LAST - (1 / CME_6J.LAST))
+例 3：(TAIFEX_GDF.LAST / COMEX_GC.LAST - 1) * 100"></textarea>
+          <div class="formula-action-row"><button id="calcSpreadFormula">計算公式</button><button id="saveSpreadFormula" class="secondary-btn">儲存到監控</button><span id="formulaResult" class="formula-result">等待輸入公式</span></div>
+          <div class="formula-examples"><button data-example="TAIFEX_SPF.BID - CME_ES.ASK">S&P 可成交價差</button><button data-example="TAIFEX_UNF.LAST / CME_NQ.LAST - 1">Nasdaq 比率</button><button data-example="TAIFEX_XJF.LAST - (1 / CME_6J.LAST)">JPY 倒數換向</button><button data-example="(TAIFEX_GDF.LAST / COMEX_GC.LAST - 1) * 100">Gold % 差</button><button data-example="TAIFEX_BRF.BID - ICE_BRENT.ASK">Brent Bid/Ask 價差</button></div>
+        </section>
+
         <div class="spread-grid">
-          <article class="panel"><h3>價差監控說明 <small>找價差前先對齊條件</small></h3><div class="info-list"><div><b>1. 同到期月份</b><span>不同月份的 carry 不同，不直接比較。</span></div><div><b>2. 用 Bid / Ask</b><span>不用 Last Price 假設可成交價；兩個方向分開算。</span></div><div><b>3. 同步時間</b><span>兩地報價延遲不同時，表面價差可能是假訊號。</span></div><div><b>4. 成本後價差</b><span>正式版會加入交易成本、稅費、匯率與合約乘數。</span></div></div></article>
-          <article class="panel"><h3>自訂價差警示 <small>下一階段可接 Push</small></h3><div class="spread-alert-examples"><span>SPX_TW_SELL_US_BUY &gt; 5</span><span>SOX_TW_BUY_US_SELL &gt; 10</span><span>TOPIX_TW_SELL_JP_BUY &gt; 3</span></div></article>
+          <article class="panel"><h3>比較原則 <small>你決定公式，系統不替你限制</small></h3><div class="info-list"><div><b>同月份</b><span>跨市場期貨最好先確認相同或相近到期月。</span></div><div><b>Bid / Ask / Last</b><span>三種欄位都可直接放入公式；找可成交價差時優先使用 Bid/Ask。</span></div><div><b>報價方向</b><span>例如 TAIFEX USD/JPY 與 CME 6J 的報價方向不同，可自行使用 1 / CME_6J。</span></div><div><b>單位與幣別</b><span>新台幣黃金等商品需自行加入 USD/TWD、單位或合約乘數換算。</span></div></div></article>
+          <article class="panel"><h3>目前納入範圍 <small>官方商品清單</small></h3><div class="spread-alert-examples"><span>股價指數：TJF / UDF / SPF / UNF / SXF / F1F</span><span>外匯：RHF / XEF / XJF / XBF / XAF</span><span>貴金屬：GDF / TGF</span><span>能源：BRF</span><span>RTF（CNT）暫不列入直接海外同標的，避免把 CNT 與 CNH 混為相同市場。</span></div></article>
         </div>
       </section>
 
-      <footer class="footer"><span>Global Market Monitor v1.1 · GitHub Pages Ready</span><span>資料來源架構：TAIFEX · NetDania · Investing.com · CME · JPX · 各央行/政府官方資料 <span class="tag">Provider 可替換</span></span><span>僅供資訊參考，不構成投資建議</span></footer>
+      <footer class="footer"><span>Global Market Monitor v1.2 · GitHub Pages Ready</span><span>資料來源架構：TAIFEX · NetDania · Investing.com · CME · JPX · 各央行/政府官方資料 <span class="tag">Provider 可替換</span></span><span>僅供資訊參考，不構成投資建議</span></footer>
     </div>
   </main>
 </div>
