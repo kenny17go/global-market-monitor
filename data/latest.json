@@ -520,19 +520,19 @@
   "crossMarketCatalog": [
     {
       "category": "台灣指數",
-      "name": "TAIEX 小型 / 微型",
+      "name": "臺指期 TX / 小型臺指 MTX",
       "underlying": "TAIEX",
       "tw": {
-        "id": "TAIFEX_MTX",
-        "code": "MTX",
+        "id": "TAIFEX_TX",
+        "code": "TX",
         "exchange": "TAIFEX",
         "bid": 0,
         "ask": 0,
         "last": 0
       },
       "os": {
-        "id": "TAIFEX_TMF",
-        "code": "TMF",
+        "id": "TAIFEX_MTX",
+        "code": "MTX",
         "exchange": "TAIFEX",
         "bid": 0,
         "ask": 0,
