@@ -1,10 +1,10 @@
 {
   "meta": {
-    "source": "Yahoo Finance + Investing.com",
+    "source": "Yahoo Finance + Investing.com fallback",
     "mode": "DELAYED",
     "realtime": false,
-    "generatedAt": "2026-09-15T23:55:43.904Z",
-    "note": "Delayed public quote snapshot. Bid/Ask are left null when the source does not expose them; LIVE broker connectors can override this file."
+    "generatedAt": "2026-09-15T23:56:31.879Z",
+    "note": "Delayed public quote snapshot. CME uses Yahoo Finance. JPX attempts Investing.com and remains unavailable when automated access is blocked. Brent uses Yahoo BZ delayed benchmark as the quote reference for the mini contract. Bid/Ask stay null when a source does not expose them. LIVE broker connectors override delayed data."
   },
   "products": {
     "CME_MES": {
@@ -237,16 +237,25 @@
       "mode": "UNAVAILABLE"
     },
     "JPX_NIKKEI225_MINI": {
-      "defaultMonth": "202612",
-      "contracts": [],
-      "source": "Investing.com · Tokyo delayed",
-      "mode": "DELAYED"
-    },
-    "ICE_BRENT_MINI": {
       "defaultMonth": null,
       "contracts": [],
-      "source": "Investing.com · Brent delayed reference",
+      "source": "Investing.com · Tokyo delayed",
       "mode": "UNAVAILABLE"
+    },
+    "ICE_BRENT_MINI": {
+      "defaultMonth": "202611",
+      "contracts": [
+        {
+          "symbol": "BZX26.NYM",
+          "month": "202611",
+          "bid": 0,
+          "ask": 0,
+          "last": 2.8,
+          "timestamp": "2026-09-15T20:00:00.000Z"
+        }
+      ],
+      "source": "Yahoo Finance · Brent delayed benchmark",
+      "mode": "DELAYED"
     }
   }
 }
