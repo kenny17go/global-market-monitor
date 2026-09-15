@@ -1,0 +1,32 @@
+<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#071422"><title>Global Market Monitor</title><link rel="stylesheet" href="styles.css"></head><body>
+<div class="app">
+  <aside class="sidebar"><div class="brand">Global Market Monitor<small>Markets in One View</small></div><div class="nav">
+    <button class="active">⌂ 首頁 Dashboard</button><button>◉ 外匯 FX</button><button>▥ 股市 Equity</button><button>◫ 商品 Commodities</button><button>≋ 利率 Rates</button><button>▦ 經濟數據 Macro</button><button>☆ 自選 Watchlist</button><button>♢ 我的警示 Alerts</button><div class="spacer"></div><button>⚙ 設定 Settings</button><button>ⓘ 關於 About</button>
+  </div></aside>
+  <main class="main">
+    <header class="topbar"><div class="tabs"><span class="active">總覽</span><span>外匯</span><span>股市</span><span>商品</span><span>利率</span><span>經濟數據</span><span>我的監控</span></div><div class="status"><span id="asof">—</span><span><i class="dot"></i><span id="feedStatus">資料更新中</span></span></div></header>
+    <div class="content">
+      <section id="topCards" class="cards"></section>
+      <section class="grid-main">
+        <article class="panel"><h3>外匯 / FX & Forward Points <small>Spot + Swap Points</small></h3><div class="table-wrap"><table><thead><tr><th>貨幣對</th><th>Bid</th><th>Ask</th><th>變動</th><th>1M</th><th>3M</th><th>6M</th><th>1Y</th></tr></thead><tbody id="fxBody"></tbody></table><div id="twdRows"></div></div></article>
+        <article class="panel"><h3>全球股價指數 / Equity Indices & Futures <small>Cash + Futures</small></h3><div class="table-wrap"><table><thead><tr><th>指數</th><th>現貨</th><th>期貨</th><th>基差</th><th>漲跌</th></tr></thead><tbody id="eqBody"></tbody></table></div></article>
+        <div class="right-stack">
+          <article class="panel"><h3>商品現貨與期貨 / Commodities <small>Spot + Futures</small></h3><div class="table-wrap"><table><thead><tr><th>商品</th><th>Spot</th><th>Futures</th><th>基差</th><th>漲跌</th></tr></thead><tbody id="cmdBody"></tbody></table></div></article>
+          <div class="split">
+            <article class="panel"><h3>主要利率 / Policy Rate <small>官方基準</small></h3><div class="table-wrap"><table><thead><tr><th>市場</th><th>利率</th><th>下次會議</th></tr></thead><tbody id="rateBody"></tbody></table></div></article>
+            <article class="panel"><h3>美國公債利率 / UST Yield Curve <small>Daily</small></h3><div class="curve"><canvas id="yieldCanvas" class="chart-canvas"></canvas></div></article>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel chart-section"><h3>即時走勢 / Intraday Charts <small>可自行選擇顯示項目</small></h3><div class="chart-toolbar" id="chartChoices"></div><div id="chartGrid" class="chart-grid"></div></section>
+
+      <section class="panel alerts"><h3>公式 / 到價警示 <small>瀏覽器本機儲存</small></h3>
+        <div class="alert-form"><input id="formulaInput" placeholder="例：GOLD/SILVER > 90 或 US10Y-JP10Y < 2.5"><select id="cooldown"><option value="0">只提示一次</option><option value="300">冷卻 5 分鐘</option><option value="900">冷卻 15 分鐘</option></select><button id="addAlert">＋ 新增警示</button><button id="notifyBtn">啟用通知</button></div><div class="alert-list" id="alertList"></div>
+      </section>
+
+      <footer class="footer"><span>Global Market Monitor v1.0 · GitHub Pages Ready</span><span>資料來源架構：TAIFEX · NetDania · Investing.com · CME · JPX · 各央行/政府官方資料 <span class="tag">Provider 可替換</span></span><span>僅供資訊參考，不構成投資建議</span></footer>
+    </div>
+  </main>
+</div>
+<script src="config.example.js"></script><script src="providers.js"></script><script src="app.js"></script></body></html>
