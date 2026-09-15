@@ -7,7 +7,7 @@ on:
       - 'scripts/fetch-taifex.mjs'
       - 'scripts/install-taifex-official.mjs'
       - 'scripts/patch-ui-target.mjs'
-      - 'scripts/apply-market-connections.mjs'
+      - 'scripts/apply-market-connections-safe.mjs'
       - '.github/workflows/update-taifex-data.yml'
   schedule:
     - cron: '35 7 * * 1-5'
@@ -33,13 +33,13 @@ jobs:
       - name: Apply UI target patch
         run: node scripts/patch-ui-target.mjs
       - name: Apply market connections
-        run: node scripts/apply-market-connections.mjs
+        run: node scripts/apply-market-connections-safe.mjs
       - name: Validate JavaScript
         run: |
           node --check app.js
           node --check providers.js
           node --check scripts/patch-ui-target.mjs
-          node --check scripts/apply-market-connections.mjs
+          node --check scripts/apply-market-connections-safe.mjs
       - name: Commit integration/data changes
         run: |
           if git diff --quiet -- app.js providers.js config.example.js index.html styles.css data/latest.json data/taifex-latest.json; then
