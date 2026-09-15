@@ -93,3 +93,73 @@ $('#addAlert').onclick=()=>{const f=$('#formulaInput').value.trim(); if(!f)retur
 $('#notifyBtn').onclick=async()=>{if(!('Notification'in window))return alert('此瀏覽器不支援通知'); const p=await Notification.requestPermission(); alert(p==='granted'?'通知已啟用':'通知未啟用');};
 async function refresh(){try{$('#feedStatus').textContent='更新中';const raw=await MarketProviders.load(); DATA=MarketProviders.simulate(raw); $('#feedStatus').textContent='資料已更新';render();}catch(e){console.error(e);$('#feedStatus').textContent='資料讀取失敗';}}
 refresh(); setInterval(refresh,(window.MARKET_MONITOR_CONFIG?.refreshMs)||15000); window.addEventListener('resize',()=>{if(DATA)renderYield();});
+
+// v1.3 Contract & Cost Lab
+function costProductOptions(){
+  const s=$('#costProduct'); if(!s||!DATA)return;
+  const cur=s.value;
+  s.innerHTML=catalogRows().map((x,i)=>`<option value="${i}">${x.category}｜${x.name}｜${x.tw.code} ↔ ${x.os.code}</option>`).join('');
+  if(cur && [...s.options].some(o=>o.value===cur)) s.value=cur;
+}
+function costFieldValue(q,field){return Number(q?.[String(field).toLowerCase()] ?? 0)}
+function setDirectionalFields(){
+  if(!$('#costDirection'))return;
+  const d=$('#costDirection').value;
+  if(d==='sellTw'){$('#twPriceField').value='BID';$('#osPriceField').value='ASK';}
+  else{$('#twPriceField').value='ASK';$('#osPriceField').value='BID';}
+}
+function loadCostProductDefaults(){
+  if(!DATA||!$('#costProduct'))return;
+  const row=catalogRows()[Number($('#costProduct').value)||0]; if(!row)return;
+  $('#twMultiplier').value=row.tw.multiplier ?? 1;
+  $('#osMultiplier').value=row.os.multiplier ?? 1;
+  $('#twUnitFactor').value=row.tw.unitFactor ?? 1;
+  $('#osUnitFactor').value=row.os.unitFactor ?? 1;
+  $('#osFx').value=row.os.fxFactor ?? 1;
+  $('#twExpiry').value=row.tw.expiry ?? '近月';
+  $('#osExpiry').value=row.os.expiry ?? '近月';
+  setDirectionalFields();
+  calcCostLab();
+}
+function calcCostLab(){
+  if(!DATA||!$('#costProduct'))return;
+  const row=catalogRows()[Number($('#costProduct').value)||0]; if(!row)return;
+  const d=$('#costDirection').value;
+  const twField=$('#twPriceField').value, osField=$('#osPriceField').value;
+  const twP=costFieldValue(row.tw,twField), osP=costFieldValue(row.os,osField);
+  const twMult=Number($('#twMultiplier').value)||0, osMult=Number($('#osMultiplier').value)||0;
+  const twN=Number($('#twContracts').value)||0, osN=Number($('#osContracts').value)||0;
+  const twU=Number($('#twUnitFactor').value)||0, osU=Number($('#osUnitFactor').value)||0, fx=Number($('#osFx').value)||0;
+  const twCost=Number($('#twCost').value)||0, osCost=Number($('#osCost').value)||0, other=Number($('#otherCost').value)||0;
+  const twComparable=twP*twU, osComparable=osP*osU*fx;
+  const rawSpread=d==='sellTw'?twComparable-osComparable:osComparable-twComparable;
+  const twPointValue=twMult*twU, osPointValue=osMult*osU*fx;
+  const hedgeRatio=twPointValue?osPointValue/twPointValue:0;
+  const twNotional=twP*twPointValue*twN, osNotional=osP*osPointValue*osN;
+  const gross=d==='sellTw'?twNotional-osNotional:osNotional-twNotional;
+  const costs=twCost+osCost+other;
+  const net=gross-costs;
+  const expTw=$('#twExpiry').value||'—', expOs=$('#osExpiry').value||'—';
+  $('#costResults').innerHTML=`
+    <div class="cost-metric"><span>台期所選價</span><b>${fmt(twP,6)}</b><small>${row.tw.code} ${twField} · ${expTw}</small></div>
+    <div class="cost-metric"><span>海外選價</span><b>${fmt(osP,6)}</b><small>${row.os.code} ${osField} · ${expOs}</small></div>
+    <div class="cost-metric"><span>換算後價格價差</span><b class="${cls(rawSpread)}">${rawSpread>=0?'+':''}${fmt(rawSpread,8)}</b><small>${d==='sellTw'?'賣台 / 買海外':'賣海外 / 買台'}</small></div>
+    <div class="cost-metric"><span>每點價值比</span><b>${fmt(hedgeRatio,6)}</b><small>約需 ${fmt(hedgeRatio,4)} 口台期所 / 1 口海外以匹配點值</small></div>
+    <div class="cost-metric"><span>雙邊總成本</span><b>${fmt(costs,2)}</b><small>台 ${fmt(twCost,2)} + 海外 ${fmt(osCost,2)} + 其他 ${fmt(other,2)}</small></div>
+    <div class="cost-metric"><span>成本後名目差額</span><b class="${cls(net)}">${net>=0?'+':''}${fmt(net,2)}</b><small>Gross ${fmt(gross,2)} − Cost ${fmt(costs,2)}</small></div>
+    <div class="cost-warning">「成本後名目差額」不是保證套利獲利。跨交易所比較仍需確認相同/相近到期月、合約規格、報價方向、結算方式、交易時段、匯率與實際可成交 Bid/Ask。</div>`;
+}
+function initCostLab(){
+  if(!$('#costProduct')||!DATA)return;
+  costProductOptions();
+  if(!$('#costProduct').value && $('#costProduct').options.length) $('#costProduct').value='0';
+  loadCostProductDefaults();
+}
+
+const _renderCatalogV13=renderCatalog;
+renderCatalog=function(){_renderCatalogV13();initCostLab();};
+if($('#costProduct')) $('#costProduct').onchange=loadCostProductDefaults;
+if($('#costDirection')) $('#costDirection').onchange=()=>{setDirectionalFields();calcCostLab();};
+['twExpiry','osExpiry','twPriceField','osPriceField','twMultiplier','osMultiplier','twContracts','osContracts','twUnitFactor','osUnitFactor','osFx','twCost','osCost','otherCost'].forEach(id=>{const el=$('#'+id);if(el)el.oninput=calcCostLab;if(el&&el.tagName==='SELECT')el.onchange=calcCostLab;});
+if($('#calcCostLab')) $('#calcCostLab').onclick=calcCostLab;
+if($('#resetCostLab')) $('#resetCostLab').onclick=()=>{['twMultiplier','osMultiplier','twContracts','osContracts','twUnitFactor','osUnitFactor','osFx'].forEach(id=>$('#'+id).value=1);['twCost','osCost','otherCost'].forEach(id=>$('#'+id).value=0);$('#twExpiry').value='近月';$('#osExpiry').value='近月';setDirectionalFields();calcCostLab();};
