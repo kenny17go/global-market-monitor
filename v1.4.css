@@ -1,0 +1,4 @@
+/* Global Market Monitor v1.4 contract-spec overlay */
+.spec-summary{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px;border-bottom:1px solid var(--line)}
+.spec-card{background:#081827;border:1px solid #254d6a;border-radius:8px;padding:10px;display:grid;gap:6px}.spec-card>div:first-child{display:flex;justify-content:space-between;gap:8px;align-items:center}.spec-card small{color:var(--muted)}.verified-badge{font-size:10px;color:#70f2bd;border:1px solid #157f5b;background:rgba(34,223,145,.08);border-radius:999px;padding:2px 6px}.spec-line{display:flex;justify-content:space-between;gap:10px;border-top:1px solid rgba(23,59,88,.45);padding-top:5px}.spec-line span{color:var(--muted);font-size:11px}.spec-line strong{font-size:11px;text-align:right}
+@media(max-width:800px){.spec-summary{grid-template-columns:1fr}}
