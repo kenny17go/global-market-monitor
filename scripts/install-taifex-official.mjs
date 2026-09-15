@@ -5,154 +5,97 @@ let app=await fs.readFile(appPath,'utf8');
 let index=await fs.readFile('index.html','utf8');
 const data=JSON.parse(await fs.readFile('data/latest.json','utf8'));
 
-function replaceIfPresent(text,from,to){return text.includes(from)?text.replace(from,to):text}
+// ---- Keep only TX + MTX for Taiwan index comparison ----
+app=app.replace('TX:0,MTX:0,TMF:0,','TX:0,MTX:0,');
+app=app.replace(/\n\s*TAIFEX_TMF:\{code:'TMF'[^\n]*\},?/g,'');
+app=app.replace("label:'TAIEX Futures'","label:'臺指期'");
+app=app.replace("label:'Mini-TAIEX Futures'","label:'小型臺指 MTX'");
+app=app.replaceAll('TX|MTX|TMF|SPF','TX|MTX|SPF');
 
-app=replaceIfPresent(app,
-"const DISPLAY_DECIMALS={SPF:2,ES:2,UNF:0,NQ:2,UDF:0,YM:0,SXF:1,SOX:1,TJF:1,TOPIX:1,F1F:1,Z:1,RHF:4,CNH:4,XEF:4,'6E':4,XJF:2,'6J':6,XBF:4,'6B':4,XAF:4,'6A':4,GDF:1,GC:1,TGF:0,BRF:2,BRENT:2};",
-"const DISPLAY_DECIMALS={TX:0,MTX:0,TMF:0,SPF:2,MES:2,ES:2,UNF:0,MNQ:2,NQ:2,UDF:0,MYM:0,YM:0,SXF:1,SOX:1,TJF:1,'mini-TOPIX':2,TOPIX:1,F1F:1,Z:1,RHF:4,CNH:4,XEF:4,'6E':4,XJF:2,'6J':6,XBF:4,'6B':4,XAF:4,'6A':4,GDF:1,MGC:1,GC:1,TGF:0,BRF:2,IMM:3,BRENT:2};"
-);
-
-if(!app.includes("TAIFEX_MTX:{code:'MTX'")){
-  app=app.replace("const CONTRACT_SPECS={\n",
-`const CONTRACT_SPECS={\n  TAIFEX_TX:{code:'TX',multiplier:200,tick:1,currency:'TWD',cycle:'monthly6',label:'TAIEX Futures',note:'TWD 200 / index point'},\n  TAIFEX_MTX:{code:'MTX',multiplier:50,tick:1,currency:'TWD',cycle:'monthly6',label:'Mini-TAIEX Futures',note:'TWD 50 / index point'},\n  TAIFEX_TMF:{code:'TMF',multiplier:10,tick:1,currency:'TWD',cycle:'monthly6',label:'Micro TAIEX Futures',note:'TWD 10 / index point'},\n`);
+// ---- Initial margin registry. Null means the exchange/clearing house uses dynamic margin and no current static number is embedded. ----
+const marginBlock=`const INITIAL_MARGINS={
+  TAIFEX_TX:{initial:701000,currency:'TWD',asOf:'2026-08-12',source:'TAIFEX'},
+  TAIFEX_MTX:{initial:175250,currency:'TWD',asOf:'2026-08-12',source:'TAIFEX'},
+  TAIFEX_TJF:{initial:49000,currency:'TWD',asOf:'2026-08-12',source:'TAIFEX'},
+  TAIFEX_UDF:{initial:64000,currency:'TWD',asOf:'2026-08-12',source:'TAIFEX'},
+  TAIFEX_SPF:{initial:103000,currency:'TWD',asOf:'2026-08-12',source:'TAIFEX'},
+  TAIFEX_UNF:{initial:98000,currency:'TWD',asOf:'2026-08-12',source:'TAIFEX'},
+  TAIFEX_SXF:{initial:88000,currency:'TWD',asOf:'2026-08-12',source:'TAIFEX'},
+  TAIFEX_F1F:{initial:29000,currency:'TWD',asOf:'2026-08-12',source:'TAIFEX'},
+  TAIFEX_RHF:{initial:14580,currency:'CNH',asOf:'2026-02-24',source:'TAIFEX'},
+  TAIFEX_XEF:{initial:690,currency:'USD',asOf:'2026-02-24',source:'TAIFEX'},
+  TAIFEX_XJF:{initial:102000,currency:'JPY',asOf:'2026-02-24',source:'TAIFEX'},
+  TAIFEX_XBF:{initial:750,currency:'USD',asOf:'2026-02-24',source:'TAIFEX'},
+  TAIFEX_XAF:{initial:590,currency:'USD',asOf:'2026-02-24',source:'TAIFEX'},
+  TAIFEX_GDF:{initial:560,currency:'USD',asOf:'2026-07-06',source:'TAIFEX'},
+  TAIFEX_TGF:{initial:22000,currency:'TWD',asOf:'2026-07-06',source:'TAIFEX'},
+  TAIFEX_BRF:{initial:87000,currency:'TWD',asOf:'2026-07-06',source:'TAIFEX'},
+  CME_MES:{initial:2504,currency:'USD',asOf:'2026-07-07',source:'CME margin estimate'},
+  CME_MNQ:{initial:3138,currency:'USD',asOf:'2026-09',source:'CME margin estimate'},
+  COMEX_MGC:{initial:2040,currency:'USD',asOf:'2026-09',source:'CME margin estimate'},
+  COMEX_MGC_TWD:{initial:2040,currency:'USD',asOf:'2026-09',source:'CME margin estimate'},
+  CME_6E:{initial:3400,currency:'USD',asOf:'2025-07-01',source:'CME margin estimate'},
+  CME_6J:{initial:3800,currency:'USD',asOf:'2025-07-01',source:'CME margin estimate'},
+  CME_6B:{initial:2200,currency:'USD',asOf:'2025-07-01',source:'CME margin estimate'},
+  CME_6A:{initial:2200,currency:'USD',asOf:'2025-07-01',source:'CME margin estimate'},
+  CBOT_MYM:{initial:null,currency:'USD',asOf:'dynamic',source:'CME Clearing dynamic'},
+  CME_SOX:{initial:null,currency:'USD',asOf:'dynamic',source:'CME Clearing dynamic'},
+  CME_CNH:{initial:null,currency:'CNH',asOf:'dynamic',source:'CME Clearing dynamic'},
+  JPX_MINI_TOPIX:{initial:null,currency:'JPY',asOf:'daily',source:'JSCC VaR daily'},
+  JPX_NIKKEI225_MINI:{initial:null,currency:'JPY',asOf:'daily',source:'JSCC VaR daily'},
+  ICE_Z:{initial:null,currency:'GBP',asOf:'dynamic',source:'ICE Clear Europe dynamic'},
+  ICE_BRENT_MINI:{initial:null,currency:'USD',asOf:'dynamic',source:'ICE Clear Europe dynamic'}
+};`;
+if(/const INITIAL_MARGINS=\{[\s\S]*?\};\n\nconst CONTRACT_SPECS=/.test(app)){
+  app=app.replace(/const INITIAL_MARGINS=\{[\s\S]*?\};\n\nconst CONTRACT_SPECS=/,marginBlock+'\n\nconst CONTRACT_SPECS=');
+}else{
+  app=app.replace('const CONTRACT_SPECS={',marginBlock+'\n\nconst CONTRACT_SPECS={');
 }
-app=replaceIfPresent(app,
-"  CME_ES:{code:'ES',multiplier:50,tick:0.25,currency:'USD',cycle:'quarter8',label:'E-mini S&P 500',note:'USD 50 / index point'},",
-"  CME_MES:{code:'MES',multiplier:5,tick:0.25,currency:'USD',cycle:'quarter8',label:'Micro E-mini S&P 500',note:'USD 5 / index point'},"
-);
-app=replaceIfPresent(app,
-"  CME_NQ:{code:'NQ',multiplier:20,tick:0.25,currency:'USD',cycle:'quarter8',label:'E-mini Nasdaq-100',note:'USD 20 / index point'},",
-"  CME_MNQ:{code:'MNQ',multiplier:2,tick:0.25,currency:'USD',cycle:'quarter8',label:'Micro E-mini Nasdaq-100',note:'USD 2 / index point'},"
-);
-app=replaceIfPresent(app,
-"  CBOT_YM:{code:'YM',multiplier:5,tick:1,currency:'USD',cycle:'quarter8',label:'E-mini Dow',note:'USD 5 / index point'},",
-"  CBOT_MYM:{code:'MYM',multiplier:0.5,tick:1,currency:'USD',cycle:'quarter8',label:'Micro E-mini Dow',note:'USD 0.50 / index point'},"
-);
-app=replaceIfPresent(app,
-"  JPX_TOPIX:{code:'TOPIX',multiplier:10000,tick:0.5,currency:'JPY',cycle:'quarter12',label:'TOPIX',note:'JPY 10,000 / index point'},",
-"  JPX_MINI_TOPIX:{code:'mini-TOPIX',multiplier:1000,tick:0.25,currency:'JPY',cycle:'quarter12',label:'mini-TOPIX',note:'JPY 1,000 / index point'},\n  JPX_NIKKEI225_MINI:{code:'Nikkei 225 mini',multiplier:100,tick:5,currency:'JPY',cycle:'monthly18',label:'Nikkei 225 mini',note:'JPY 100 / index point'},"
-);
-app=replaceIfPresent(app,
-"  COMEX_GC:{code:'GC',multiplier:100,tick:0.1,currency:'USD',cycle:'gold12',label:'COMEX Gold',note:'100 troy oz'},",
-"  COMEX_MGC:{code:'MGC',multiplier:10,tick:0.1,currency:'USD',cycle:'gold12',label:'Micro Gold',note:'10 troy oz'},"
-);
-app=replaceIfPresent(app,
-"  COMEX_GC_TWD:{code:'GC',multiplier:100,tick:0.1,currency:'USD',cycle:'gold12',label:'COMEX Gold + FX',note:'100 troy oz'},",
-"  COMEX_MGC_TWD:{code:'MGC',multiplier:10,tick:0.1,currency:'USD',cycle:'gold12',label:'Micro Gold + FX',note:'10 troy oz'},"
-);
-app=replaceIfPresent(app,
-"  ICE_BRENT:{code:'BRENT',multiplier:1000,tick:0.01,currency:'USD',cycle:'monthly18',label:'ICE Brent',note:'1,000 barrels'}",
-"  ICE_BRENT_MINI:{code:'IMM',multiplier:100,tick:0.001,currency:'USD',cycle:'monthly18',label:'Brent 1st Line Mini',note:'100 barrels'}"
-);
 
-app=app.replace(/\^TAIFEX_\(SPF\|UNF\|UDF\|SXF\|F1F\)\$/g,'^TAIFEX_(TX|MTX|TMF|SPF|UNF|UDF|SXF|F1F)$');
-app=app.replace(/\^\(CME_ES\|CME_NQ\|CBOT_YM\|CME_SOX\|ICE_Z\)\$/g,'^(CME_MES|CME_MNQ|CBOT_MYM|CME_SOX|ICE_Z)$');
-app=app.replace("if(id==='JPX_TOPIX')return nthWeekday(y,m,5,2);","if(['JPX_TOPIX','JPX_MINI_TOPIX'].includes(id))return nthWeekday(y,m,5,2);");
+// ---- Contract spec UI with original margin ----
+const specFn=`function marginFor(id){return INITIAL_MARGINS[id]||{initial:null,currency:specFor(id).currency,asOf:'dynamic',source:'交易所動態'}}
+function marginDisplay(m){return m?.initial==null?'動態':tidy(m.initial,2)+' '+m.currency}
+function renderSpecSummary(row){const el=$('#contractSpecSummary');if(!el||!row)return;const a=specFor(row.tw.id),b=specFor(row.os.id),ma=marginFor(row.tw.id),mb=marginFor(row.os.id);const card=(title,q,s,m)=>\`<div class="spec-card"><div><b>\${title} \${q.code}</b><span class="verified-badge">規格預設</span></div><div class="spec-line"><span>乘數</span><strong>\${tidy(s.multiplier,6)}</strong></div><div class="spec-line"><span>Tick</span><strong>\${fixedInput(s.tick,8)}</strong></div><div class="spec-line"><span>幣別</span><strong>\${s.currency}</strong></div><div class="spec-line"><span>原始保證金</span><strong>\${marginDisplay(m)}</strong></div><div class="source-note">\${m.source}\${m.asOf&&m.asOf!=='dynamic'?' · '+m.asOf:''}</div><div class="spec-line"><span>到期週期</span><strong>\${s.cycle}</strong></div></div>\`;el.innerHTML=card(row.tw.exchange||'TAIFEX',row.tw,a,ma)+card(row.os.exchange,row.os,b,mb)}`;
+app=app.replace(/function renderSpecSummary\(row\)\{[\s\S]*?\}\nfunction renderMonthSummary/,specFn+'\nfunction renderMonthSummary');
 
-app=replaceIfPresent(app,
-'<td><b>${x.tw.code}</b><div class="source-note">${x.tw.exchange}${x.tw.source?` · ${x.tw.source}`:\'\'}${x.tw.expiry?` · ${monthLabel(x.tw.expiry)}`:\'\'}</div></td>',
-'<td><b>${x.tw.code}</b><div class="source-note">${x.tw.expiry?monthLabel(x.tw.expiry):\'—\'}</div></td>'
-);
-app=app.replaceAll('TAIFEX × Overseas','跨市場 / 同標的');
+// ---- Cost lab: show margin requirements by contract count ----
+const costFn=`function calcCostLab(){const row=selectedCostRow();if(!row||!$('#costResults'))return;const d=$('#costDirection').value,twField=$('#twPriceField').value,osField=$('#osPriceField').value,twP=costFieldValue(row.tw,twField,$('#twExpiry').value),osP=costFieldValue(row.os,osField,$('#osExpiry').value),twMult=n($('#twMultiplier').value),osMult=n($('#osMultiplier').value),twN=n($('#twContracts').value,1),osN=n($('#osContracts').value,1),twU=n($('#twUnitFactor').value,1),osU=n($('#osUnitFactor').value,1),twFx=n($('#twFx').value,1),osFx=n($('#osFx').value,1),twCost=n($('#twCost').value),osCost=n($('#osCost').value),other=n($('#otherCost').value);const twCmp=normalizedPrice(row,'tw',twP)*twU,osCmp=normalizedPrice(row,'os',osP)*osU,rawSpread=d==='sellTw'?twCmp-osCmp:osCmp-twCmp,twPoint=twMult*twU*twFx,osPoint=osMult*osU*osFx,hedge=twPoint?osPoint/twPoint:0,twNot=twP*twPoint*twN,osNot=osP*osPoint*osN,gross=d==='sellTw'?twNot-osNot:osNot-twNot,costs=twCost*twN+osCost*osN+other,net=gross-costs;const tm=marginFor(row.tw.id),om=marginFor(row.os.id),twMargin=tm.initial==null?null:tm.initial*twN,osMargin=om.initial==null?null:om.initial*osN,twMarginTwd=twMargin==null?null:twMargin*fxToTwd(tm.currency),osMarginTwd=osMargin==null?null:osMargin*fxToTwd(om.currency),knownMarginTwd=(twMarginTwd||0)+(osMarginTwd||0),hasDynamic=twMargin==null||osMargin==null;$('#costResults').innerHTML=\`<div class="cost-metric"><span>台期所選價</span><b>\${qfmt(twP,row.tw.code)}</b><small>\${row.tw.code} \${twField} · \${monthLabel($('#twExpiry').value)}</small></div><div class="cost-metric"><span>海外/比較腿選價</span><b>\${qfmt(osP,row.os.code)}</b><small>\${row.os.code} \${osField} · \${monthLabel($('#osExpiry').value)}</small></div><div class="cost-metric"><span>台灣腿原始保證金</span><b>\${twMargin==null?'動態':tidy(twMargin,2)+' '+tm.currency}</b><small>\${tm.source} · \${twN} 口</small></div><div class="cost-metric"><span>海外/比較腿原始保證金</span><b>\${osMargin==null?'動態':tidy(osMargin,2)+' '+om.currency}</b><small>\${om.source} · \${osN} 口</small></div><div class="cost-metric"><span>已知保證金合計</span><b>\${tidy(knownMarginTwd,0)} TWD</b><small>依目前 Dashboard FX 換算\${hasDynamic?'；不含動態保證金腿':''}</small></div><div class="cost-metric"><span>換算後價格價差</span><b class="\${cls(rawSpread)}">\${rawSpread>=0?'+':''}\${tidy(rawSpread,6)}</b><small>\${row.compare==='inverse'?'海外報價已倒數換向':''}</small></div><div class="cost-metric"><span>每點價值比</span><b>\${tidy(hedge,4)}</b><small>台 / 海外已換成共同幣別</small></div><div class="cost-metric"><span>雙邊總交易成本</span><b>\${tidy(costs,2)}</b><small>含口數；不含保證金</small></div><div class="cost-metric"><span>成本後名目差額</span><b class="\${cls(net)}">\${net>=0?'+':''}\${tidy(net,2)}</b><small>不等同套利獲利</small></div><div class="cost-warning">原始保證金與交易成本是不同概念。海外交易所/清算所可能依波動、組合與帳戶類型動態調整保證金；顯示為「動態」者不以舊數字冒充現行要求。</div>\`}`;
+app=app.replace(/function calcCostLab\(\)\{[\s\S]*?\}\nfunction bindCostInputs/,costFn+'\nfunction bindCostInputs');
 
+// ---- Rebuild Taiwan index row: TX vs MTX only ----
 const rows=data.crossMarketCatalog||[];
-const byName=name=>rows.find(r=>r.name===name);
-function setOs(name,id,code,exchange){const r=byName(name);if(r){r.os.id=id;r.os.code=code;r.os.exchange=exchange;}}
-setOs('S&P 500','CME_MES','MES','CME');
-setOs('Nasdaq-100','CME_MNQ','MNQ','CME');
-setOs('Dow Jones','CBOT_MYM','MYM','CBOT/CME');
-setOs('TOPIX','JPX_MINI_TOPIX','mini-TOPIX','JPX/OSE');
-setOs('黃金（美元計價）','COMEX_MGC','MGC','COMEX/CME');
-setOs('黃金（新台幣計價）','COMEX_MGC_TWD','MGC + USD/TWD','COMEX/CME + FX');
-setOs('Brent 原油','ICE_BRENT_MINI','IMM','ICE Futures Europe');
-
-if(!rows.some(r=>r?.tw?.code==='MTX')){
-  rows.unshift({
-    category:'台灣指數',name:'TAIEX 小型 / 微型',underlying:'TAIEX',
-    tw:{id:'TAIFEX_MTX',code:'MTX',exchange:'TAIFEX',bid:0,ask:0,last:0},
-    os:{id:'TAIFEX_TMF',code:'TMF',exchange:'TAIFEX',bid:0,ask:0,last:0},
-    compare:'direct'
-  });
-}
-for(const e of data.equities||[]){
-  if(e.name==='S&P 500')e.futureCode='MES';
-  if(e.name==='Nasdaq-100')e.futureCode='MNQ';
-  if(e.name==='日經 225')e.futureCode='Nikkei 225 mini';
-  if(e.name==='東證 TOPIX')e.futureCode='mini-TOPIX';
-}
-for(const c of data.commodities||[]){
-  if(c.name==='黃金')c.futureCode='MGC';
-  if(c.name==='WTI 原油')c.futureCode='MCL';
-}
+for(let i=rows.length-1;i>=0;i--){const r=rows[i];if(r.category==='台灣指數'||r?.tw?.code==='TMF'||r?.os?.code==='TMF')rows.splice(i,1)}
+rows.unshift({
+  category:'台灣指數',name:'臺指期 TX / 小型臺指 MTX',underlying:'TAIEX',
+  tw:{id:'TAIFEX_TX',code:'TX',exchange:'TAIFEX',bid:0,ask:0,last:0},
+  os:{id:'TAIFEX_MTX',code:'MTX',exchange:'TAIFEX',bid:0,ask:0,last:0},
+  compare:'direct'
+});
+for(const e of data.equities||[]){if(e.name==='S&P 500')e.futureCode='MES';if(e.name==='Nasdaq-100')e.futureCode='MNQ';if(e.name==='日經 225')e.futureCode='Nikkei 225 mini';if(e.name==='東證 TOPIX')e.futureCode='mini-TOPIX'}
+for(const c of data.commodities||[]){if(c.name==='黃金')c.futureCode='MGC';if(c.name==='WTI 原油')c.futureCode='MCL'}
 await fs.writeFile('data/latest.json',JSON.stringify(data,null,2)+'\n');
 
-index=index.replaceAll('TAIFEX × Overseas','跨市場 / 同標的');
-index=index.replaceAll('CME_ES','CME_MES').replaceAll('CME_NQ','CME_MNQ').replaceAll('COMEX_GC','COMEX_MGC');
-index=index.replace('股價指數：TJF / UDF / SPF / UNF / SXF / F1F','台灣指數：MTX / TMF　｜　股價指數：TJF / UDF / SPF / UNF / SXF / F1F');
+index=index.replaceAll('台灣指數：MTX / TMF','台灣指數：TX / MTX');
+index=index.replaceAll('TAIEX 小型 / 微型','臺指期 TX / 小型臺指 MTX');
+index=index.replace('選擇商品後，自動帶入交易所官方合約乘數、幣別、最小跳動點與到期週期；','選擇商品後，自動帶入交易所合約乘數、幣別、最小跳動點、原始保證金與到期週期；');
 await fs.writeFile('index.html',index);
 
 await fs.writeFile(appPath,app);
 
+// ---- Provider: TAIFEX official daily + optional normalized licensed LIVE gateway for CME/JPX/ICE ----
 const providers=`window.MarketProviders = (() => {
-  const cfg = () => window.MARKET_MONITOR_CONFIG || {mode:'local-json',endpoint:'./data/latest.json',refreshMs:15000,demoSimulation:false};
-  async function fetchJson(url, required=true) {
-    try {
-      const r = await fetch(url + (url.includes('?') ? '&' : '?') + 't=' + Date.now(), {cache:'no-store'});
-      if (!r.ok) throw new Error('HTTP ' + r.status);
-      return await r.json();
-    } catch (e) {
-      if (required) throw e;
-      console.warn('Optional market data unavailable:', url, e);
-      return null;
-    }
-  }
-  function mergeLeg(leg, official) {
-    const p = official?.products?.[leg?.code];
-    if (!p?.contracts?.length) return;
-    const contracts = p.contracts.map(c => ({month:c.month,date:c.date,session:c.session,bid:c.bid,ask:c.ask,last:c.last,settlement:c.settlement,volume:c.volume,openInterest:c.openInterest}));
-    const selected = contracts.find(c => c.month === p.defaultMonth) || contracts[0];
-    leg.contracts = contracts;
-    leg.actualMonths = contracts.map(c => c.month);
-    leg.expiry = selected?.month || leg.expiry;
-    if (selected?.bid != null) leg.bid = selected.bid;
-    if (selected?.ask != null) leg.ask = selected.ask;
-    if (selected?.last != null) leg.last = selected.last;
-    leg.quoteDate = selected?.date || null;
-    leg.quoteSession = selected?.session || null;
-    leg.source = 'TAIFEX OpenAPI';
-    leg.quoteMode = 'OFFICIAL DAILY';
-  }
-  function mergeTaifex(data, official) {
-    if (!official?.products || !Array.isArray(data?.crossMarketCatalog)) return data;
-    data.taifexMeta = official.meta || null;
-    for (const row of data.crossMarketCatalog) {
-      mergeLeg(row.tw,official);
-      if (String(row?.os?.exchange||'').includes('TAIFEX')) mergeLeg(row.os,official);
-    }
-    return data;
-  }
-  async function load() {
-    const c = cfg();
-    const endpoint = c.endpoint || './data/latest.json';
-    const [base, taifex] = await Promise.all([fetchJson(endpoint,true),fetchJson('./data/taifex-latest.json',false)]);
-    return mergeTaifex(base,taifex);
-  }
-  function simulate(data) {
-    if (!cfg().demoSimulation) return data;
-    const copy = structuredClone(data);
-    copy.asOf = new Date().toISOString();
-    const jitter = (v, scale=0.0006) => v * (1 + (Math.random()-0.5)*scale);
-    copy.top.forEach(x => { x.value = jitter(x.value); });
-    copy.equities.forEach(x => { x.cash=jitter(x.cash); x.future=jitter(x.future); x.basis=x.future-x.cash; });
-    copy.commodities.forEach(x => { x.spot=jitter(x.spot,0.001); x.future=jitter(x.future,0.001); x.basis=x.future-x.spot; });
-    if (copy.series) Object.keys(copy.series).forEach(k => { const s=copy.series[k],last=s[s.length-1];s.push(jitter(last,0.001));if(s.length>36)s.shift(); });
-    return copy;
-  }
+  const cfg=()=>window.MARKET_MONITOR_CONFIG||{mode:'local-json',endpoint:'./data/latest.json',refreshMs:15000,demoSimulation:false,liveEndpoint:''};
+  async function fetchJson(url,required=true){if(!url)return null;try{const r=await fetch(url+(url.includes('?')?'&':'?')+'t='+Date.now(),{cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status);return await r.json()}catch(e){if(required)throw e;console.warn('Optional market data unavailable:',url,e);return null}}
+  function applyContracts(leg,p,source,mode){if(!p?.contracts?.length)return;const contracts=p.contracts.map(c=>({month:c.month,date:c.date||null,session:c.session||null,bid:c.bid??null,ask:c.ask??null,last:c.last??null,settlement:c.settlement??null,volume:c.volume??null,openInterest:c.openInterest??null,timestamp:c.timestamp||null}));const selected=contracts.find(c=>c.month===p.defaultMonth)||contracts[0];leg.contracts=contracts;leg.actualMonths=contracts.map(c=>c.month);leg.expiry=selected?.month||leg.expiry;if(selected?.bid!=null)leg.bid=selected.bid;if(selected?.ask!=null)leg.ask=selected.ask;if(selected?.last!=null)leg.last=selected.last;leg.quoteDate=selected?.date||null;leg.quoteSession=selected?.session||null;leg.quoteTimestamp=selected?.timestamp||null;leg.source=source;leg.quoteMode=mode}
+  function mergeTaifex(data,official){if(!official?.products||!Array.isArray(data?.crossMarketCatalog))return data;data.taifexMeta=official.meta||null;for(const row of data.crossMarketCatalog){const a=official.products[row?.tw?.code];if(a)applyContracts(row.tw,a,'TAIFEX OpenAPI','OFFICIAL DAILY');if(String(row?.os?.exchange||'').includes('TAIFEX')){const b=official.products[row?.os?.code];if(b)applyContracts(row.os,b,'TAIFEX OpenAPI','OFFICIAL DAILY')}}return data}
+  function mergeLive(data,live){if(!live?.quotes||!Array.isArray(data?.crossMarketCatalog))return data;data.liveMeta=live.meta||null;for(const row of data.crossMarketCatalog){for(const leg of [row.tw,row.os]){if(!leg||String(leg.exchange||'').includes('TAIFEX'))continue;const p=live.quotes[leg.id]||live.quotes[leg.code];if(p)applyContracts(leg,p,p.source||leg.exchange||'Licensed feed','LIVE')}}return data}
+  async function load(){const c=cfg(),endpoint=c.endpoint||'./data/latest.json';const [base,taifex,live]=await Promise.all([fetchJson(endpoint,true),fetchJson('./data/taifex-latest.json',false),fetchJson(c.liveEndpoint,false)]);mergeTaifex(base,taifex);mergeLive(base,live);return base}
+  function simulate(data){if(!cfg().demoSimulation)return data;const copy=structuredClone(data),j=(v,s=.0006)=>v*(1+(Math.random()-.5)*s);copy.asOf=new Date().toISOString();copy.top.forEach(x=>x.value=j(x.value));return copy}
   return {load,simulate};
 })();
 `;
 await fs.writeFile('providers.js',providers);
-await fs.writeFile('config.example.js',`window.MARKET_MONITOR_CONFIG = {\n  mode: 'local-json',\n  endpoint: './data/latest.json',\n  refreshMs: 15000,\n  demoSimulation: false\n};\n`);
+await fs.writeFile('config.example.js',`window.MARKET_MONITOR_CONFIG = {\n  mode: 'local-json',\n  endpoint: './data/latest.json',\n  refreshMs: 15000,\n  demoSimulation: false,\n  liveEndpoint: '' // Licensed backend gateway for CME / JPX / ICE; never put exchange API keys in GitHub Pages\n};\n`);
 
 await import('./fetch-taifex.mjs');
-console.log('TAIFEX official data integration installed with smaller overseas contract defaults.');
+console.log('Installed TX/MTX comparison, initial margins, TAIFEX official data and licensed overseas LIVE gateway.');
