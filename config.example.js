@@ -11,4 +11,5 @@ window.addEventListener('load',()=>{
   addCss('v1.5.css','gmm-v15');
   addScript('contract-specs.js','gmm-v14');
   setTimeout(()=>addScript('contract-months.js','gmm-v15'),100);
+  setTimeout(()=>addScript('display-format.js','gmm-format'),220);
 });
