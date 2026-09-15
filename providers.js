@@ -11,24 +11,28 @@ window.MarketProviders = (() => {
       return null;
     }
   }
+  function mergeLeg(leg, official) {
+    const p = official?.products?.[leg?.code];
+    if (!p?.contracts?.length) return;
+    const contracts = p.contracts.map(c => ({month:c.month,date:c.date,session:c.session,bid:c.bid,ask:c.ask,last:c.last,settlement:c.settlement,volume:c.volume,openInterest:c.openInterest}));
+    const selected = contracts.find(c => c.month === p.defaultMonth) || contracts[0];
+    leg.contracts = contracts;
+    leg.actualMonths = contracts.map(c => c.month);
+    leg.expiry = selected?.month || leg.expiry;
+    if (selected?.bid != null) leg.bid = selected.bid;
+    if (selected?.ask != null) leg.ask = selected.ask;
+    if (selected?.last != null) leg.last = selected.last;
+    leg.quoteDate = selected?.date || null;
+    leg.quoteSession = selected?.session || null;
+    leg.source = 'TAIFEX OpenAPI';
+    leg.quoteMode = 'OFFICIAL DAILY';
+  }
   function mergeTaifex(data, official) {
     if (!official?.products || !Array.isArray(data?.crossMarketCatalog)) return data;
     data.taifexMeta = official.meta || null;
     for (const row of data.crossMarketCatalog) {
-      const p = official.products[row?.tw?.code];
-      if (!p?.contracts?.length) continue;
-      const contracts = p.contracts.map(c => ({month:c.month,date:c.date,session:c.session,bid:c.bid,ask:c.ask,last:c.last,settlement:c.settlement,volume:c.volume,openInterest:c.openInterest}));
-      const selected = contracts.find(c => c.month === p.defaultMonth) || contracts[0];
-      row.tw.contracts = contracts;
-      row.tw.actualMonths = contracts.map(c => c.month);
-      row.tw.expiry = selected?.month || row.tw.expiry;
-      if (selected?.bid != null) row.tw.bid = selected.bid;
-      if (selected?.ask != null) row.tw.ask = selected.ask;
-      if (selected?.last != null) row.tw.last = selected.last;
-      row.tw.quoteDate = selected?.date || null;
-      row.tw.quoteSession = selected?.session || null;
-      row.tw.source = 'TAIFEX OpenAPI';
-      row.tw.quoteMode = 'OFFICIAL DAILY';
+      mergeLeg(row.tw,official);
+      if (String(row?.os?.exchange||'').includes('TAIFEX')) mergeLeg(row.os,official);
     }
     return data;
   }

@@ -1,1 +1,852 @@
-{"asOf":"2026-09-15T19:40:00+08:00","top":[{"id":"SPX","label":"S&P 500","value":5616.84,"change":24.17,"pct":0.43},{"id":"SOX","label":"SOX 費半","value":4932.18,"change":86.21,"pct":1.78},{"id":"TAIEX","label":"台灣加權","value":22312.54,"change":-102.36,"pct":-0.46},{"id":"NIKKEI","label":"日經 225","value":38371.76,"change":525.12,"pct":1.39},{"id":"GOLD","label":"黃金 XAU/USD","value":3347.2,"change":12.6,"pct":0.38},{"id":"WTI","label":"WTI 原油","value":78.42,"change":-0.63,"pct":-0.8},{"id":"USDTWD","label":"USD/TWD","value":32.128,"change":0.032,"pct":0.1}],"fx":[{"pair":"EUR/USD","bid":1.0823,"ask":1.0825,"change":0.0019,"p1m":12.4,"p3m":-36.8,"p6m":-78.1,"p1y":-165.3},{"pair":"GBP/USD","bid":1.2714,"ask":1.2717,"change":0.0018,"p1m":10.6,"p3m":-31.5,"p6m":-68.7,"p1y":-148.9},{"pair":"USD/JPY","bid":147.62,"ask":147.66,"change":-0.21,"p1m":-8.2,"p3m":-24.6,"p6m":-51.3,"p1y":-112.7},{"pair":"USD/CHF","bid":0.8521,"ask":0.8524,"change":0.0015,"p1m":-5.1,"p3m":-16.4,"p6m":-35.8,"p1y":-77.6},{"pair":"USD/CAD","bid":1.3562,"ask":1.3565,"change":-0.0008,"p1m":4.7,"p3m":14.8,"p6m":31.6,"p1y":69.5},{"pair":"AUD/USD","bid":0.6558,"ask":0.6561,"change":0.0024,"p1m":-8.9,"p3m":-27.6,"p6m":-55.1,"p1y":-118.4},{"pair":"NZD/USD","bid":0.5996,"ask":0.5999,"change":0.0027,"p1m":-10.3,"p3m":-31.8,"p6m":-67.9,"p1y":-143.2},{"pair":"USD/CNH","bid":7.1129,"ask":7.1132,"change":0.0081,"p1m":-125,"p3m":-385,"p6m":-812,"p1y":-1620},{"pair":"USD/HKD","bid":7.8203,"ask":7.8205,"change":0.0,"p1m":110,"p3m":340,"p6m":720,"p1y":1480}],"twd":{"spotBid":32.118,"spotAsk":32.132,"ndf":{"source":"NetDania","p1m":-125,"p3m":-385,"p6m":-812,"p1y":-1620},"onshore":{"source":"Investing.com","p1m":-110,"p3m":-340,"p6m":-720,"p1y":-1480}},"equities":[{"name":"S&P 500","cash":5616.84,"future":5619.25,"basis":2.41,"pct":0.43,"futureCode":"ES"},{"name":"Nasdaq-100","cash":19462.31,"future":19488.0,"basis":25.69,"pct":0.53,"futureCode":"NQ"},{"name":"SOX 費半","cash":4932.18,"future":4940.5,"basis":8.32,"pct":1.78,"futureCode":"SOX"},{"name":"台灣加權","cash":22312.54,"future":22285.08,"basis":-27.46,"pct":-0.46,"futureCode":"TX"},{"name":"日經 225","cash":38371.76,"future":38420.0,"basis":48.24,"pct":1.39,"futureCode":"NK"},{"name":"東證 TOPIX","cash":2730.45,"future":2733.0,"basis":2.55,"pct":0.82,"futureCode":"TOPIX"}],"commodities":[{"name":"黃金","spot":3347.2,"future":3356.1,"basis":8.9,"pct":0.38,"futureCode":"GC"},{"name":"白銀","spot":37.85,"future":38.12,"basis":0.27,"pct":1.12,"futureCode":"SI"},{"name":"WTI 原油","spot":78.42,"future":78.65,"basis":0.23,"pct":-0.8,"futureCode":"CL"},{"name":"Brent 原油","spot":81.53,"future":81.98,"basis":0.45,"pct":-0.67,"futureCode":"BRN"},{"name":"銅","spot":4.14,"future":4.17,"basis":0.03,"pct":0.73,"futureCode":"HG"},{"name":"天然氣","spot":2.83,"future":2.87,"basis":0.04,"pct":-1.74,"futureCode":"NG"}],"rates":[{"name":"美國 Fed","rate":5.5,"next":"2026/09/17"},{"name":"歐元區 ECB","rate":4.25,"next":"2026/10/29"},{"name":"日本 BOJ","rate":0.1,"next":"2026/09/19"},{"name":"英國 BOE","rate":5.0,"next":"2026/09/18"},{"name":"台灣 CBC","rate":2.0,"next":"2026/09/19"},{"name":"香港 HKMA","rate":5.75,"next":"—"},{"name":"中國 PBOC","rate":3.45,"next":"—"}],"ust":[{"tenor":"1M","yield":5.32},{"tenor":"3M","yield":5.28},{"tenor":"6M","yield":5.12},{"tenor":"1Y","yield":4.98},{"tenor":"2Y","yield":4.46},{"tenor":"5Y","yield":4.12},{"tenor":"10Y","yield":4.21},{"tenor":"30Y","yield":4.81}],"series":{"SPX":[5590,5600,5595,5608,5612,5609,5615,5611,5618,5623,5616.84],"SOX":[4840,4865,4880,4895,4902,4910,4918,4925,4932,4928,4932.18],"TAIEX":[22490,22430,22385,22340,22310,22325,22320,22305,22300,22295,22312.54],"NIKKEI":[37800,38050,38100,38200,38250,38300,38310,38320,38350,38380,38371.76],"TOPIX":[2690,2700,2705,2710,2718,2720,2725,2728,2730,2732,2730.45],"GOLD":[3318,3325,3315,3320,3330,3338,3335,3344,3350,3345,3347.2],"WTI":[79.3,79.0,78.9,78.7,78.8,78.6,78.5,78.4,78.3,78.5,78.42],"USDTWD":[32.02,32.04,32.05,32.08,32.09,32.1,32.11,32.12,32.12,32.13,32.128],"USDJPY":[147.2,147.4,147.5,147.6,147.7,147.8,147.7,147.6,147.65,147.63,147.62]},"crossExchange":[{"key":"SPX","type":"equity","name":"S&P 500","underlying":"S&P 500 Index","expiry":"2026-12","twCode":"SPF","twBid":5621.0,"twAsk":5622.0,"osCode":"ES","osExchange":"CME","osBid":5619.25,"osAsk":5619.5,"syncMs":180,"decimals":2},{"key":"NDX","type":"equity","name":"Nasdaq-100","underlying":"Nasdaq-100 Index","expiry":"2026-12","twCode":"UNF","twBid":19492.0,"twAsk":19496.0,"osCode":"NQ","osExchange":"CME","osBid":19488.0,"osAsk":19489.0,"syncMs":210,"decimals":2},{"key":"SOX","type":"equity","name":"PHLX Semiconductor","underlying":"SOX Index","expiry":"2026-12","twCode":"SXF","twBid":4947.0,"twAsk":4949.0,"osCode":"SOX","osExchange":"CME","osBid":4940.5,"osAsk":4942.0,"syncMs":240,"decimals":2},{"key":"TOPIX","type":"equity","name":"TOPIX","underlying":"Tokyo Stock Price Index","expiry":"2026-12","twCode":"TJF","twBid":2735.5,"twAsk":2737.0,"osCode":"TOPIX","osExchange":"OSE/JPX","osBid":2733.0,"osAsk":2734.0,"syncMs":260,"decimals":2}],"crossMarketCatalog":[{"category":"股價指數","name":"S&P 500","underlying":"S&P 500 Index","tw":{"id":"TAIFEX_SPF","code":"SPF","exchange":"TAIFEX","bid":5618.5,"ask":5619.0,"last":5618.75},"os":{"id":"CME_ES","code":"ES","exchange":"CME","bid":5619.0,"ask":5619.25,"last":5619.25},"compare":"direct"},{"category":"股價指數","name":"Nasdaq-100","underlying":"Nasdaq-100 Index","tw":{"id":"TAIFEX_UNF","code":"UNF","exchange":"TAIFEX","bid":19484.0,"ask":19488.0,"last":19486.0},"os":{"id":"CME_NQ","code":"NQ","exchange":"CME","bid":19487.5,"ask":19488.0,"last":19488.0},"compare":"direct"},{"category":"股價指數","name":"Dow Jones","underlying":"DJIA","tw":{"id":"TAIFEX_UDF","code":"UDF","exchange":"TAIFEX","bid":42010.0,"ask":42018.0,"last":42014.0},"os":{"id":"CBOT_YM","code":"YM","exchange":"CBOT/CME","bid":42015.0,"ask":42017.0,"last":42016.0},"compare":"direct"},{"category":"股價指數","name":"PHLX Semiconductor","underlying":"PHLX Semiconductor Sector Index","tw":{"id":"TAIFEX_SXF","code":"SXF","exchange":"TAIFEX","bid":4938.0,"ask":4942.0,"last":4940.0},"os":{"id":"CME_SOX","code":"SOX","exchange":"CME","bid":4939.5,"ask":4940.5,"last":4940.5},"compare":"direct"},{"category":"股價指數","name":"TOPIX","underlying":"TOPIX","tw":{"id":"TAIFEX_TJF","code":"TJF","exchange":"TAIFEX","bid":2731.5,"ask":2734.0,"last":2733.0},"os":{"id":"JPX_TOPIX","code":"TOPIX","exchange":"JPX/OSE","bid":2732.5,"ask":2733.0,"last":2733.0},"compare":"direct"},{"category":"股價指數","name":"FTSE 100","underlying":"FTSE 100 Index","tw":{"id":"TAIFEX_F1F","code":"F1F","exchange":"TAIFEX","bid":8315.0,"ask":8320.0,"last":8318.0},"os":{"id":"ICE_Z","code":"Z","exchange":"ICE Futures Europe","bid":8317.5,"ask":8318.0,"last":8318.0},"compare":"direct"},{"category":"外匯","name":"USD/CNH","underlying":"USD/CNH","tw":{"id":"TAIFEX_RHF","code":"RHF","exchange":"TAIFEX","bid":7.1125,"ask":7.1135,"last":7.113},"os":{"id":"CME_CNH","code":"CNH","exchange":"CME","bid":7.1127,"ask":7.1132,"last":7.113},"compare":"direct"},{"category":"外匯","name":"EUR/USD","underlying":"EUR/USD","tw":{"id":"TAIFEX_XEF","code":"XEF","exchange":"TAIFEX","bid":1.0822,"ask":1.0826,"last":1.0824},"os":{"id":"CME_6E","code":"6E","exchange":"CME","bid":1.0823,"ask":1.0825,"last":1.0824},"compare":"direct"},{"category":"外匯","name":"USD/JPY vs JPY/USD","underlying":"JPY FX (quote direction differs)","tw":{"id":"TAIFEX_XJF","code":"XJF","exchange":"TAIFEX","bid":147.61,"ask":147.67,"last":147.64},"os":{"id":"CME_6J","code":"6J","exchange":"CME","bid":0.006772,"ask":0.006774,"last":0.006773},"compare":"inverse"},{"category":"外匯","name":"GBP/USD","underlying":"GBP/USD","tw":{"id":"TAIFEX_XBF","code":"XBF","exchange":"TAIFEX","bid":1.2713,"ask":1.2718,"last":1.2716},"os":{"id":"CME_6B","code":"6B","exchange":"CME","bid":1.2714,"ask":1.2717,"last":1.2716},"compare":"direct"},{"category":"外匯","name":"AUD/USD","underlying":"AUD/USD","tw":{"id":"TAIFEX_XAF","code":"XAF","exchange":"TAIFEX","bid":0.6557,"ask":0.6562,"last":0.656},"os":{"id":"CME_6A","code":"6A","exchange":"CME","bid":0.6558,"ask":0.6561,"last":0.656},"compare":"direct"},{"category":"貴金屬","name":"黃金（美元計價）","underlying":"Gold","tw":{"id":"TAIFEX_GDF","code":"GDF","exchange":"TAIFEX","bid":3354.8,"ask":3357.2,"last":3356.0},"os":{"id":"COMEX_GC","code":"GC","exchange":"COMEX/CME","bid":3355.9,"ask":3356.1,"last":3356.1},"compare":"direct"},{"category":"貴金屬","name":"黃金（新台幣計價）","underlying":"Gold; requires FX/unit conversion","tw":{"id":"TAIFEX_TGF","code":"TGF","exchange":"TAIFEX","bid":3518.0,"ask":3522.0,"last":3520.0},"os":{"id":"COMEX_GC_TWD","code":"GC + USD/TWD","exchange":"COMEX/CME + FX","bid":3355.9,"ask":3356.1,"last":3356.1},"compare":"conversion"},{"category":"能源","name":"Brent 原油","underlying":"Brent Crude Oil","tw":{"id":"TAIFEX_BRF","code":"BRF","exchange":"TAIFEX","bid":81.91,"ask":82.05,"last":81.98},"os":{"id":"ICE_BRENT","code":"Brent","exchange":"ICE Futures Europe","bid":81.97,"ask":81.99,"last":81.98},"compare":"direct"}]}
+{
+  "asOf": "2026-09-15T19:40:00+08:00",
+  "top": [
+    {
+      "id": "SPX",
+      "label": "S&P 500",
+      "value": 5616.84,
+      "change": 24.17,
+      "pct": 0.43
+    },
+    {
+      "id": "SOX",
+      "label": "SOX 費半",
+      "value": 4932.18,
+      "change": 86.21,
+      "pct": 1.78
+    },
+    {
+      "id": "TAIEX",
+      "label": "台灣加權",
+      "value": 22312.54,
+      "change": -102.36,
+      "pct": -0.46
+    },
+    {
+      "id": "NIKKEI",
+      "label": "日經 225",
+      "value": 38371.76,
+      "change": 525.12,
+      "pct": 1.39
+    },
+    {
+      "id": "GOLD",
+      "label": "黃金 XAU/USD",
+      "value": 3347.2,
+      "change": 12.6,
+      "pct": 0.38
+    },
+    {
+      "id": "WTI",
+      "label": "WTI 原油",
+      "value": 78.42,
+      "change": -0.63,
+      "pct": -0.8
+    },
+    {
+      "id": "USDTWD",
+      "label": "USD/TWD",
+      "value": 32.128,
+      "change": 0.032,
+      "pct": 0.1
+    }
+  ],
+  "fx": [
+    {
+      "pair": "EUR/USD",
+      "bid": 1.0823,
+      "ask": 1.0825,
+      "change": 0.0019,
+      "p1m": 12.4,
+      "p3m": -36.8,
+      "p6m": -78.1,
+      "p1y": -165.3
+    },
+    {
+      "pair": "GBP/USD",
+      "bid": 1.2714,
+      "ask": 1.2717,
+      "change": 0.0018,
+      "p1m": 10.6,
+      "p3m": -31.5,
+      "p6m": -68.7,
+      "p1y": -148.9
+    },
+    {
+      "pair": "USD/JPY",
+      "bid": 147.62,
+      "ask": 147.66,
+      "change": -0.21,
+      "p1m": -8.2,
+      "p3m": -24.6,
+      "p6m": -51.3,
+      "p1y": -112.7
+    },
+    {
+      "pair": "USD/CHF",
+      "bid": 0.8521,
+      "ask": 0.8524,
+      "change": 0.0015,
+      "p1m": -5.1,
+      "p3m": -16.4,
+      "p6m": -35.8,
+      "p1y": -77.6
+    },
+    {
+      "pair": "USD/CAD",
+      "bid": 1.3562,
+      "ask": 1.3565,
+      "change": -0.0008,
+      "p1m": 4.7,
+      "p3m": 14.8,
+      "p6m": 31.6,
+      "p1y": 69.5
+    },
+    {
+      "pair": "AUD/USD",
+      "bid": 0.6558,
+      "ask": 0.6561,
+      "change": 0.0024,
+      "p1m": -8.9,
+      "p3m": -27.6,
+      "p6m": -55.1,
+      "p1y": -118.4
+    },
+    {
+      "pair": "NZD/USD",
+      "bid": 0.5996,
+      "ask": 0.5999,
+      "change": 0.0027,
+      "p1m": -10.3,
+      "p3m": -31.8,
+      "p6m": -67.9,
+      "p1y": -143.2
+    },
+    {
+      "pair": "USD/CNH",
+      "bid": 7.1129,
+      "ask": 7.1132,
+      "change": 0.0081,
+      "p1m": -125,
+      "p3m": -385,
+      "p6m": -812,
+      "p1y": -1620
+    },
+    {
+      "pair": "USD/HKD",
+      "bid": 7.8203,
+      "ask": 7.8205,
+      "change": 0,
+      "p1m": 110,
+      "p3m": 340,
+      "p6m": 720,
+      "p1y": 1480
+    }
+  ],
+  "twd": {
+    "spotBid": 32.118,
+    "spotAsk": 32.132,
+    "ndf": {
+      "source": "NetDania",
+      "p1m": -125,
+      "p3m": -385,
+      "p6m": -812,
+      "p1y": -1620
+    },
+    "onshore": {
+      "source": "Investing.com",
+      "p1m": -110,
+      "p3m": -340,
+      "p6m": -720,
+      "p1y": -1480
+    }
+  },
+  "equities": [
+    {
+      "name": "S&P 500",
+      "cash": 5616.84,
+      "future": 5619.25,
+      "basis": 2.41,
+      "pct": 0.43,
+      "futureCode": "MES"
+    },
+    {
+      "name": "Nasdaq-100",
+      "cash": 19462.31,
+      "future": 19488,
+      "basis": 25.69,
+      "pct": 0.53,
+      "futureCode": "MNQ"
+    },
+    {
+      "name": "SOX 費半",
+      "cash": 4932.18,
+      "future": 4940.5,
+      "basis": 8.32,
+      "pct": 1.78,
+      "futureCode": "SOX"
+    },
+    {
+      "name": "台灣加權",
+      "cash": 22312.54,
+      "future": 22285.08,
+      "basis": -27.46,
+      "pct": -0.46,
+      "futureCode": "TX"
+    },
+    {
+      "name": "日經 225",
+      "cash": 38371.76,
+      "future": 38420,
+      "basis": 48.24,
+      "pct": 1.39,
+      "futureCode": "Nikkei 225 mini"
+    },
+    {
+      "name": "東證 TOPIX",
+      "cash": 2730.45,
+      "future": 2733,
+      "basis": 2.55,
+      "pct": 0.82,
+      "futureCode": "mini-TOPIX"
+    }
+  ],
+  "commodities": [
+    {
+      "name": "黃金",
+      "spot": 3347.2,
+      "future": 3356.1,
+      "basis": 8.9,
+      "pct": 0.38,
+      "futureCode": "MGC"
+    },
+    {
+      "name": "白銀",
+      "spot": 37.85,
+      "future": 38.12,
+      "basis": 0.27,
+      "pct": 1.12,
+      "futureCode": "SI"
+    },
+    {
+      "name": "WTI 原油",
+      "spot": 78.42,
+      "future": 78.65,
+      "basis": 0.23,
+      "pct": -0.8,
+      "futureCode": "MCL"
+    },
+    {
+      "name": "Brent 原油",
+      "spot": 81.53,
+      "future": 81.98,
+      "basis": 0.45,
+      "pct": -0.67,
+      "futureCode": "BRN"
+    },
+    {
+      "name": "銅",
+      "spot": 4.14,
+      "future": 4.17,
+      "basis": 0.03,
+      "pct": 0.73,
+      "futureCode": "HG"
+    },
+    {
+      "name": "天然氣",
+      "spot": 2.83,
+      "future": 2.87,
+      "basis": 0.04,
+      "pct": -1.74,
+      "futureCode": "NG"
+    }
+  ],
+  "rates": [
+    {
+      "name": "美國 Fed",
+      "rate": 5.5,
+      "next": "2026/09/17"
+    },
+    {
+      "name": "歐元區 ECB",
+      "rate": 4.25,
+      "next": "2026/10/29"
+    },
+    {
+      "name": "日本 BOJ",
+      "rate": 0.1,
+      "next": "2026/09/19"
+    },
+    {
+      "name": "英國 BOE",
+      "rate": 5,
+      "next": "2026/09/18"
+    },
+    {
+      "name": "台灣 CBC",
+      "rate": 2,
+      "next": "2026/09/19"
+    },
+    {
+      "name": "香港 HKMA",
+      "rate": 5.75,
+      "next": "—"
+    },
+    {
+      "name": "中國 PBOC",
+      "rate": 3.45,
+      "next": "—"
+    }
+  ],
+  "ust": [
+    {
+      "tenor": "1M",
+      "yield": 5.32
+    },
+    {
+      "tenor": "3M",
+      "yield": 5.28
+    },
+    {
+      "tenor": "6M",
+      "yield": 5.12
+    },
+    {
+      "tenor": "1Y",
+      "yield": 4.98
+    },
+    {
+      "tenor": "2Y",
+      "yield": 4.46
+    },
+    {
+      "tenor": "5Y",
+      "yield": 4.12
+    },
+    {
+      "tenor": "10Y",
+      "yield": 4.21
+    },
+    {
+      "tenor": "30Y",
+      "yield": 4.81
+    }
+  ],
+  "series": {
+    "SPX": [
+      5590,
+      5600,
+      5595,
+      5608,
+      5612,
+      5609,
+      5615,
+      5611,
+      5618,
+      5623,
+      5616.84
+    ],
+    "SOX": [
+      4840,
+      4865,
+      4880,
+      4895,
+      4902,
+      4910,
+      4918,
+      4925,
+      4932,
+      4928,
+      4932.18
+    ],
+    "TAIEX": [
+      22490,
+      22430,
+      22385,
+      22340,
+      22310,
+      22325,
+      22320,
+      22305,
+      22300,
+      22295,
+      22312.54
+    ],
+    "NIKKEI": [
+      37800,
+      38050,
+      38100,
+      38200,
+      38250,
+      38300,
+      38310,
+      38320,
+      38350,
+      38380,
+      38371.76
+    ],
+    "TOPIX": [
+      2690,
+      2700,
+      2705,
+      2710,
+      2718,
+      2720,
+      2725,
+      2728,
+      2730,
+      2732,
+      2730.45
+    ],
+    "GOLD": [
+      3318,
+      3325,
+      3315,
+      3320,
+      3330,
+      3338,
+      3335,
+      3344,
+      3350,
+      3345,
+      3347.2
+    ],
+    "WTI": [
+      79.3,
+      79,
+      78.9,
+      78.7,
+      78.8,
+      78.6,
+      78.5,
+      78.4,
+      78.3,
+      78.5,
+      78.42
+    ],
+    "USDTWD": [
+      32.02,
+      32.04,
+      32.05,
+      32.08,
+      32.09,
+      32.1,
+      32.11,
+      32.12,
+      32.12,
+      32.13,
+      32.128
+    ],
+    "USDJPY": [
+      147.2,
+      147.4,
+      147.5,
+      147.6,
+      147.7,
+      147.8,
+      147.7,
+      147.6,
+      147.65,
+      147.63,
+      147.62
+    ]
+  },
+  "crossExchange": [
+    {
+      "key": "SPX",
+      "type": "equity",
+      "name": "S&P 500",
+      "underlying": "S&P 500 Index",
+      "expiry": "2026-12",
+      "twCode": "SPF",
+      "twBid": 5621,
+      "twAsk": 5622,
+      "osCode": "ES",
+      "osExchange": "CME",
+      "osBid": 5619.25,
+      "osAsk": 5619.5,
+      "syncMs": 180,
+      "decimals": 2
+    },
+    {
+      "key": "NDX",
+      "type": "equity",
+      "name": "Nasdaq-100",
+      "underlying": "Nasdaq-100 Index",
+      "expiry": "2026-12",
+      "twCode": "UNF",
+      "twBid": 19492,
+      "twAsk": 19496,
+      "osCode": "NQ",
+      "osExchange": "CME",
+      "osBid": 19488,
+      "osAsk": 19489,
+      "syncMs": 210,
+      "decimals": 2
+    },
+    {
+      "key": "SOX",
+      "type": "equity",
+      "name": "PHLX Semiconductor",
+      "underlying": "SOX Index",
+      "expiry": "2026-12",
+      "twCode": "SXF",
+      "twBid": 4947,
+      "twAsk": 4949,
+      "osCode": "SOX",
+      "osExchange": "CME",
+      "osBid": 4940.5,
+      "osAsk": 4942,
+      "syncMs": 240,
+      "decimals": 2
+    },
+    {
+      "key": "TOPIX",
+      "type": "equity",
+      "name": "TOPIX",
+      "underlying": "Tokyo Stock Price Index",
+      "expiry": "2026-12",
+      "twCode": "TJF",
+      "twBid": 2735.5,
+      "twAsk": 2737,
+      "osCode": "TOPIX",
+      "osExchange": "OSE/JPX",
+      "osBid": 2733,
+      "osAsk": 2734,
+      "syncMs": 260,
+      "decimals": 2
+    }
+  ],
+  "crossMarketCatalog": [
+    {
+      "category": "台灣指數",
+      "name": "TAIEX 小型 / 微型",
+      "underlying": "TAIEX",
+      "tw": {
+        "id": "TAIFEX_MTX",
+        "code": "MTX",
+        "exchange": "TAIFEX",
+        "bid": 0,
+        "ask": 0,
+        "last": 0
+      },
+      "os": {
+        "id": "TAIFEX_TMF",
+        "code": "TMF",
+        "exchange": "TAIFEX",
+        "bid": 0,
+        "ask": 0,
+        "last": 0
+      },
+      "compare": "direct"
+    },
+    {
+      "category": "股價指數",
+      "name": "S&P 500",
+      "underlying": "S&P 500 Index",
+      "tw": {
+        "id": "TAIFEX_SPF",
+        "code": "SPF",
+        "exchange": "TAIFEX",
+        "bid": 5618.5,
+        "ask": 5619,
+        "last": 5618.75
+      },
+      "os": {
+        "id": "CME_MES",
+        "code": "MES",
+        "exchange": "CME",
+        "bid": 5619,
+        "ask": 5619.25,
+        "last": 5619.25
+      },
+      "compare": "direct"
+    },
+    {
+      "category": "股價指數",
+      "name": "Nasdaq-100",
+      "underlying": "Nasdaq-100 Index",
+      "tw": {
+        "id": "TAIFEX_UNF",
+        "code": "UNF",
+        "exchange": "TAIFEX",
+        "bid": 19484,
+        "ask": 19488,
+        "last": 19486
+      },
+      "os": {
+        "id": "CME_MNQ",
+        "code": "MNQ",
+        "exchange": "CME",
+        "bid": 19487.5,
+        "ask": 19488,
+        "last": 19488
+      },
+      "compare": "direct"
+    },
+    {
+      "category": "股價指數",
+      "name": "Dow Jones",
+      "underlying": "DJIA",
+      "tw": {
+        "id": "TAIFEX_UDF",
+        "code": "UDF",
+        "exchange": "TAIFEX",
+        "bid": 42010,
+        "ask": 42018,
+        "last": 42014
+      },
+      "os": {
+        "id": "CBOT_MYM",
+        "code": "MYM",
+        "exchange": "CBOT/CME",
+        "bid": 42015,
+        "ask": 42017,
+        "last": 42016
+      },
+      "compare": "direct"
+    },
+    {
+      "category": "股價指數",
+      "name": "PHLX Semiconductor",
+      "underlying": "PHLX Semiconductor Sector Index",
+      "tw": {
+        "id": "TAIFEX_SXF",
+        "code": "SXF",
+        "exchange": "TAIFEX",
+        "bid": 4938,
+        "ask": 4942,
+        "last": 4940
+      },
+      "os": {
+        "id": "CME_SOX",
+        "code": "SOX",
+        "exchange": "CME",
+        "bid": 4939.5,
+        "ask": 4940.5,
+        "last": 4940.5
+      },
+      "compare": "direct"
+    },
+    {
+      "category": "股價指數",
+      "name": "TOPIX",
+      "underlying": "TOPIX",
+      "tw": {
+        "id": "TAIFEX_TJF",
+        "code": "TJF",
+        "exchange": "TAIFEX",
+        "bid": 2731.5,
+        "ask": 2734,
+        "last": 2733
+      },
+      "os": {
+        "id": "JPX_MINI_TOPIX",
+        "code": "mini-TOPIX",
+        "exchange": "JPX/OSE",
+        "bid": 2732.5,
+        "ask": 2733,
+        "last": 2733
+      },
+      "compare": "direct"
+    },
+    {
+      "category": "股價指數",
+      "name": "FTSE 100",
+      "underlying": "FTSE 100 Index",
+      "tw": {
+        "id": "TAIFEX_F1F",
+        "code": "F1F",
+        "exchange": "TAIFEX",
+        "bid": 8315,
+        "ask": 8320,
+        "last": 8318
+      },
+      "os": {
+        "id": "ICE_Z",
+        "code": "Z",
+        "exchange": "ICE Futures Europe",
+        "bid": 8317.5,
+        "ask": 8318,
+        "last": 8318
+      },
+      "compare": "direct"
+    },
+    {
+      "category": "外匯",
+      "name": "USD/CNH",
+      "underlying": "USD/CNH",
+      "tw": {
+        "id": "TAIFEX_RHF",
+        "code": "RHF",
+        "exchange": "TAIFEX",
+        "bid": 7.1125,
+        "ask": 7.1135,
+        "last": 7.113
+      },
+      "os": {
+        "id": "CME_CNH",
+        "code": "CNH",
+        "exchange": "CME",
+        "bid": 7.1127,
+        "ask": 7.1132,
+        "last": 7.113
+      },
+      "compare": "direct"
+    },
+    {
+      "category": "外匯",
+      "name": "EUR/USD",
+      "underlying": "EUR/USD",
+      "tw": {
+        "id": "TAIFEX_XEF",
+        "code": "XEF",
+        "exchange": "TAIFEX",
+        "bid": 1.0822,
+        "ask": 1.0826,
+        "last": 1.0824
+      },
+      "os": {
+        "id": "CME_6E",
+        "code": "6E",
+        "exchange": "CME",
+        "bid": 1.0823,
+        "ask": 1.0825,
+        "last": 1.0824
+      },
+      "compare": "direct"
+    },
+    {
+      "category": "外匯",
+      "name": "USD/JPY vs JPY/USD",
+      "underlying": "JPY FX (quote direction differs)",
+      "tw": {
+        "id": "TAIFEX_XJF",
+        "code": "XJF",
+        "exchange": "TAIFEX",
+        "bid": 147.61,
+        "ask": 147.67,
+        "last": 147.64
+      },
+      "os": {
+        "id": "CME_6J",
+        "code": "6J",
+        "exchange": "CME",
+        "bid": 0.006772,
+        "ask": 0.006774,
+        "last": 0.006773
+      },
+      "compare": "inverse"
+    },
+    {
+      "category": "外匯",
+      "name": "GBP/USD",
+      "underlying": "GBP/USD",
+      "tw": {
+        "id": "TAIFEX_XBF",
+        "code": "XBF",
+        "exchange": "TAIFEX",
+        "bid": 1.2713,
+        "ask": 1.2718,
+        "last": 1.2716
+      },
+      "os": {
+        "id": "CME_6B",
+        "code": "6B",
+        "exchange": "CME",
+        "bid": 1.2714,
+        "ask": 1.2717,
+        "last": 1.2716
+      },
+      "compare": "direct"
+    },
+    {
+      "category": "外匯",
+      "name": "AUD/USD",
+      "underlying": "AUD/USD",
+      "tw": {
+        "id": "TAIFEX_XAF",
+        "code": "XAF",
+        "exchange": "TAIFEX",
+        "bid": 0.6557,
+        "ask": 0.6562,
+        "last": 0.656
+      },
+      "os": {
+        "id": "CME_6A",
+        "code": "6A",
+        "exchange": "CME",
+        "bid": 0.6558,
+        "ask": 0.6561,
+        "last": 0.656
+      },
+      "compare": "direct"
+    },
+    {
+      "category": "貴金屬",
+      "name": "黃金（美元計價）",
+      "underlying": "Gold",
+      "tw": {
+        "id": "TAIFEX_GDF",
+        "code": "GDF",
+        "exchange": "TAIFEX",
+        "bid": 3354.8,
+        "ask": 3357.2,
+        "last": 3356
+      },
+      "os": {
+        "id": "COMEX_MGC",
+        "code": "MGC",
+        "exchange": "COMEX/CME",
+        "bid": 3355.9,
+        "ask": 3356.1,
+        "last": 3356.1
+      },
+      "compare": "direct"
+    },
+    {
+      "category": "貴金屬",
+      "name": "黃金（新台幣計價）",
+      "underlying": "Gold; requires FX/unit conversion",
+      "tw": {
+        "id": "TAIFEX_TGF",
+        "code": "TGF",
+        "exchange": "TAIFEX",
+        "bid": 3518,
+        "ask": 3522,
+        "last": 3520
+      },
+      "os": {
+        "id": "COMEX_MGC_TWD",
+        "code": "MGC + USD/TWD",
+        "exchange": "COMEX/CME + FX",
+        "bid": 3355.9,
+        "ask": 3356.1,
+        "last": 3356.1
+      },
+      "compare": "conversion"
+    },
+    {
+      "category": "能源",
+      "name": "Brent 原油",
+      "underlying": "Brent Crude Oil",
+      "tw": {
+        "id": "TAIFEX_BRF",
+        "code": "BRF",
+        "exchange": "TAIFEX",
+        "bid": 81.91,
+        "ask": 82.05,
+        "last": 81.98
+      },
+      "os": {
+        "id": "ICE_BRENT_MINI",
+        "code": "IMM",
+        "exchange": "ICE Futures Europe",
+        "bid": 81.97,
+        "ask": 81.99,
+        "last": 81.98
+      },
+      "compare": "direct"
+    }
+  ]
+}

@@ -34,7 +34,7 @@
           <div class="spread-controls"><label>分類 <select id="catalogFilter"><option value="all">全部</option><option value="股價指數">股價指數</option><option value="外匯">外匯</option><option value="貴金屬">貴金屬</option><option value="能源">能源</option></select></label></div>
         </section>
         <section id="catalogSummary" class="spread-kpis"></section>
-        <article class="panel spread-table-panel"><h3>可比較商品 / Comparable Products <small>TAIFEX × Overseas</small></h3><div class="table-wrap spread-table-wrap"><table><thead><tr><th>分類</th><th>標的</th><th>台期所</th><th>Bid</th><th>Ask</th><th>Last</th><th>海外市場</th><th>商品</th><th>Bid</th><th>Ask</th><th>Last</th><th>比較注意</th></tr></thead><tbody id="catalogBody"></tbody></table></div></article>
+        <article class="panel spread-table-panel"><h3>可比較商品 / Comparable Products <small>跨市場 / 同標的</small></h3><div class="table-wrap spread-table-wrap"><table><thead><tr><th>分類</th><th>標的</th><th>台期所</th><th>Bid</th><th>Ask</th><th>Last</th><th>海外市場</th><th>商品</th><th>Bid</th><th>Ask</th><th>Last</th><th>比較注意</th></tr></thead><tbody id="catalogBody"></tbody></table></div></article>
 
         <section class="cost-lab panel">
           <div class="formula-lab-head"><div><h3>合約規格、換算與成本試算 / Contract Spec & Cost Lab</h3><p>選擇商品後，自動帶入交易所官方合約乘數、幣別、最小跳動點與到期週期；報價欄位、口數、換算係數與成本仍可手動覆寫。</p></div><button id="resetCostLab" class="secondary-btn">恢復官方預設</button></div>
@@ -71,16 +71,16 @@
             <button data-op=" + ">＋</button><button data-op=" - ">−</button><button data-op=" * ">×</button><button data-op=" / ">÷</button><button data-op="(">(</button><button data-op=")">)</button>
             <button data-op=" > ">&gt;</button><button data-op=" < ">&lt;</button><button data-op=" >= ">&gt;=</button><button data-op=" <= ">&lt;=</button>
           </div>
-          <textarea id="spreadFormula" rows="3" placeholder="例 1：TAIFEX_SPF.BID - CME_ES.ASK
+          <textarea id="spreadFormula" rows="3" placeholder="例 1：TAIFEX_SPF.BID - CME_MES.ASK
 例 2：(TAIFEX_XJF.LAST - (1 / CME_6J.LAST))
-例 3：(TAIFEX_GDF.LAST / COMEX_GC.LAST - 1) * 100"></textarea>
+例 3：(TAIFEX_GDF.LAST / COMEX_MGC.LAST - 1) * 100"></textarea>
           <div class="formula-action-row"><button id="calcSpreadFormula">計算公式</button><button id="saveSpreadFormula" class="secondary-btn">儲存到監控</button><span id="formulaResult" class="formula-result">等待輸入公式</span></div>
-          <div class="formula-examples"><button data-example="TAIFEX_SPF.BID - CME_ES.ASK">S&P 可成交價差</button><button data-example="TAIFEX_UNF.LAST / CME_NQ.LAST - 1">Nasdaq 比率</button><button data-example="TAIFEX_XJF.LAST - (1 / CME_6J.LAST)">JPY 倒數換向</button><button data-example="(TAIFEX_GDF.LAST / COMEX_GC.LAST - 1) * 100">Gold % 差</button><button data-example="TAIFEX_BRF.BID - ICE_BRENT.ASK">Brent Bid/Ask 價差</button></div>
+          <div class="formula-examples"><button data-example="TAIFEX_SPF.BID - CME_MES.ASK">S&P 可成交價差</button><button data-example="TAIFEX_UNF.LAST / CME_MNQ.LAST - 1">Nasdaq 比率</button><button data-example="TAIFEX_XJF.LAST - (1 / CME_6J.LAST)">JPY 倒數換向</button><button data-example="(TAIFEX_GDF.LAST / COMEX_MGC.LAST - 1) * 100">Gold % 差</button><button data-example="TAIFEX_BRF.BID - ICE_BRENT.ASK">Brent Bid/Ask 價差</button></div>
         </section>
 
         <div class="spread-grid">
           <article class="panel"><h3>比較原則 <small>你決定公式，系統不替你限制</small></h3><div class="info-list"><div><b>同月份</b><span>跨市場期貨最好先確認相同或相近到期月。</span></div><div><b>Bid / Ask / Last</b><span>三種欄位都可直接放入公式；找可成交價差時優先使用 Bid/Ask。</span></div><div><b>報價方向</b><span>例如 TAIFEX USD/JPY 與 CME 6J 的報價方向不同，可自行使用 1 / CME_6J。</span></div><div><b>單位與幣別</b><span>新台幣黃金等商品需自行加入 USD/TWD、單位或合約乘數換算。</span></div></div></article>
-          <article class="panel"><h3>目前納入範圍 <small>官方商品清單</small></h3><div class="spread-alert-examples"><span>股價指數：TJF / UDF / SPF / UNF / SXF / F1F</span><span>外匯：RHF / XEF / XJF / XBF / XAF</span><span>貴金屬：GDF / TGF</span><span>能源：BRF</span><span>RTF（CNT）暫不列入直接海外同標的，避免把 CNT 與 CNH 混為相同市場。</span></div></article>
+          <article class="panel"><h3>目前納入範圍 <small>官方商品清單</small></h3><div class="spread-alert-examples"><span>台灣指數：MTX / TMF　｜　股價指數：TJF / UDF / SPF / UNF / SXF / F1F</span><span>外匯：RHF / XEF / XJF / XBF / XAF</span><span>貴金屬：GDF / TGF</span><span>能源：BRF</span><span>RTF（CNT）暫不列入直接海外同標的，避免把 CNT 與 CNH 混為相同市場。</span></div></article>
         </div>
       </section>
 
