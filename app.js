@@ -40,19 +40,41 @@ function render(){ if(!DATA)return; $('#asof').textContent=new Date(DATA.asOf).t
   $('#eqBody').innerHTML=DATA.equities.map(x=>`<tr><td>${x.name}<div class="source-note">${x.futureCode}</div></td><td>${fmt(x.cash)}</td><td>${fmt(x.future)}</td><td class="${cls(x.basis)}">${x.basis>=0?'+':''}${fmt(x.basis)}</td><td class="${cls(x.pct)}">${x.pct>=0?'+':''}${fmt(x.pct)}%</td></tr>`).join('');
   $('#cmdBody').innerHTML=DATA.commodities.map(x=>`<tr><td>${x.name}<div class="source-note">${x.futureCode}</div></td><td>${fmt(x.spot)}</td><td>${fmt(x.future)}</td><td class="${cls(x.basis)}">${x.basis>=0?'+':''}${fmt(x.basis)}</td><td class="${cls(x.pct)}">${x.pct>=0?'+':''}${fmt(x.pct)}%</td></tr>`).join('');
   $('#rateBody').innerHTML=DATA.rates.map(x=>`<tr><td>${x.name}</td><td>${fmt(x.rate)}%</td><td>${x.next}</td></tr>`).join('');
-  renderYield(); renderAlerts(); renderSpreads(); evaluateAlerts();
+  renderYield(); renderAlerts(); renderCatalog(); evaluateAlerts();
 }
 function renderYield(){ drawLine($('#yieldCanvas'), DATA.ust.map(x=>x.yield), {color:'#56aef7'}); }
-function spreadRows(){return DATA.crossExchange||[]}
-function spreadCalc(x){const sellTwBuyOs=x.twBid-x.osAsk;const buyTwSellOs=x.osBid-x.twAsk;const best=Math.max(sellTwBuyOs,buyTwSellOs);const dir=sellTwBuyOs>=buyTwSellOs?'賣台 / 買海外':'買台 / 賣海外';return {...x,sellTwBuyOs,buyTwSellOs,best,dir}}
-function renderSpreads(){
-  if(!$('#spreadBody'))return; const type=$('#spreadFilter')?.value||'all'; const only=$('#onlyOpportunity')?.checked||false;
-  let rows=spreadRows().map(spreadCalc).filter(x=>type==='all'||x.type===type).filter(x=>!only||x.best>0);
-  $('#spreadBody').innerHTML=rows.length?rows.map(x=>`<tr><td><b>${x.name}</b><div class="source-note">${x.underlying}</div></td><td>${x.expiry}</td><td>${x.twCode}<div class="source-note">TAIFEX</div></td><td>${fmt(x.twBid,x.decimals||2)}</td><td>${fmt(x.twAsk,x.decimals||2)}</td><td>${x.osCode}<div class="source-note">${x.osExchange}</div></td><td>${fmt(x.osBid,x.decimals||2)}</td><td>${fmt(x.osAsk,x.decimals||2)}</td><td class="${cls(x.sellTwBuyOs)}">${x.sellTwBuyOs>=0?'+':''}${fmt(x.sellTwBuyOs,x.decimals||2)}</td><td class="${cls(x.buyTwSellOs)}">${x.buyTwSellOs>=0?'+':''}${fmt(x.buyTwSellOs,x.decimals||2)}</td><td><span class="direction ${x.best>0?'opportunity':''}">${x.dir}<br><b>${x.best>=0?'+':''}${fmt(x.best,x.decimals||2)}</b></span></td><td>${x.syncMs} ms</td></tr>`).join(''):`<tr><td colspan="12" class="empty">目前篩選條件下沒有項目</td></tr>`;
-  const all=spreadRows().map(spreadCalc), pos=all.filter(x=>x.best>0), best=all.sort((a,b)=>b.best-a.best)[0];
-  $('#spreadKpis').innerHTML=`<div class="kpi"><span>監控商品</span><b>${spreadRows().length}</b></div><div class="kpi"><span>正向價差</span><b class="${pos.length?'pos':''}">${pos.length}</b></div><div class="kpi"><span>目前最大價差</span><b>${best?best.name:'—'}</b><small>${best?`${best.best>=0?'+':''}${fmt(best.best,best.decimals||2)} pts`:'—'}</small></div><div class="kpi"><span>資料模式</span><b>DEMO</b><small>待接真實 Bid/Ask</small></div>`;
+function catalogRows(){return DATA.crossMarketCatalog||[]}
+function quoteTokenMap(){
+  const m={USD_TWD_SPOT:DATA.twd?.spotBid};
+  catalogRows().forEach(x=>{[x.tw,x.os].forEach(q=>{if(!q?.id)return;m[q.id+'.BID']=q.bid;m[q.id+'.ASK']=q.ask;m[q.id+'.LAST']=q.last;});});
+  return m;
 }
-function symbolMap(){ const m={GOLD:DATA.commodities[0].spot,SILVER:DATA.commodities[1].spot,WTI:DATA.commodities[2].spot,BRENT:DATA.commodities[3].spot,USDTWD:DATA.twd.spotBid,USDTWD_1M:DATA.twd.ndf.p1m,USDTWD_3M:DATA.twd.ndf.p3m,SPX:DATA.equities[0].cash,SOX:DATA.equities[2].cash,TAIEX:DATA.equities[3].cash,NIKKEI:DATA.equities[4].cash,TOPIX:DATA.equities[5].cash}; DATA.ust.forEach(x=>m['US'+x.tenor]=x.yield); spreadRows().map(spreadCalc).forEach(x=>{const k=x.key.toUpperCase();m[k+'_TW_SELL_OS_BUY']=x.sellTwBuyOs;m[k+'_TW_BUY_OS_SELL']=x.buyTwSellOs}); return m; }
+function catalogNote(x){return x.compare==='inverse'?'報價方向不同：可用倒數換向':x.compare==='conversion'?'需加入匯率 / 單位換算':'可直接比較，但仍須對齊月份與時間'}
+function renderCatalog(){
+  if(!$('#catalogBody'))return; const type=$('#catalogFilter')?.value||'all'; const rows=catalogRows().filter(x=>type==='all'||x.category===type);
+  $('#catalogBody').innerHTML=rows.map(x=>`<tr><td><span class="category-pill">${x.category}</span></td><td><b>${x.name}</b><div class="source-note">${x.underlying}</div></td><td><b>${x.tw.code}</b><div class="source-note">${x.tw.exchange}</div></td><td>${fmt(x.tw.bid,4)}</td><td>${fmt(x.tw.ask,4)}</td><td>${fmt(x.tw.last,4)}</td><td>${x.os.exchange}</td><td><b>${x.os.code}</b></td><td>${fmt(x.os.bid,4)}</td><td>${fmt(x.os.ask,4)}</td><td>${fmt(x.os.last,4)}</td><td class="catalog-note">${catalogNote(x)}</td></tr>`).join('')||`<tr><td colspan="12" class="empty">此分類目前沒有項目</td></tr>`;
+  const cats=[...new Set(catalogRows().map(x=>x.category))];
+  $('#catalogSummary').innerHTML=`<div class="kpi"><span>可比較商品</span><b>${catalogRows().length}</b><small>TAIFEX × Overseas</small></div><div class="kpi"><span>商品分類</span><b>${cats.length}</b><small>${cats.join(' / ')}</small></div><div class="kpi"><span>原始欄位</span><b>${Object.keys(quoteTokenMap()).length}</b><small>Bid / Ask / Last</small></div><div class="kpi"><span>公式模式</span><b>自由</b><small>+ − × ÷ / 比較運算</small></div>`;
+  renderTokenOptions();
+}
+function renderTokenOptions(){
+  const s=$('#tokenSelect'); if(!s)return; const current=s.value; const groups={};
+  catalogRows().forEach(x=>{groups[x.category]??=[];groups[x.category].push({label:`${x.name}｜${x.tw.exchange} ${x.tw.code}`,id:x.tw.id});groups[x.category].push({label:`${x.name}｜${x.os.exchange} ${x.os.code}`,id:x.os.id});});
+  s.innerHTML='<option value="">選擇報價欄位…</option>'+Object.entries(groups).map(([g,arr])=>`<optgroup label="${g}">${arr.map(q=>['BID','ASK','LAST'].map(f=>`<option value="${q.id}.${f}">${q.label} · ${f}</option>`).join('')).join('')}</optgroup>`).join('')+`<optgroup label="其他"><option value="USD_TWD_SPOT">USD/TWD Spot</option></optgroup>`; if([...s.options].some(o=>o.value===current))s.value=current;
+}
+function evalMarketFormula(raw){
+  try{
+    let e=raw.trim(); if(!e)return {ok:false,error:'請輸入公式'}; const vars=quoteTokenMap();
+    Object.keys(vars).sort((a,b)=>b.length-a.length).forEach(k=>e=e.split(k).join(String(vars[k])));
+    if(/[A-Za-z_]/.test(e))throw new Error('含未知欄位代碼');
+    const comp=e.match(/^(.+?)(>=|<=|==|>|<)(.+)$/);
+    const calc=t=>{if(!/^[0-9eE+\-*/().\s]+$/.test(t))throw new Error('公式含不支援字元');return Function('"use strict";return ('+t+')')()};
+    if(comp){const l=calc(comp[1]),r=calc(comp[3]),op=comp[2];return {ok:true,type:'condition',value:({'>':l>r,'<':l<r,'>=':l>=r,'<=':l<=r,'==':l==r})[op],left:l,right:r};}
+    return {ok:true,type:'number',value:calc(e)};
+  }catch(err){return {ok:false,error:err.message}}
+}
+function calcFormula(){const r=evalMarketFormula($('#spreadFormula').value);const el=$('#formulaResult');if(!r.ok){el.className='formula-result neg';el.textContent='公式錯誤：'+r.error;return}el.className='formula-result '+(r.type==='condition'?(r.value?'pos':'neg'):'pos');el.textContent=r.type==='condition'?`條件 ${r.value?'成立':'未成立'}｜左值 ${fmt(r.left,6)} / 右值 ${fmt(r.right,6)}`:`計算結果：${fmt(r.value,8)}`;}
+function symbolMap(){ const m={GOLD:DATA.commodities[0].spot,SILVER:DATA.commodities[1].spot,WTI:DATA.commodities[2].spot,BRENT:DATA.commodities[3].spot,USDTWD:DATA.twd.spotBid,USDTWD_1M:DATA.twd.ndf.p1m,USDTWD_3M:DATA.twd.ndf.p3m,SPX:DATA.equities[0].cash,SOX:DATA.equities[2].cash,TAIEX:DATA.equities[3].cash,NIKKEI:DATA.equities[4].cash,TOPIX:DATA.equities[5].cash}; DATA.ust.forEach(x=>m['US'+x.tenor]=x.yield); Object.assign(m,quoteTokenMap()); return m; }
 function evalFormula(s){ const comp=s.match(/(.+?)(>=|<=|>|<|==)(.+)/); if(!comp)return {ok:false,error:'格式需包含 >、<、>=、<='}; const vars=symbolMap(); const evalSide=t=>{ let e=t.toUpperCase(); Object.keys(vars).sort((a,b)=>b.length-a.length).forEach(k=>e=e.replaceAll(k,String(vars[k]))); if(!/^[0-9+\-*/().\s]+$/.test(e))throw new Error('含未知代碼'); return Function('"use strict";return ('+e+')')(); }; try{const l=evalSide(comp[1]),r=evalSide(comp[3]); const op=comp[2]; return {ok:true,hit:({'>':l>r,'<':l<r,'>=':l>=r,'<=':l<=r,'==':l==r})[op],left:l,right:r};}catch(e){return {ok:false,error:e.message};} }
 function renderAlerts(){ $('#alertList').innerHTML=alerts.length?alerts.map((a,i)=>{const r=evalFormula(a.formula);return `<div class="alert-item"><span>${a.formula} <small class="source-note">${r.ok?(r.hit?'條件成立':'未觸發'):'公式錯誤'}</small></span><button data-del="${i}">刪除</button></div>`}).join(''):`<div class="source-note">尚未建立警示。可輸入：GOLD/SILVER > 90</div>`; document.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{alerts.splice(+b.dataset.del,1);saveAlerts();renderAlerts();}); }
 function saveAlerts(){localStorage.setItem('gmmAlerts',JSON.stringify(alerts))}
@@ -60,7 +82,13 @@ function evaluateAlerts(){ alerts.forEach(a=>{const r=evalFormula(a.formula); if
 function switchView(name){document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===name+'View'));document.querySelectorAll('[data-view]').forEach(x=>x.classList.toggle('active',x.dataset.view===name));window.scrollTo({top:0,behavior:'smooth'});}
 document.querySelectorAll('[data-view]').forEach(x=>x.onclick=()=>switchView(x.dataset.view));
 $('#customizeTop').onclick=()=>$('#topPicker').classList.toggle('hidden');
-$('#spreadFilter').onchange=renderSpreads; $('#onlyOpportunity').onchange=renderSpreads;
+if($('#catalogFilter')) $('#catalogFilter').onchange=renderCatalog;
+if($('#insertToken')) $('#insertToken').onclick=()=>{const t=$('#tokenSelect').value;if(t){const ta=$('#spreadFormula');ta.value+=(ta.value&& !ta.value.endsWith(' ')?' ':'')+t;ta.focus();}};
+document.querySelectorAll('[data-op]').forEach(b=>b.onclick=()=>{const ta=$('#spreadFormula');ta.value+=b.dataset.op;ta.focus();});
+document.querySelectorAll('[data-example]').forEach(b=>b.onclick=()=>{$('#spreadFormula').value=b.dataset.example;calcFormula();});
+if($('#calcSpreadFormula')) $('#calcSpreadFormula').onclick=calcFormula;
+if($('#clearFormula')) $('#clearFormula').onclick=()=>{$('#spreadFormula').value='';$('#formulaResult').className='formula-result';$('#formulaResult').textContent='等待輸入公式';};
+if($('#saveSpreadFormula')) $('#saveSpreadFormula').onclick=()=>{const f=$('#spreadFormula').value.trim();if(!f)return;const r=evalMarketFormula(f);if(!r.ok)return alert('公式無法解析：'+r.error);alerts.push({formula:f,cooldown:300,lastHit:0});saveAlerts();renderAlerts();alert('已加入監控清單');};
 $('#addAlert').onclick=()=>{const f=$('#formulaInput').value.trim(); if(!f)return; const test=evalFormula(f); if(!test.ok)return alert('公式無法解析：'+test.error); alerts.push({formula:f,cooldown:+$('#cooldown').value,lastHit:0}); saveAlerts(); $('#formulaInput').value=''; renderAlerts();};
 $('#notifyBtn').onclick=async()=>{if(!('Notification'in window))return alert('此瀏覽器不支援通知'); const p=await Notification.requestPermission(); alert(p==='granted'?'通知已啟用':'通知未啟用');};
 async function refresh(){try{$('#feedStatus').textContent='更新中';const raw=await MarketProviders.load(); DATA=MarketProviders.simulate(raw); $('#feedStatus').textContent='資料已更新';render();}catch(e){console.error(e);$('#feedStatus').textContent='資料讀取失敗';}}
