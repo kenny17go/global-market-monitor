@@ -1,5 +1,5 @@
 const URL = 'https://openapi.taifex.com.tw/v1/DailyMarketReportFut';
-const TARGETS = ['TX','MTX','TMF','SPF','UNF','UDF','SXF','TJF','F1F','RHF','XEF','XJF','XBF','XAF','GDF','TGF','BRF'];
+const TARGETS = ['TX','MTX','SPF','UNF','UDF','SXF','TJF','F1F','RHF','XEF','XJF','XBF','XAF','GDF','TGF','BRF'];
 
 const nullish = new Set(['','-','--','---','null','NULL','N/A']);
 const text = v => (v == null ? '' : String(v).trim());
