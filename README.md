@@ -1,23 +1,19 @@
-# Global Market Monitor v1.1
+# Global Market Monitor v1.2
 
-可直接部署到 GitHub Pages 的純前端市場監控介面。
+GitHub Pages ready market dashboard prototype.
 
-## v1.1 變更
-- 移除底部 Intraday Charts 區塊。
-- 最上方市場快覽可自行勾選顯示商品，設定儲存在瀏覽器 localStorage。
-- 新增「價差比較 Spread」頁：TAIFEX vs 海外交易所同標的期貨。
-- 價差採 Bid/Ask 計算兩個可交易方向，而不是單純 Last Price 相減。
-- 預留公式警示與 Provider 可替換架構。
+## v1.2
+- Top market cards remain user-selectable.
+- Cross-market page is now a categorized product catalog instead of fixed spread pairs.
+- Covers comparable TAIFEX products in foreign equity indices, FX, gold and Brent crude.
+- Formula Lab allows arbitrary Bid / Ask / Last formulas with + - * /, parentheses and comparisons.
+- Quote-direction and currency/unit conversions are intentionally user-controlled.
+- Demo quotes only; providers remain replaceable before live deployment.
 
-## 目前資料模式
-`data/latest.json` 為 Demo 資料，`config.example.js` 預設會模擬小幅更新。尚未接正式即時行情。
+### Catalog
+Equity indices: TJF, UDF, SPF, UNF, SXF, F1F.
+FX: RHF, XEF, XJF, XBF, XAF.
+Metals: GDF, TGF.
+Energy: BRF.
 
-## GitHub Pages
-將此資料夾所有檔案放在 repository root，Settings → Pages → Deploy from a branch → main / root 即可。
-
-## 後續真實資料來源規劃
-- TAIFEX：台灣期貨與海外指數期貨
-- NetDania：USD/TWD Offshore NDF
-- Investing.com：USD/TWD Onshore Forward Points
-- CME / JPX：海外期貨
-- 官方央行 / 財政部：政策利率與公債曲線
+RTF (CNT fixing) is not treated as identical to offshore CNH for direct cross-exchange comparison.
