@@ -36,6 +36,30 @@
         <section id="catalogSummary" class="spread-kpis"></section>
         <article class="panel spread-table-panel"><h3>可比較商品 / Comparable Products <small>TAIFEX × Overseas</small></h3><div class="table-wrap spread-table-wrap"><table><thead><tr><th>分類</th><th>標的</th><th>台期所</th><th>Bid</th><th>Ask</th><th>Last</th><th>海外市場</th><th>商品</th><th>Bid</th><th>Ask</th><th>Last</th><th>比較注意</th></tr></thead><tbody id="catalogBody"></tbody></table></div></article>
 
+        <section class="cost-lab panel">
+          <div class="formula-lab-head"><div><h3>合約換算與成本試算 / Contract & Cost Lab</h3><p>選擇商品後，自訂月份、報價欄位、合約乘數、口數、匯率/單位換算與交易成本。結果分開顯示價格價差、點值避險比與成本後名目差額。</p></div><button id="resetCostLab" class="secondary-btn">重設</button></div>
+          <div class="cost-grid">
+            <label>商品<select id="costProduct"></select></label>
+            <label>方向<select id="costDirection"><option value="sellTw">賣台期所 / 買海外</option><option value="sellOs">買台期所 / 賣海外</option></select></label>
+            <label>台期所月份<input id="twExpiry" value="近月"></label>
+            <label>海外月份<input id="osExpiry" value="近月"></label>
+            <label>台期所價格欄位<select id="twPriceField"><option value="BID">Bid</option><option value="ASK">Ask</option><option value="LAST">Last</option></select></label>
+            <label>海外價格欄位<select id="osPriceField"><option value="ASK">Ask</option><option value="BID">Bid</option><option value="LAST">Last</option></select></label>
+            <label>台期所乘數<input id="twMultiplier" type="number" step="any" value="1"></label>
+            <label>海外乘數<input id="osMultiplier" type="number" step="any" value="1"></label>
+            <label>台期所口數<input id="twContracts" type="number" step="any" value="1"></label>
+            <label>海外口數<input id="osContracts" type="number" step="any" value="1"></label>
+            <label>台期所單位換算<input id="twUnitFactor" type="number" step="any" value="1"></label>
+            <label>海外單位換算<input id="osUnitFactor" type="number" step="any" value="1"></label>
+            <label>海外→共同幣別 FX<input id="osFx" type="number" step="any" value="1"></label>
+            <label>台期所交易成本<input id="twCost" type="number" step="any" value="0"></label>
+            <label>海外交易成本<input id="osCost" type="number" step="any" value="0"></label>
+            <label>其他成本/稅/FX<input id="otherCost" type="number" step="any" value="0"></label>
+          </div>
+          <div class="cost-actions"><button id="calcCostLab">重新計算</button><span class="source-note">所有乘數、匯率與成本均可自行覆寫；Demo 預設值僅供測試介面。</span></div>
+          <div id="costResults" class="cost-results"></div>
+        </section>
+
         <section class="formula-lab panel">
           <div class="formula-lab-head"><div><h3>自訂比較公式 / Formula Lab</h3><p>任意插入商品欄位與運算符號。支援 + − × ÷、括號與 &gt; &lt; &gt;= &lt;= ==。公式只使用你選的原始行情，不預設比較邏輯。</p></div><button id="clearFormula" class="secondary-btn">清除</button></div>
           <div class="formula-tools">
@@ -56,7 +80,7 @@
         </div>
       </section>
 
-      <footer class="footer"><span>Global Market Monitor v1.2 · GitHub Pages Ready</span><span>資料來源架構：TAIFEX · NetDania · Investing.com · CME · JPX · 各央行/政府官方資料 <span class="tag">Provider 可替換</span></span><span>僅供資訊參考，不構成投資建議</span></footer>
+      <footer class="footer"><span>Global Market Monitor v1.3 · GitHub Pages Ready</span><span>資料來源架構：TAIFEX · NetDania · Investing.com · CME · JPX · 各央行/政府官方資料 <span class="tag">Provider 可替換</span></span><span>僅供資訊參考，不構成投資建議</span></footer>
     </div>
   </main>
 </div>
