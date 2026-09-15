@@ -7,6 +7,7 @@ on:
       - 'scripts/fetch-taifex.mjs'
       - 'scripts/install-taifex-official.mjs'
       - 'scripts/patch-ui-target.mjs'
+      - 'scripts/apply-market-connections.mjs'
       - '.github/workflows/update-taifex-data.yml'
   schedule:
     - cron: '35 7 * * 1-5'
@@ -31,19 +32,22 @@ jobs:
         run: node scripts/install-taifex-official.mjs
       - name: Apply UI target patch
         run: node scripts/patch-ui-target.mjs
+      - name: Apply market connections
+        run: node scripts/apply-market-connections.mjs
       - name: Validate JavaScript
         run: |
           node --check app.js
           node --check providers.js
           node --check scripts/patch-ui-target.mjs
+          node --check scripts/apply-market-connections.mjs
       - name: Commit integration/data changes
         run: |
-          if git diff --quiet -- app.js providers.js config.example.js index.html data/latest.json data/taifex-latest.json; then
-            echo "No TAIFEX changes"
+          if git diff --quiet -- app.js providers.js config.example.js index.html styles.css data/latest.json data/taifex-latest.json; then
+            echo "No changes"
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add app.js providers.js config.example.js index.html data/latest.json data/taifex-latest.json
-          git commit -m "feat: simplify TAIEX label and show contract underlying"
+          git add app.js providers.js config.example.js index.html styles.css data/latest.json data/taifex-latest.json
+          git commit -m "feat: add market data connections"
           git push
