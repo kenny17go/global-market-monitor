@@ -19,9 +19,11 @@ if(!index.includes('id="indicatorName"')){
             </div>
             <div id="indicatorAlertList" class="indicator-alert-list"></div>
           </div>`;
-  const re=/(<div[^>]*id="formulaResult"[^>]*>[\s\S]*?<\/div>)/;
-  if(!re.test(index)) throw new Error('formulaResult anchor not found');
-  index=index.replace(re,'$1'+block);
+  const start=index.indexOf('id="tokenCategory"');
+  if(start<0) throw new Error('Formula Lab tokenCategory anchor not found');
+  const close=index.indexOf('</section>',start);
+  if(close<0) throw new Error('Formula Lab closing section not found');
+  index=index.slice(0,close)+block+index.slice(close);
 }
 
 if(!app.includes("const INDICATOR_KEY='gmmCustomIndicatorsV1'")){
