@@ -1,0 +1,173 @@
+{
+  "meta": {
+    "source": "Stooq + FRED/EIA + Yahoo Finance",
+    "mode": "MIXED DELAYED/DAILY",
+    "realtime": false,
+    "generatedAt": "2026-09-16T14:41:42.552Z",
+    "note": "Gold/silver and selected cash references use Stooq public quotes when available. Oil and natural-gas spot can fall back to FRED/EIA daily observations. Futures use Yahoo public delayed/web data. Copper spot is left unavailable if no comparable public cash quote is found; no futures quote is relabeled as spot and no synthetic values are created."
+  },
+  "commodities": {
+    "GOLD": {
+      "id": "GOLD",
+      "name": "黃金",
+      "spot": {
+        "label": "Gold spot XAU/USD",
+        "symbol": "xauusd",
+        "last": null,
+        "previousClose": null,
+        "change": null,
+        "pct": null,
+        "timestamp": null,
+        "source": "Stooq public quote",
+        "mode": "UNAVAILABLE"
+      },
+      "future": {
+        "label": "COMEX Micro Gold futures",
+        "symbol": "MGC=F",
+        "last": 4377.6,
+        "previousClose": 4332.8,
+        "change": 44.80000000000018,
+        "pct": 1.0339734121122641,
+        "timestamp": "2026-09-16T14:31:26.000Z",
+        "source": "Yahoo Finance",
+        "mode": "DELAYED"
+      },
+      "futureCode": "MGC"
+    },
+    "SILVER": {
+      "id": "SILVER",
+      "name": "白銀",
+      "spot": {
+        "label": "Silver spot XAG/USD",
+        "symbol": "xagusd",
+        "last": null,
+        "previousClose": null,
+        "change": null,
+        "pct": null,
+        "timestamp": null,
+        "source": "Stooq public quote",
+        "mode": "UNAVAILABLE"
+      },
+      "future": {
+        "label": "COMEX Silver futures",
+        "symbol": "SI=F",
+        "last": 64.78,
+        "previousClose": 63.856,
+        "change": 0.9239999999999995,
+        "pct": 1.4470057629666742,
+        "timestamp": "2026-09-16T14:31:20.000Z",
+        "source": "Yahoo Finance",
+        "mode": "DELAYED"
+      },
+      "futureCode": "SI"
+    },
+    "WTI": {
+      "id": "WTI",
+      "name": "WTI 原油",
+      "spot": {
+        "label": "WTI Cushing spot",
+        "series": "DCOILWTICO",
+        "last": null,
+        "previousClose": null,
+        "change": null,
+        "pct": null,
+        "timestamp": null,
+        "source": "FRED / EIA daily spot",
+        "mode": "UNAVAILABLE"
+      },
+      "future": {
+        "label": "NYMEX Micro WTI futures",
+        "symbol": "MCL=F",
+        "last": 103.53,
+        "previousClose": 105.83,
+        "change": -2.299999999999997,
+        "pct": -2.173296796749501,
+        "timestamp": "2026-09-16T14:31:29.000Z",
+        "source": "Yahoo Finance",
+        "mode": "DELAYED"
+      },
+      "futureCode": "MCL"
+    },
+    "BRENT": {
+      "id": "BRENT",
+      "name": "Brent 原油",
+      "spot": {
+        "label": "Brent Europe spot",
+        "series": "DCOILBRENTEU",
+        "last": null,
+        "previousClose": null,
+        "change": null,
+        "pct": null,
+        "timestamp": null,
+        "source": "FRED / EIA daily spot",
+        "mode": "UNAVAILABLE"
+      },
+      "future": {
+        "label": "Brent futures benchmark",
+        "symbol": "BZ=F",
+        "last": 107.06,
+        "previousClose": 108.75,
+        "change": -1.6899999999999977,
+        "pct": -1.554022988505745,
+        "timestamp": "2026-09-16T14:31:28.000Z",
+        "source": "Yahoo Finance",
+        "mode": "DELAYED"
+      },
+      "futureCode": "BRN"
+    },
+    "COPPER": {
+      "id": "COPPER",
+      "name": "銅",
+      "spot": {
+        "label": "Copper spot reference",
+        "symbol": "copper",
+        "last": null,
+        "previousClose": null,
+        "change": null,
+        "pct": null,
+        "timestamp": null,
+        "source": "Stooq public quote",
+        "mode": "UNAVAILABLE"
+      },
+      "future": {
+        "label": "COMEX Copper futures",
+        "symbol": "HG=F",
+        "last": 6.4975,
+        "previousClose": 6.4435,
+        "change": 0.05399999999999938,
+        "pct": 0.8380538527197855,
+        "timestamp": "2026-09-16T14:31:20.000Z",
+        "source": "Yahoo Finance",
+        "mode": "DELAYED"
+      },
+      "futureCode": "HG"
+    },
+    "NATGAS": {
+      "id": "NATGAS",
+      "name": "天然氣",
+      "spot": {
+        "label": "Henry Hub natural gas spot",
+        "series": "DHHNGSP",
+        "last": null,
+        "previousClose": null,
+        "change": null,
+        "pct": null,
+        "timestamp": null,
+        "source": "FRED / EIA daily spot",
+        "mode": "UNAVAILABLE"
+      },
+      "future": {
+        "label": "NYMEX Natural Gas futures",
+        "symbol": "NG=F",
+        "last": 2.92,
+        "previousClose": 2.919,
+        "change": 0.0009999999999998899,
+        "pct": 0.034258307639598834,
+        "timestamp": "2026-09-16T14:31:23.000Z",
+        "source": "Yahoo Finance",
+        "mode": "DELAYED"
+      },
+      "futureCode": "NG"
+    }
+  }
+}
