@@ -5,6 +5,7 @@ on:
   push:
     paths:
       - 'scripts/fetch-usdtwd-fx.mjs'
+      - 'scripts/patch-fx-v11.mjs'
       - '.github/workflows/update-usdtwd-fx.yml'
   schedule:
     - cron: '3,18,33,48 * * * 1-5'
@@ -26,13 +27,17 @@ jobs:
           node-version: '22'
       - name: Fetch USD TWD spot and curves
         run: node scripts/fetch-usdtwd-fx.mjs
-      - name: Validate JSON
-        run: node -e "JSON.parse(require('fs').readFileSync('data/usdtwd-fx.json','utf8'))"
-      - name: Commit FX data
+      - name: Apply FX V1.1 labels
+        run: node scripts/patch-fx-v11.mjs
+      - name: Validate
         run: |
-          git add data/usdtwd-fx.json
+          node -e "JSON.parse(require('fs').readFileSync('data/usdtwd-fx.json','utf8'))"
+          node --check app.js
+      - name: Commit FX data and UI
+        run: |
+          git add data/usdtwd-fx.json index.html
           if git diff --cached --quiet; then
-            echo "No FX data changes"
+            echo "No FX changes"
             exit 0
           fi
           git config user.name "github-actions[bot]"
