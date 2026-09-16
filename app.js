@@ -1,3 +1,25 @@
+
+function syncUsdtwdVisibility(){
+  const panel=document.getElementById('usdtwdFxPanel');
+  const btn=document.getElementById('toggleUsdtwdFx');
+  if(!panel||!btn)return;
+  let show=false;
+  try{show=localStorage.getItem('gmmShowUsdtwdFx')==='1'}catch(e){}
+  panel.classList.toggle('is-hidden',!show);
+  btn.textContent=show?'隱藏台幣專區':'顯示台幣專區';
+  btn.setAttribute('aria-expanded',show?'true':'false');
+  if(btn.dataset.usdtwdBound==='1')return;
+  btn.dataset.usdtwdBound='1';
+  btn.addEventListener('click',function(e){
+    e.preventDefault();
+    const willShow=panel.classList.contains('is-hidden');
+    panel.classList.toggle('is-hidden',!willShow);
+    btn.textContent=willShow?'隱藏台幣專區':'顯示台幣專區';
+    btn.setAttribute('aria-expanded',willShow?'true':'false');
+    try{localStorage.setItem('gmmShowUsdtwdFx',willShow?'1':'0')}catch(err){}
+  });
+}
+
 const $ = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];
 const cls = v => Number(v) >= 0 ? 'pos' : 'neg';
@@ -231,3 +253,5 @@ bindStaticUI();
 refresh();
 setInterval(refresh,(window.MARKET_MONITOR_CONFIG?.refreshMs)||15000);
 window.addEventListener('resize',()=>{if(DATA)renderYield()});
+
+if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',syncUsdtwdVisibility)}else{syncUsdtwdVisibility()}
