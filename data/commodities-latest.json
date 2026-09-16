@@ -3,7 +3,7 @@
     "source": "Stooq + FRED/EIA + Yahoo Finance",
     "mode": "MIXED DELAYED/DAILY",
     "realtime": false,
-    "generatedAt": "2026-09-16T23:28:14.869Z",
+    "generatedAt": "2026-09-16T23:34:28.646Z",
     "note": "Gold/silver and selected cash references use Stooq public quotes when available. Oil and natural-gas spot can fall back to FRED/EIA daily observations. Futures use Yahoo public delayed/web data. Copper spot is left unavailable if no comparable public cash quote is found; no futures quote is relabeled as spot and no synthetic values are created."
   },
   "commodities": {
@@ -24,11 +24,11 @@
       "future": {
         "label": "COMEX Micro Gold futures",
         "symbol": "MGC=F",
-        "last": 4304.3,
+        "last": 4309.6,
         "previousClose": 4387.5,
-        "change": -83.19999999999982,
-        "pct": -1.8962962962962921,
-        "timestamp": "2026-09-16T23:18:00.000Z",
+        "change": -77.89999999999964,
+        "pct": -1.7754985754985673,
+        "timestamp": "2026-09-16T23:24:13.000Z",
         "source": "Yahoo Finance",
         "mode": "DELAYED"
       },
@@ -51,11 +51,11 @@
       "future": {
         "label": "COMEX Silver futures",
         "symbol": "SI=F",
-        "last": 63.405,
+        "last": 63.575,
         "previousClose": 64.919,
-        "change": -1.5139999999999958,
-        "pct": -2.3321369706865416,
-        "timestamp": "2026-09-16T23:17:51.000Z",
+        "change": -1.343999999999994,
+        "pct": -2.0702721853386437,
+        "timestamp": "2026-09-16T23:23:50.000Z",
         "source": "Yahoo Finance",
         "mode": "DELAYED"
       },
@@ -82,7 +82,7 @@
         "previousClose": 102.43,
         "change": -0.44000000000001194,
         "pct": -0.4295616518598183,
-        "timestamp": "2026-09-16T23:17:57.000Z",
+        "timestamp": "2026-09-16T23:24:01.000Z",
         "source": "Yahoo Finance",
         "mode": "DELAYED"
       },
@@ -132,11 +132,11 @@
       "future": {
         "label": "COMEX Copper futures",
         "symbol": "HG=F",
-        "last": 6.445,
+        "last": 6.45,
         "previousClose": 6.509,
-        "change": -0.06400000000000006,
-        "pct": -0.9832539560608397,
-        "timestamp": "2026-09-16T23:17:52.000Z",
+        "change": -0.05900000000000016,
+        "pct": -0.9064372407435883,
+        "timestamp": "2026-09-16T23:23:50.000Z",
         "source": "Yahoo Finance",
         "mode": "DELAYED"
       },
@@ -163,7 +163,7 @@
         "previousClose": 2.891,
         "change": 0.0030000000000001137,
         "pct": 0.10377032168800117,
-        "timestamp": "2026-09-16T23:17:44.000Z",
+        "timestamp": "2026-09-16T23:23:53.000Z",
         "source": "Yahoo Finance",
         "mode": "DELAYED"
       },
