@@ -12,6 +12,7 @@ on:
       - 'scripts/patch-ndf-formula-tokens.mjs'
       - 'scripts/patch-formula-category-filter.mjs'
       - 'scripts/patch-custom-indicators.mjs'
+      - 'scripts/patch-indicator-dashboard.mjs'
       - 'scripts/fix-usdtwd-toggle.mjs'
       - 'scripts/patch-fx-v11.mjs'
       - '.github/workflows/update-usdtwd-fx.yml'
@@ -49,6 +50,8 @@ jobs:
         run: node scripts/patch-formula-category-filter.mjs
       - name: Install named indicators and alerts
         run: node scripts/patch-custom-indicators.mjs
+      - name: Install custom indicator dashboard
+        run: node scripts/patch-indicator-dashboard.mjs
       - name: Install USD TWD toggle binding
         run: node scripts/fix-usdtwd-toggle.mjs
       - name: Apply FX V1.1 labels
@@ -62,6 +65,7 @@ jobs:
           node --check scripts/patch-ndf-formula-tokens.mjs
           node --check scripts/patch-formula-category-filter.mjs
           node --check scripts/patch-custom-indicators.mjs
+          node --check scripts/patch-indicator-dashboard.mjs
           grep -q "function syncUsdtwdVisibility" app.js
           grep -q "function renderTaifexSettlementNdf" app.js
           grep -q "TAIFEX settlement NDF render failed" app.js
@@ -72,7 +76,9 @@ jobs:
           grep -q "indicatorName" index.html
           grep -q "renderCustomIndicators" app.js
           grep -q "evaluateIndicatorAlerts" app.js
-          grep -q "app.js?v=20260916-indicator1" index.html
+          grep -q "indicatorsView" index.html
+          grep -q "renderIndicatorDashboard" app.js
+          grep -q "app.js?v=20260916-indicator-dashboard1" index.html
           grep -q "taifexSettlementNdf" index.html
           grep -q "DOMContentLoaded',syncUsdtwdVisibility" app.js
           grep -q "toggleUsdtwdFx" index.html
@@ -86,5 +92,5 @@ jobs:
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "data: refresh USD TWD FX curves and named indicators"
+          git commit -m "data: refresh USD TWD FX curves and indicator dashboard"
           git push
