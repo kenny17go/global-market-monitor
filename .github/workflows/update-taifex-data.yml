@@ -21,6 +21,7 @@ on:
       - 'scripts/patch-overview-equities.mjs'
       - 'scripts/patch-overview-commodities.mjs'
       - 'scripts/patch-overview-rates.mjs'
+      - 'scripts/patch-ust-yield-panel.mjs'
       - 'scripts/fix-runtime-regressions.mjs'
       - '.github/workflows/update-taifex-data.yml'
   schedule:
@@ -74,6 +75,8 @@ jobs:
         run: node scripts/patch-overview-commodities.mjs
       - name: Restore overview rates market bridge
         run: node scripts/patch-overview-rates.mjs
+      - name: Restore UST yield chart and tenor table
+        run: node scripts/patch-ust-yield-panel.mjs
       - name: Fix browser runtime regressions
         run: node scripts/fix-runtime-regressions.mjs
       - name: Validate JavaScript
@@ -95,6 +98,7 @@ jobs:
           node --check scripts/patch-overview-equities.mjs
           node --check scripts/patch-overview-commodities.mjs
           node --check scripts/patch-overview-rates.mjs
+          node --check scripts/patch-ust-yield-panel.mjs
           node --check scripts/fix-runtime-regressions.mjs
           grep -q "function renderTaifexSettlementNdf" app.js
           grep -q "TAIFEX settlement NDF render failed" app.js
@@ -111,6 +115,9 @@ jobs:
           grep -q "SCREEN_LOCK_PASS" app.js
           grep -q "app.js?v=20260916-lockdemo1" index.html
           grep -q "taifexSettlementNdf" index.html
+          grep -q "ustYieldValues" index.html
+          grep -q "ustYieldTenors" app.js
+          grep -q "ust-yield-panel" styles.css
           grep -q "mergeMajorFx(base,majorFx)" providers.js
           grep -q "mergeOverviewEquities(base,delayed,taifex)" providers.js
           grep -q "mergeOverviewCommodities(base,commodityData)" providers.js
