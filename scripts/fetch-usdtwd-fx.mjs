@@ -34,12 +34,16 @@ async function netdaniaOffshore(){
   try{
     const html=await get('https://www.netdania.com/quotes/forex-usdforwards');
     const text=strip(html);
-    const m=text.match(/USD\/TWD\s+(-?[\d,.]+)\s+(-?[\d,.]+)\s+(-?[\d,.]+)\s+(-?[\d,.]+)\s+(-?[\d,.]+)\s+(-?[\d,.]+)\s+(-?[\d,.]+)\s+(-?[\d,.]+)\s+(-?[\d,.]+)\s+(-?[\d,.]+)/i);
-    if(!m)throw new Error('USD/TWD row not found');
+    const tableStart=text.search(/Name\s+1W Bid\s+1W Ask\s+1M Bid/i);
+    if(tableStart<0)throw new Error('forward table header not found');
+    const tableEnd=text.indexOf('Comments',tableStart);
+    const tableText=text.slice(tableStart,tableEnd>tableStart?tableEnd:tableStart+12000);
+    const m=tableText.match(/USD\/TWD\s+(-?[\d,.]+)\s+(-?[\d,.]+)\s+(-?[\d,.]+)\s+(-?[\d,.]+)\s+(-?[\d,.]+)\s+(-?[\d,.]+)\s+(-?[\d,.]+)\s+(-?[\d,.]+)\s+(-?[\d,.]+)\s+(-?[\d,.]+)/i);
+    if(!m)throw new Error('USD/TWD row not found in forward table');
     const tenors=['1W','1M','3M','6M','1Y'];const curve={};
     tenors.forEach((t,i)=>{const bid=num(m[1+i*2]),ask=num(m[2+i*2]);curve[t]=fwdOk(bid,ask)?{bid,ask,mid:mid(bid,ask)}:{bid:null,ask:null,mid:null,invalidRaw:[bid,ask]}});
     const validCount=Object.values(curve).filter(x=>x.mid!=null).length;
-    return {source:'NetDania USD Forwards',market:'OFFSHORE',mode:validCount?'WEB QUOTE':'UNAVAILABLE',curve};
+    return {source:'NetDania USD Forwards',market:'OFFSHORE',mode:validCount?'WEB QUOTE':'UNAVAILABLE',curve,rawRow:m[0]};
   }catch(e){console.warn('NetDania forwards failed:',e.message);return {source:'NetDania USD Forwards',market:'OFFSHORE',mode:'UNAVAILABLE',curve:{}}}
 }
 
@@ -81,5 +85,5 @@ await fs.mkdir('data',{recursive:true});
 await fs.writeFile('data/usdtwd-fx.json',JSON.stringify(out,null,2)+'\n');
 console.log('Wrote data/usdtwd-fx.json');
 console.log('spot',spot.bid,spot.ask,spot.source,spot.mode,'validated',validSpot);
-console.log('offshore',offshore.mode,JSON.stringify(offshore.curve));
+console.log('offshore',offshore.mode,offshore.rawRow||'',JSON.stringify(offshore.curve));
 console.log('onshore',onshore.mode,JSON.stringify(onshore.curve));
