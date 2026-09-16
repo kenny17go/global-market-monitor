@@ -30,7 +30,7 @@ async function netdaniaSpot(){
   }catch(e){console.warn('NetDania spot failed:',e.message);return {bid:null,ask:null,mid:null,time:null,source:'NetDania',mode:'UNAVAILABLE'}}
 }
 
-async function netdaniaOffshore(){
+async function netdaniaUsdTwdForward(){
   try{
     const html=await get('https://www.netdania.com/quotes/forex-usdforwards');
     const text=strip(html);
@@ -43,8 +43,8 @@ async function netdaniaOffshore(){
     const tenors=['1W','1M','3M','6M','1Y'];const curve={};
     tenors.forEach((t,i)=>{const bid=num(m[1+i*2]),ask=num(m[2+i*2]);curve[t]=fwdOk(bid,ask)?{bid,ask,mid:mid(bid,ask)}:{bid:null,ask:null,mid:null,invalidRaw:[bid,ask]}});
     const validCount=Object.values(curve).filter(x=>x.mid!=null).length;
-    return {source:'NetDania USD Forwards',market:'OFFSHORE',mode:validCount?'WEB QUOTE':'UNAVAILABLE',curve,rawRow:m[0]};
-  }catch(e){console.warn('NetDania forwards failed:',e.message);return {source:'NetDania USD Forwards',market:'OFFSHORE',mode:'UNAVAILABLE',curve:{}}}
+    return {source:'NetDania USD Forwards',market:'UNVERIFIED',mode:validCount?'WEB QUOTE':'UNAVAILABLE',curve,rawRow:m[0]};
+  }catch(e){console.warn('NetDania forwards failed:',e.message);return {source:'NetDania USD Forwards',market:'UNVERIFIED',mode:'UNAVAILABLE',curve:{}}}
 }
 
 async function investingOnshore(){
@@ -61,7 +61,7 @@ async function investingOnshore(){
 }
 
 const spot=await netdaniaSpot();
-const offshore=await netdaniaOffshore();
+const offshore=await netdaniaUsdTwdForward(); // compatibility key retained in output/UI; market classification is UNVERIFIED.
 const onshore=await investingOnshore();
 const tenors=['1W','1M','3M','6M','1Y'];
 const validSpot=spotOk(spot.bid,spot.ask);
@@ -80,10 +80,10 @@ for(const t of tenors){
   const o=offshore.curve?.[t],n=onshore.curve?.[t];
   spread[t]={pointsMid:o?.mid!=null&&n?.mid!=null?o.mid-n.mid:null,outrightMid:o?.outrightMid!=null&&n?.outrightMid!=null?o.outrightMid-n.outrightMid:null};
 }
-const out={meta:{generatedAt:new Date().toISOString(),realtime:false,spotValidated:validSpot,note:'USD/TWD spot, onshore forward and offshore forward/NDF-style curve are intentionally kept separate. Public web quotes may be delayed and are for monitoring, not execution. Invalid/crossed quotes are rejected rather than displayed.'},spot,onshore,offshore,spread};
+const out={meta:{generatedAt:new Date().toISOString(),realtime:false,spotValidated:validSpot,note:'USD/TWD spot, confirmed onshore forward and NetDania USD/TWD forward are kept separate. NetDania public USD Forwards page does not identify the USD/TWD row as onshore or offshore, so its market classification remains UNVERIFIED. Public web quotes may be delayed and are for monitoring, not execution. Invalid/crossed quotes are rejected rather than displayed.'},spot,onshore,offshore,spread};
 await fs.mkdir('data',{recursive:true});
 await fs.writeFile('data/usdtwd-fx.json',JSON.stringify(out,null,2)+'\n');
 console.log('Wrote data/usdtwd-fx.json');
 console.log('spot',spot.bid,spot.ask,spot.source,spot.mode,'validated',validSpot);
-console.log('offshore',offshore.mode,offshore.rawRow||'',JSON.stringify(offshore.curve));
+console.log('netdania forward',offshore.mode,offshore.rawRow||'',JSON.stringify(offshore.curve));
 console.log('onshore',onshore.mode,JSON.stringify(onshore.curve));
