@@ -5,6 +5,7 @@ on:
   push:
     paths:
       - 'scripts/fetch-usdtwd-fx.mjs'
+      - 'scripts/apply-fx-v1.mjs'
       - 'scripts/patch-fx-v11.mjs'
       - '.github/workflows/update-usdtwd-fx.yml'
   schedule:
@@ -27,20 +28,25 @@ jobs:
           node-version: '22'
       - name: Fetch USD TWD spot and curves
         run: node scripts/fetch-usdtwd-fx.mjs
+      - name: Apply USD TWD panel and toggle behavior
+        run: node scripts/apply-fx-v1.mjs
       - name: Apply FX V1.1 labels
         run: node scripts/patch-fx-v11.mjs
       - name: Validate
         run: |
           node -e "JSON.parse(require('fs').readFileSync('data/usdtwd-fx.json','utf8'))"
           node --check app.js
+          grep -q "function syncUsdtwdVisibility" app.js
+          grep -q "toggleUsdtwdFx" index.html
+          grep -q "usdtwdFxPanel" index.html
       - name: Commit FX data and UI
         run: |
-          git add data/usdtwd-fx.json index.html
+          git add data/usdtwd-fx.json index.html app.js providers.js styles.css
           if git diff --cached --quiet; then
             echo "No FX changes"
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "data: refresh USD TWD FX curves"
+          git commit -m "data: refresh USD TWD FX curves and panel"
           git push
