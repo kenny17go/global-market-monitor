@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generatedAt": "2026-09-16T02:06:12.151Z",
+    "generatedAt": "2026-09-16T02:09:44.782Z",
     "realtime": false,
     "spotValidated": false,
     "sourcePolicy": "Offshore = NetDania 1W/1M/3M/6M/1Y. Onshore = Investing.com; fallback whole curve to Cbonds Taipei daily close when Investing is unavailable.",
@@ -29,25 +29,25 @@
     "quoteType": "FORWARD POINTS",
     "curve": {
       "1W": {
-        "bid": 0.01,
-        "ask": 0.06,
-        "mid": 0.034999999999999996,
-        "outrightBid": null,
-        "outrightAsk": null,
-        "outrightMid": null
-      },
-      "1M": {
-        "bid": 0.03,
-        "ask": 0.05,
+        "bid": 0.04,
+        "ask": 0.04,
         "mid": 0.04,
         "outrightBid": null,
         "outrightAsk": null,
         "outrightMid": null
       },
+      "1M": {
+        "bid": 0.05,
+        "ask": 0.04,
+        "mid": 0.045,
+        "outrightBid": null,
+        "outrightAsk": null,
+        "outrightMid": null
+      },
       "3M": {
-        "bid": 0,
-        "ask": 0.02,
-        "mid": 0.01,
+        "bid": 0.03,
+        "ask": 0,
+        "mid": 0.015,
         "outrightBid": null,
         "outrightAsk": null,
         "outrightMid": null
@@ -61,15 +61,15 @@
         "outrightMid": null
       },
       "1Y": {
-        "bid": -0.17,
-        "ask": -0.12,
-        "mid": -0.14500000000000002,
+        "bid": -0.15,
+        "ask": -0.13,
+        "mid": -0.14,
         "outrightBid": null,
         "outrightAsk": null,
         "outrightMid": null
       }
     },
-    "rawRow": "USD/TWD 0.01 0.06 0.03 0.05 0.00 0.02 -0.09 -0.06 -0.17 -0.12"
+    "rawRow": "USD/TWD 0.04 0.04 0.05 0.04 0.03 0.00 -0.09 -0.06 -0.15 -0.13"
   },
   "spread": {
     "1W": {
