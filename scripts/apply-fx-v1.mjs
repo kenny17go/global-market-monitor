@@ -2,7 +2,6 @@ import fs from 'node:fs/promises';
 
 let index=await fs.readFile('index.html','utf8');
 let app=await fs.readFile('app.js','utf8');
-let providers=await fs.readFile('providers.js','utf8');
 let styles=await fs.readFile('styles.css','utf8');
 const extract=fn=>fn.toString().match(/\/\*([\s\S]*?)\*\//)[1];
 
@@ -11,7 +10,7 @@ const panel=extract(function(){/*
           <div class="fx-focus-head"><div><h2>USD/TWD 專區</h2><p>Spot、境內 Onshore Forward 與境外 Offshore NDF/Forward 分開顯示，不互相混用。</p></div><div id="usdtwdFxFreshness" class="source-note">資料載入中…</div></div>
           <div id="usdtwdSpotCards" class="fx-spot-cards"></div>
           <div class="table-wrap"><table class="fx-curve-table"><thead><tr><th>Tenor</th><th colspan="3">Onshore Forward · Investing.com</th><th colspan="3">Offshore NDF / Forward · NetDania</th><th>Offshore − Onshore</th></tr><tr><th></th><th>Bid</th><th>Ask</th><th>Mid Outright</th><th>Bid</th><th>Ask</th><th>Mid Outright</th><th>Points Mid</th></tr></thead><tbody id="usdtwdCurveBody"></tbody></table></div>
-          <div class="fx-focus-note">Forward points 與 outright 皆以各來源原始報價計算；若來源暫時無法取得，顯示「—」，不使用模擬值補齊。</div>
+          <div class="fx-focus-note">Forward points 與 outright 皆以各來源原始報價計算；來源暫時無法取得或報價驗證失敗時顯示「—」，不使用模擬值補齊。</div>
         </section>
 */});
 if(!index.includes('id="usdtwdFxPanel"')) index=index.replace('        <section class="grid-main">',panel+'\n        <section class="grid-main">');
@@ -28,12 +27,24 @@ function renderUsdtwdFx(){
   $('#usdtwdFxFreshness').textContent=(dt&&!Number.isNaN(dt.getTime())?`更新 ${dt.toLocaleString('zh-TW')}`:'更新時間 —')+` · Onshore ${p?.onshore?.mode||'UNAVAILABLE'} · Offshore ${p?.offshore?.mode||'UNAVAILABLE'}`;
 }
 */});
-if(!app.includes('function renderUsdtwdFx()')) app=app.replace('function render(){if(!DATA)return;',fxCode+'\nfunction render(){if(!DATA)return;renderUsdtwdFx();');
-else app=app.replace('function render(){if(!DATA)return;','function render(){if(!DATA)return;renderUsdtwdFx();');
+if(!app.includes('function renderUsdtwdFx()')) app=app.replace('function render(){if(!DATA)return;',fxCode+'\nfunction render(){if(!DATA)return;');
+app=app.replace(/function render\(\)\{if\(!DATA\)return;(?:renderUsdtwdFx\(\);)*/,'function render(){if(!DATA)return;renderUsdtwdFx();');
 
-if(!providers.includes("fetchJson('./data/usdtwd-fx.json'")){
-  providers=providers.replace('const [base,taifex,delayed,live]=await Promise.all([fetchJson(endpoint,true),fetchJson(\'./data/taifex-latest.json\',false),fetchJson(\'./data/overseas-delayed.json\',false),fetchJson(localLiveEndpoint()||c.liveEndpoint,false)]);mergeTaifex(base,taifex);mergeDelayed(base,delayed);mergeLive(base,live);return base',"const [base,taifex,delayed,live,fxTwd]=await Promise.all([fetchJson(endpoint,true),fetchJson('./data/taifex-latest.json',false),fetchJson('./data/overseas-delayed.json',false),fetchJson(localLiveEndpoint()||c.liveEndpoint,false),fetchJson('./data/usdtwd-fx.json',false)]);mergeTaifex(base,taifex);mergeDelayed(base,delayed);mergeLive(base,live);base.usdtwdFx=fxTwd||null;return base");
-}
+// Final provider pipeline. The TAIFEX installer rewrites providers.js, so rebuild it here
+// after all source-specific installers to keep delayed + FX + optional LIVE layers intact.
+const providers=`window.MarketProviders = (() => {
+  const cfg=()=>window.MARKET_MONITOR_CONFIG||{mode:'local-json',endpoint:'./data/latest.json',refreshMs:15000,demoSimulation:false,liveEndpoint:''};
+  async function fetchJson(url,required=true){if(!url)return null;try{const r=await fetch(url+(url.includes('?')?'&':'?')+'t='+Date.now(),{cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status);return await r.json()}catch(e){if(required)throw e;console.warn('Optional market data unavailable:',url,e);return null}}
+  function applyContracts(leg,p,source,mode){if(!p?.contracts?.length)return;const contracts=p.contracts.map(c=>({month:c.month,date:c.date||null,session:c.session||null,bid:c.bid??null,ask:c.ask??null,last:c.last??null,settlement:c.settlement??null,volume:c.volume??null,openInterest:c.openInterest??null,timestamp:c.timestamp||null}));const selected=contracts.find(c=>c.month===p.defaultMonth)||contracts[0];leg.contracts=contracts;leg.actualMonths=contracts.map(c=>c.month);leg.expiry=selected?.month||leg.expiry;leg.bid=selected?.bid??null;leg.ask=selected?.ask??null;leg.last=selected?.last??null;leg.quoteDate=selected?.date||null;leg.quoteSession=selected?.session||null;leg.quoteTimestamp=selected?.timestamp||null;leg.source=source;leg.quoteMode=mode}
+  function mergeTaifex(data,official){if(!official?.products||!Array.isArray(data?.crossMarketCatalog))return data;data.taifexMeta=official.meta||null;for(const row of data.crossMarketCatalog){const a=official.products[row?.tw?.code];if(a)applyContracts(row.tw,a,'TAIFEX OpenAPI','OFFICIAL DAILY');if(String(row?.os?.exchange||'').includes('TAIFEX')){const b=official.products[row?.os?.code];if(b)applyContracts(row.os,b,'TAIFEX OpenAPI','OFFICIAL DAILY')}}return data}
+  function mergeDelayed(data,delayed){if(!delayed?.products||!Array.isArray(data?.crossMarketCatalog))return data;data.delayedMeta=delayed.meta||null;for(const row of data.crossMarketCatalog){for(const leg of [row.tw,row.os]){if(!leg||String(leg.exchange||'').includes('TAIFEX'))continue;const p=delayed.products[leg.id]||delayed.products[leg.code];if(p?.contracts?.length)applyContracts(leg,p,p.source||'Delayed feed',p.mode||'DELAYED')}}return data}
+  function localLiveEndpoint(){try{const s=JSON.parse(localStorage.getItem('gmmMarketConnectionsV1')||'{}');if(!s.preferLive||!s.activeBroker)return '';return s.brokers?.[s.activeBroker]?.endpoint||''}catch{return ''}}
+  function mergeLive(data,live){if(!live?.quotes||!Array.isArray(data?.crossMarketCatalog))return data;data.liveMeta=live.meta||null;for(const row of data.crossMarketCatalog){for(const leg of [row.tw,row.os]){if(!leg)continue;const p=live.quotes[leg.id]||live.quotes[leg.code];if(p)applyContracts(leg,p,p.source||leg.exchange||'Licensed feed','LIVE')}}return data}
+  async function load(){const c=cfg(),endpoint=c.endpoint||'./data/latest.json';const [base,taifex,delayed,fxTwd,live]=await Promise.all([fetchJson(endpoint,true),fetchJson('./data/taifex-latest.json',false),fetchJson('./data/overseas-delayed.json',false),fetchJson('./data/usdtwd-fx.json',false),fetchJson(localLiveEndpoint()||c.liveEndpoint,false)]);mergeTaifex(base,taifex);mergeDelayed(base,delayed);base.usdtwdFx=fxTwd||null;mergeLive(base,live);return base}
+  function simulate(data){if(!cfg().demoSimulation)return data;const copy=structuredClone(data),j=(v,s=.0006)=>v*(1+(Math.random()-.5)*s);copy.asOf=new Date().toISOString();copy.top.forEach(x=>x.value=j(x.value));return copy}
+  return {load,simulate};
+})();
+`;
 
 const css=`
 /* USD/TWD FX focus */
@@ -45,4 +56,4 @@ await fs.writeFile('index.html',index);
 await fs.writeFile('app.js',app);
 await fs.writeFile('providers.js',providers);
 await fs.writeFile('styles.css',styles);
-console.log('Applied USD/TWD FX V1 dashboard integration.');
+console.log('Applied USD/TWD FX V1 dashboard integration and final provider pipeline.');
