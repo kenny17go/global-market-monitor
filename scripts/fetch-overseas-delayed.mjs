@@ -49,13 +49,33 @@ async function yahooRootProduct(t,source='Yahoo Finance'){let symbols=await yaho
 
 async function yahooIndexQuote(id,symbol,label,range){
   try{
-    const j=await fetchJson(`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1m&range=1d`);
-    const m=j?.chart?.result?.[0]?.meta;
+    const j=await fetchJson(`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=5m&range=1d`);
+    const r=j?.chart?.result?.[0],m=r?.meta;
     const last=valid(m?.regularMarketPrice,range),prev=valid(m?.chartPreviousClose??m?.previousClose,range);
     if(last==null)throw new Error('missing market price');
     const change=prev!=null?last-prev:null,pct=prev?change/prev*100:null;
-    return {id,symbol,label,last,previousClose:prev,change,pct,timestamp:m?.regularMarketTime?new Date(m.regularMarketTime*1000).toISOString():new Date().toISOString(),source:'Yahoo Finance',mode:'DELAYED'};
-  }catch(e){console.warn('Yahoo index failed',id,symbol,e.message);return {id,symbol,label,last:null,previousClose:null,change:null,pct:null,timestamp:null,source:'Yahoo Finance',mode:'UNAVAILABLE'}}
+    const ts=Array.isArray(r?.timestamp)?r.timestamp:[];
+    const close=Array.isArray(r?.indicators?.quote?.[0]?.close)?r.indicators.quote[0].close:[];
+    const regular=m?.currentTradingPeriod?.regular||null;
+    const points=[];
+    for(let i=0;i<Math.min(ts.length,close.length);i++){
+      const t=Number(ts[i]),v=valid(close[i],range);
+      if(!Number.isFinite(t)||v==null)continue;
+      if(regular?.start&&regular?.end&&(t<regular.start||t>regular.end))continue;
+      points.push({t,v});
+    }
+    return {
+      id,symbol,label,last,previousClose:prev,change,pct,
+      timestamp:m?.regularMarketTime?new Date(m.regularMarketTime*1000).toISOString():new Date().toISOString(),
+      source:'Yahoo Finance',mode:'DELAYED',
+      series:points.map(x=>x.v),
+      seriesTimes:points.map(x=>new Date(x.t*1000).toISOString()),
+      seriesMeta:{range:'1D',interval:'5m',session:'REGULAR',source:'Yahoo Finance',mode:'DELAYED',timezone:m?.exchangeTimezoneName||null,points:points.length}
+    };
+  }catch(e){
+    console.warn('Yahoo index failed',id,symbol,e.message);
+    return {id,symbol,label,last:null,previousClose:null,change:null,pct:null,timestamp:null,source:'Yahoo Finance',mode:'UNAVAILABLE',series:[],seriesTimes:[],seriesMeta:{range:'1D',interval:'5m',session:'REGULAR',source:'Yahoo Finance',mode:'UNAVAILABLE',points:0}};
+  }
 }
 
 async function tradingViewContracts({id,url,prefix,range}){
