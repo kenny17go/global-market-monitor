@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generatedAt": "2026-09-16T22:30:45.559Z",
+    "generatedAt": "2026-09-16T22:44:04.859Z",
     "source": "NetDania public web quotes",
     "quoteMode": "PUBLIC WEB QUOTE",
     "forwardSource": "NetDania USD Forwards",
@@ -11,47 +11,47 @@
   "quotes": [
     {
       "pair": "EUR/USD",
-      "bid": 1.14672,
-      "ask": 1.14676,
-      "mid": 1.1467399999999999,
-      "change": -0.00692,
+      "bid": 1.14676,
+      "ask": 1.14681,
+      "mid": 1.146785,
+      "change": -0.00688,
       "pct": -0.6,
-      "time": "22:30:41",
+      "time": "22:44:00",
       "source": "NetDania Forex Majors",
       "mode": "PUBLIC WEB QUOTE",
       "forwards": {
         "1W": {
-          "bid": 3.11,
-          "ask": 3.25,
-          "mid": 3.1799999999999997
+          "bid": 3.1,
+          "ask": 3.24,
+          "mid": 3.17
         },
         "1M": {
-          "bid": 13.85,
-          "ask": 14.05,
-          "mid": 13.95
+          "bid": 13.87,
+          "ask": 13.9,
+          "mid": 13.885
         },
         "3M": {
-          "bid": 42.65,
-          "ask": 42.98,
-          "mid": 42.815
+          "bid": 41.6,
+          "ask": 43.1,
+          "mid": 42.35
         },
         "6M": {
-          "bid": 84.4,
-          "ask": 87.4,
-          "mid": 85.9
+          "bid": 84.52,
+          "ask": 86.46,
+          "mid": 85.49
         },
         "1Y": {
-          "bid": 174.43,
-          "ask": 175.62,
-          "mid": 175.025
+          "bid": 167.2,
+          "ask": 171,
+          "mid": 169.1
         }
       },
       "forwardSource": "NetDania USD Forwards",
       "forwardMode": "PUBLIC WEB QUOTE",
-      "p1m": 13.95,
-      "p3m": 42.815,
-      "p6m": 85.9,
-      "p1y": 175.025
+      "p1m": 13.885,
+      "p3m": 42.35,
+      "p6m": 85.49,
+      "p1y": 169.1
     },
     {
       "pair": "GBP/USD",
@@ -60,7 +60,7 @@
       "mid": 1.338015,
       "change": -0.00904,
       "pct": -0.67,
-      "time": "22:30:35",
+      "time": "22:43:00",
       "source": "NetDania Forex Majors",
       "mode": "PUBLIC WEB QUOTE",
       "forwards": {
@@ -70,41 +70,41 @@
           "mid": 0.44
         },
         "1M": {
-          "bid": 1.81,
-          "ask": 1.99,
-          "mid": 1.9
+          "bid": 1.94,
+          "ask": 1.94,
+          "mid": 1.94
         },
         "3M": {
-          "bid": 4.6,
-          "ask": 4.93,
-          "mid": 4.765
+          "bid": 4.91,
+          "ask": 4.91,
+          "mid": 4.91
         },
         "6M": {
-          "bid": 5.95,
-          "ask": 6.95,
-          "mid": 6.45
+          "bid": 6.51,
+          "ask": 7.69,
+          "mid": 7.1
         },
         "1Y": {
-          "bid": 7.25,
-          "ask": 7.25,
-          "mid": 7.25
+          "bid": 7.43,
+          "ask": 7.43,
+          "mid": 7.43
         }
       },
       "forwardSource": "NetDania USD Forwards",
       "forwardMode": "PUBLIC WEB QUOTE",
-      "p1m": 1.9,
-      "p3m": 4.765,
-      "p6m": 6.45,
-      "p1y": 7.25
+      "p1m": 1.94,
+      "p3m": 4.91,
+      "p6m": 7.1,
+      "p1y": 7.43
     },
     {
       "pair": "USD/JPY",
-      "bid": 156.238,
-      "ask": 156.246,
-      "mid": 156.24200000000002,
-      "change": 0.954,
+      "bid": 156.227,
+      "ask": 156.233,
+      "mid": 156.23000000000002,
+      "change": 0.943,
       "pct": 0.61,
-      "time": "22:30:40",
+      "time": "22:43:59",
       "source": "NetDania Forex Majors",
       "mode": "PUBLIC WEB QUOTE",
       "forwards": {
@@ -114,41 +114,41 @@
           "mid": -8.99
         },
         "1M": {
-          "bid": -39.53,
+          "bid": -39.52,
           "ask": -39.52,
-          "mid": -39.525000000000006
+          "mid": -39.52
         },
         "3M": {
-          "bid": -114.89,
-          "ask": -114.58,
-          "mid": -114.735
+          "bid": -114.62,
+          "ask": -114.27,
+          "mid": -114.445
         },
         "6M": {
-          "bid": -233.76,
+          "bid": -233.74,
           "ask": -231.67,
-          "mid": -232.71499999999997
+          "mid": -232.70499999999998
         },
         "1Y": {
-          "bid": -475.32,
-          "ask": -471.15,
-          "mid": -473.235
+          "bid": -473.9,
+          "ask": -472.73,
+          "mid": -473.315
         }
       },
       "forwardSource": "NetDania USD Forwards",
       "forwardMode": "PUBLIC WEB QUOTE",
-      "p1m": -39.525000000000006,
-      "p3m": -114.735,
-      "p6m": -232.71499999999997,
-      "p1y": -473.235
+      "p1m": -39.52,
+      "p3m": -114.445,
+      "p6m": -232.70499999999998,
+      "p1y": -473.315
     },
     {
       "pair": "USD/CHF",
-      "bid": 0.82575,
-      "ask": 0.82582,
-      "mid": 0.825785,
-      "change": 0.00661,
-      "pct": 0.81,
-      "time": "22:30:39",
+      "bid": 0.82588,
+      "ask": 0.82594,
+      "mid": 0.8259099999999999,
+      "change": 0.00674,
+      "pct": 0.82,
+      "time": "22:43:28",
       "source": "NetDania Forex Majors",
       "mode": "PUBLIC WEB QUOTE",
       "forwards": {
@@ -158,92 +158,92 @@
           "mid": -6.55
         },
         "1M": {
-          "bid": -28.55,
-          "ask": -28.18,
-          "mid": -28.365000000000002
+          "bid": -28.41,
+          "ask": -28.41,
+          "mid": -28.41
         },
         "3M": {
-          "bid": -87.75,
-          "ask": -86.61,
-          "mid": -87.18
+          "bid": -87.77,
+          "ask": -86.63,
+          "mid": -87.19999999999999
         },
         "6M": {
           "bid": -180,
-          "ask": -177.7,
-          "mid": -178.85
+          "ask": -177.8,
+          "mid": -178.9
         },
         "1Y": {
-          "bid": -362.3,
-          "ask": -357.9,
-          "mid": -360.1
+          "bid": -362,
+          "ask": -357,
+          "mid": -359.5
         }
       },
       "forwardSource": "NetDania USD Forwards",
       "forwardMode": "PUBLIC WEB QUOTE",
-      "p1m": -28.365000000000002,
-      "p3m": -87.18,
-      "p6m": -178.85,
-      "p1y": -360.1
+      "p1m": -28.41,
+      "p3m": -87.19999999999999,
+      "p6m": -178.9,
+      "p1y": -359.5
     },
     {
       "pair": "USD/CAD",
-      "bid": 1.39878,
-      "ask": 1.39886,
-      "mid": 1.39882,
-      "change": 0.00627,
+      "bid": 1.3988,
+      "ask": 1.39889,
+      "mid": 1.3988450000000001,
+      "change": 0.00629,
       "pct": 0.45,
-      "time": "22:30:41",
+      "time": "22:43:47",
       "source": "NetDania Forex Majors",
       "mode": "PUBLIC WEB QUOTE",
       "forwards": {
         "1W": {
           "bid": -4.8,
-          "ask": -4.52,
-          "mid": -4.66
+          "ask": -4.51,
+          "mid": -4.654999999999999
         },
         "1M": {
-          "bid": -21.49,
-          "ask": -21.2,
-          "mid": -21.345
+          "bid": -20.22,
+          "ask": -19.93,
+          "mid": -20.075
         },
         "3M": {
-          "bid": -62.83,
-          "ask": -61.94,
-          "mid": -62.385
+          "bid": -60.87,
+          "ask": -59.98,
+          "mid": -60.425
         },
         "6M": {
-          "bid": -122.15,
-          "ask": -121.35,
-          "mid": -121.75
+          "bid": -122.05,
+          "ask": -121.25,
+          "mid": -121.65
         },
         "1Y": {
-          "bid": -229.65,
-          "ask": -227.15,
-          "mid": -228.4
+          "bid": -229.15,
+          "ask": -223.15,
+          "mid": -226.15
         }
       },
       "forwardSource": "NetDania USD Forwards",
       "forwardMode": "PUBLIC WEB QUOTE",
-      "p1m": -21.345,
-      "p3m": -62.385,
-      "p6m": -121.75,
-      "p1y": -228.4
+      "p1m": -20.075,
+      "p3m": -60.425,
+      "p6m": -121.65,
+      "p1y": -226.15
     },
     {
       "pair": "AUD/USD",
-      "bid": 0.7087,
-      "ask": 0.70876,
-      "mid": 0.70873,
-      "change": -0.00382,
-      "pct": -0.54,
-      "time": "22:30:38",
+      "bid": 0.70862,
+      "ask": 0.70867,
+      "mid": 0.708645,
+      "change": -0.0039,
+      "pct": -0.55,
+      "time": "22:44:00",
       "source": "NetDania Forex Majors",
       "mode": "PUBLIC WEB QUOTE",
       "forwards": {
         "1W": {
-          "bid": -0.55,
-          "ask": -0.45,
-          "mid": -0.5
+          "bid": -0.6,
+          "ask": -0.5,
+          "mid": -0.55
         },
         "1M": {
           "bid": -3.12,
@@ -251,36 +251,36 @@
           "mid": -3.045
         },
         "3M": {
-          "bid": -9.83,
-          "ask": -9.53,
-          "mid": -9.68
+          "bid": -10.03,
+          "ask": -9.73,
+          "mid": -9.879999999999999
         },
         "6M": {
-          "bid": -17.73,
-          "ask": -16.23,
-          "mid": -16.98
+          "bid": -17.95,
+          "ask": -16.45,
+          "mid": -17.2
         },
         "1Y": {
-          "bid": -30.78,
-          "ask": -28.78,
-          "mid": -29.78
+          "bid": -30.55,
+          "ask": -28.55,
+          "mid": -29.55
         }
       },
       "forwardSource": "NetDania USD Forwards",
       "forwardMode": "PUBLIC WEB QUOTE",
       "p1m": -3.045,
-      "p3m": -9.68,
-      "p6m": -16.98,
-      "p1y": -29.78
+      "p3m": -9.879999999999999,
+      "p6m": -17.2,
+      "p1y": -29.55
     },
     {
       "pair": "NZD/USD",
-      "bid": 0.57181,
-      "ask": 0.57184,
+      "bid": 0.5718,
+      "ask": 0.57185,
       "mid": 0.571825,
-      "change": -0.00316,
+      "change": -0.00317,
       "pct": -0.55,
-      "time": "22:30:39",
+      "time": "22:44:00",
       "source": "NetDania Forex Majors",
       "mode": "PUBLIC WEB QUOTE",
       "forwards": {
@@ -290,19 +290,19 @@
           "mid": 1.2149999999999999
         },
         "1M": {
-          "bid": 5.03,
-          "ask": 5.23,
-          "mid": 5.130000000000001
+          "bid": 5.37,
+          "ask": 5.57,
+          "mid": 5.470000000000001
         },
         "3M": {
-          "bid": 15.01,
-          "ask": 16.07,
-          "mid": 15.54
+          "bid": 14.93,
+          "ask": 15.43,
+          "mid": 15.18
         },
         "6M": {
-          "bid": 29.9,
-          "ask": 31.5,
-          "mid": 30.7
+          "bid": 29.85,
+          "ask": 31.45,
+          "mid": 30.65
         },
         "1Y": {
           "bid": 53.7,
@@ -312,16 +312,16 @@
       },
       "forwardSource": "NetDania USD Forwards",
       "forwardMode": "PUBLIC WEB QUOTE",
-      "p1m": 5.130000000000001,
-      "p3m": 15.54,
-      "p6m": 30.7,
+      "p1m": 5.470000000000001,
+      "p3m": 15.18,
+      "p6m": 30.65,
       "p1y": 56.7
     },
     {
       "pair": "USD/CNH",
-      "bid": 6.71206,
-      "ask": 6.7128,
-      "mid": 6.7124299999999995,
+      "bid": 6.71249,
+      "ask": 6.71271,
+      "mid": 6.7126,
       "change": null,
       "pct": null,
       "time": null,
@@ -363,9 +363,9 @@
     },
     {
       "pair": "USD/HKD",
-      "bid": 7.84457,
-      "ask": 7.84503,
-      "mid": 7.8448,
+      "bid": 7.84449,
+      "ask": 7.8449,
+      "mid": 7.844695,
       "change": null,
       "pct": null,
       "time": null,
@@ -373,37 +373,37 @@
       "mode": "PUBLIC WEB QUOTE",
       "forwards": {
         "1W": {
-          "bid": -27.02,
-          "ask": -27.02,
-          "mid": -27.02
+          "bid": -27.05,
+          "ask": -27.05,
+          "mid": -27.05
         },
         "1M": {
-          "bid": -86.21,
-          "ask": -76.21,
-          "mid": -81.21
+          "bid": -88.5,
+          "ask": -78.5,
+          "mid": -83.5
         },
         "3M": {
-          "bid": -248.25,
-          "ask": -221.98,
-          "mid": -235.115
+          "bid": -242.51,
+          "ask": -232.51,
+          "mid": -237.51
         },
         "6M": {
-          "bid": -411.24,
-          "ask": -381.24,
-          "mid": -396.24
+          "bid": -411.83,
+          "ask": -381.83,
+          "mid": -396.83
         },
         "1Y": {
-          "bid": -724.43,
-          "ask": -674.43,
-          "mid": -699.43
+          "bid": -724.71,
+          "ask": -674.71,
+          "mid": -699.71
         }
       },
       "forwardSource": "NetDania USD Forwards",
       "forwardMode": "PUBLIC WEB QUOTE",
-      "p1m": -81.21,
-      "p3m": -235.115,
-      "p6m": -396.24,
-      "p1y": -699.43
+      "p1m": -83.5,
+      "p3m": -237.51,
+      "p6m": -396.83,
+      "p1y": -699.71
     }
   ]
 }
