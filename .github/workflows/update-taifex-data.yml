@@ -18,6 +18,7 @@ on:
       - 'scripts/patch-indicator-dashboard.mjs'
       - 'scripts/patch-screen-lock.mjs'
       - 'scripts/patch-overview-major-fx.mjs'
+      - 'scripts/patch-overview-equities.mjs'
       - 'scripts/fix-runtime-regressions.mjs'
       - '.github/workflows/update-taifex-data.yml'
   schedule:
@@ -65,6 +66,8 @@ jobs:
         run: node scripts/patch-screen-lock.mjs
       - name: Restore overview FX market bridge
         run: node scripts/patch-overview-major-fx.mjs
+      - name: Restore overview equity market bridge
+        run: node scripts/patch-overview-equities.mjs
       - name: Fix browser runtime regressions
         run: node scripts/fix-runtime-regressions.mjs
       - name: Validate JavaScript
@@ -83,6 +86,7 @@ jobs:
           node --check scripts/patch-indicator-dashboard.mjs
           node --check scripts/patch-screen-lock.mjs
           node --check scripts/patch-overview-major-fx.mjs
+          node --check scripts/patch-overview-equities.mjs
           node --check scripts/fix-runtime-regressions.mjs
           grep -q "function renderTaifexSettlementNdf" app.js
           grep -q "TAIFEX settlement NDF render failed" app.js
@@ -100,14 +104,15 @@ jobs:
           grep -q "app.js?v=20260916-lockdemo1" index.html
           grep -q "taifexSettlementNdf" index.html
           grep -q "mergeMajorFx(base,majorFx)" providers.js
+          grep -q "mergeOverviewEquities(base,delayed,taifex)" providers.js
       - name: Commit integration/data changes
         run: |
-          if git diff --quiet -- app.js providers.js config.example.js index.html styles.css data/latest.json data/taifex-latest.json; then
+          if git diff --quiet -- app.js providers.js config.example.js index.html styles.css data/latest.json data/taifex-latest.json scripts/fetch-overseas-delayed.mjs; then
             echo "No changes"
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add app.js providers.js config.example.js index.html styles.css data/latest.json data/taifex-latest.json
-          git commit -m "feat: refresh TAIFEX data and preserve overview FX"
+          git add app.js providers.js config.example.js index.html styles.css data/latest.json data/taifex-latest.json scripts/fetch-overseas-delayed.mjs
+          git commit -m "feat: refresh TAIFEX data and preserve overview market bridges"
           git push
