@@ -11,6 +11,7 @@ on:
       - 'scripts/patch-source-status-ui.mjs'
       - 'scripts/apply-fx-v1.mjs'
       - 'scripts/patch-taifex-settlement-ndf.mjs'
+      - 'scripts/patch-ndf-runtime-cache.mjs'
       - 'scripts/fix-runtime-regressions.mjs'
       - '.github/workflows/update-taifex-data.yml'
   schedule:
@@ -44,6 +45,8 @@ jobs:
         run: node scripts/apply-fx-v1.mjs
       - name: Install TAIFEX settlement NDF panel
         run: node scripts/patch-taifex-settlement-ndf.mjs
+      - name: Force-refresh NDF frontend assets
+        run: node scripts/patch-ndf-runtime-cache.mjs
       - name: Fix browser runtime regressions
         run: node scripts/fix-runtime-regressions.mjs
       - name: Validate JavaScript
@@ -55,8 +58,11 @@ jobs:
           node --check scripts/patch-source-status-ui.mjs
           node --check scripts/apply-fx-v1.mjs
           node --check scripts/patch-taifex-settlement-ndf.mjs
+          node --check scripts/patch-ndf-runtime-cache.mjs
           node --check scripts/fix-runtime-regressions.mjs
           grep -q "function renderTaifexSettlementNdf" app.js
+          grep -q "TAIFEX settlement NDF render failed" app.js
+          grep -q "app.js?v=20260916-ndf3" index.html
           grep -q "taifexSettlementNdf" index.html
       - name: Commit integration/data changes
         run: |
