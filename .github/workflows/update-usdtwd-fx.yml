@@ -1,0 +1,41 @@
+name: Update USD TWD FX curves
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'scripts/fetch-usdtwd-fx.mjs'
+      - '.github/workflows/update-usdtwd-fx.yml'
+  schedule:
+    - cron: '3,18,33,48 * * * 1-5'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-usdtwd-fx
+  cancel-in-progress: true
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Fetch USD TWD spot and curves
+        run: node scripts/fetch-usdtwd-fx.mjs
+      - name: Validate JSON
+        run: node -e "JSON.parse(require('fs').readFileSync('data/usdtwd-fx.json','utf8'))"
+      - name: Commit FX data
+        run: |
+          git add data/usdtwd-fx.json
+          if git diff --cached --quiet; then
+            echo "No FX data changes"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "data: refresh USD TWD FX curves"
+          git push
