@@ -1,0 +1,48 @@
+import fs from 'node:fs/promises';
+
+let index=await fs.readFile('index.html','utf8');
+let app=await fs.readFile('app.js','utf8');
+let providers=await fs.readFile('providers.js','utf8');
+let styles=await fs.readFile('styles.css','utf8');
+const extract=fn=>fn.toString().match(/\/\*([\s\S]*?)\*\//)[1];
+
+const panel=extract(function(){/*
+        <section id="usdtwdFxPanel" class="panel usdtwd-fx-panel">
+          <div class="fx-focus-head"><div><h2>USD/TWD 專區</h2><p>Spot、境內 Onshore Forward 與境外 Offshore NDF/Forward 分開顯示，不互相混用。</p></div><div id="usdtwdFxFreshness" class="source-note">資料載入中…</div></div>
+          <div id="usdtwdSpotCards" class="fx-spot-cards"></div>
+          <div class="table-wrap"><table class="fx-curve-table"><thead><tr><th>Tenor</th><th colspan="3">Onshore Forward · Investing.com</th><th colspan="3">Offshore NDF / Forward · NetDania</th><th>Offshore − Onshore</th></tr><tr><th></th><th>Bid</th><th>Ask</th><th>Mid Outright</th><th>Bid</th><th>Ask</th><th>Mid Outright</th><th>Points Mid</th></tr></thead><tbody id="usdtwdCurveBody"></tbody></table></div>
+          <div class="fx-focus-note">Forward points 與 outright 皆以各來源原始報價計算；若來源暫時無法取得，顯示「—」，不使用模擬值補齊。</div>
+        </section>
+*/});
+if(!index.includes('id="usdtwdFxPanel"')) index=index.replace('        <section class="grid-main">',panel+'\n        <section class="grid-main">');
+
+const fxCode=extract(function(){/*
+function renderUsdtwdFx(){
+  const p=DATA?.usdtwdFx;if(!$('#usdtwdCurveBody'))return;
+  const spot=p?.spot||{},tenors=['1W','1M','3M','6M','1Y'];
+  const f=v=>v==null?'—':tidy(v,4);
+  const outright=v=>v==null?'—':tidy(v,4);
+  $('#usdtwdSpotCards').innerHTML=`<div class="fx-spot-card"><span>USD/TWD Spot Bid</span><b>${f(spot.bid)}</b><small>${spot.source||'—'}</small></div><div class="fx-spot-card"><span>Spot Ask</span><b>${f(spot.ask)}</b><small>${spot.mode||'—'}</small></div><div class="fx-spot-card"><span>Spot Mid</span><b>${f(spot.mid)}</b><small>Bid/Ask midpoint</small></div>`;
+  $('#usdtwdCurveBody').innerHTML=tenors.map(t=>{const on=p?.onshore?.curve?.[t]||{},off=p?.offshore?.curve?.[t]||{},sp=p?.spread?.[t]||{};return `<tr><td><b>${t}</b></td><td>${f(on.bid)}</td><td>${f(on.ask)}</td><td>${outright(on.outrightMid)}</td><td>${f(off.bid)}</td><td>${f(off.ask)}</td><td>${outright(off.outrightMid)}</td><td class="${sp.pointsMid==null?'':cls(sp.pointsMid)}">${sp.pointsMid==null?'—':(sp.pointsMid>=0?'+':'')+tidy(sp.pointsMid,4)}</td></tr>`}).join('');
+  const dt=p?.meta?.generatedAt?new Date(p.meta.generatedAt):null;
+  $('#usdtwdFxFreshness').textContent=(dt&&!Number.isNaN(dt.getTime())?`更新 ${dt.toLocaleString('zh-TW')}`:'更新時間 —')+` · Onshore ${p?.onshore?.mode||'UNAVAILABLE'} · Offshore ${p?.offshore?.mode||'UNAVAILABLE'}`;
+}
+*/});
+if(!app.includes('function renderUsdtwdFx()')) app=app.replace('function render(){if(!DATA)return;',fxCode+'\nfunction render(){if(!DATA)return;renderUsdtwdFx();');
+else app=app.replace('function render(){if(!DATA)return;','function render(){if(!DATA)return;renderUsdtwdFx();');
+
+if(!providers.includes("fetchJson('./data/usdtwd-fx.json'")){
+  providers=providers.replace('const [base,taifex,delayed,live]=await Promise.all([fetchJson(endpoint,true),fetchJson(\'./data/taifex-latest.json\',false),fetchJson(\'./data/overseas-delayed.json\',false),fetchJson(localLiveEndpoint()||c.liveEndpoint,false)]);mergeTaifex(base,taifex);mergeDelayed(base,delayed);mergeLive(base,live);return base',"const [base,taifex,delayed,live,fxTwd]=await Promise.all([fetchJson(endpoint,true),fetchJson('./data/taifex-latest.json',false),fetchJson('./data/overseas-delayed.json',false),fetchJson(localLiveEndpoint()||c.liveEndpoint,false),fetchJson('./data/usdtwd-fx.json',false)]);mergeTaifex(base,taifex);mergeDelayed(base,delayed);mergeLive(base,live);base.usdtwdFx=fxTwd||null;return base");
+}
+
+const css=`
+/* USD/TWD FX focus */
+.usdtwd-fx-panel{margin:12px 0;padding:0 0 10px}.fx-focus-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;padding:14px;border-bottom:1px solid var(--line)}.fx-focus-head h2{margin:0 0 4px;font-size:19px}.fx-focus-head p{margin:0;color:var(--muted);font-size:12px}.fx-spot-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;padding:12px}.fx-spot-card{background:#071827;border:1px solid var(--line);border-radius:8px;padding:10px;display:grid;gap:4px}.fx-spot-card span,.fx-spot-card small{color:var(--muted);font-size:10px}.fx-spot-card b{font-size:19px}.fx-curve-table th{text-align:right}.fx-curve-table th:first-child,.fx-curve-table td:first-child{text-align:left}.fx-curve-table td{text-align:right}.fx-focus-note{margin:9px 12px 0;color:#7895aa;font-size:10px}.usdtwd-fx-panel .table-wrap{padding:0 12px}@media(max-width:700px){.fx-focus-head{flex-direction:column}.fx-spot-cards{grid-template-columns:1fr}.usdtwd-fx-panel .table-wrap{overflow:auto}.fx-curve-table{min-width:820px}}
+`;
+if(!styles.includes('/* USD/TWD FX focus */'))styles+='\n'+css;
+
+await fs.writeFile('index.html',index);
+await fs.writeFile('app.js',app);
+await fs.writeFile('providers.js',providers);
+await fs.writeFile('styles.css',styles);
+console.log('Applied USD/TWD FX V1 dashboard integration.');
