@@ -12,6 +12,7 @@ on:
       - 'scripts/apply-fx-v1.mjs'
       - 'scripts/patch-taifex-settlement-ndf.mjs'
       - 'scripts/patch-ndf-runtime-cache.mjs'
+      - 'scripts/patch-ndf-formula-tokens.mjs'
       - 'scripts/fix-runtime-regressions.mjs'
       - '.github/workflows/update-taifex-data.yml'
   schedule:
@@ -47,6 +48,8 @@ jobs:
         run: node scripts/patch-taifex-settlement-ndf.mjs
       - name: Force-refresh NDF frontend assets
         run: node scripts/patch-ndf-runtime-cache.mjs
+      - name: Install settlement NDF formula tokens
+        run: node scripts/patch-ndf-formula-tokens.mjs
       - name: Fix browser runtime regressions
         run: node scripts/fix-runtime-regressions.mjs
       - name: Validate JavaScript
@@ -59,10 +62,13 @@ jobs:
           node --check scripts/apply-fx-v1.mjs
           node --check scripts/patch-taifex-settlement-ndf.mjs
           node --check scripts/patch-ndf-runtime-cache.mjs
+          node --check scripts/patch-ndf-formula-tokens.mjs
           node --check scripts/fix-runtime-regressions.mjs
           grep -q "function renderTaifexSettlementNdf" app.js
           grep -q "TAIFEX settlement NDF render failed" app.js
-          grep -q "app.js?v=20260916-ndf3" index.html
+          grep -q "TGF_NEAR_NDF" app.js
+          grep -q "BRF_NEXT_NDF" app.js
+          grep -q "app.js?v=20260916-ndf4" index.html
           grep -q "taifexSettlementNdf" index.html
       - name: Commit integration/data changes
         run: |
@@ -73,5 +79,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add app.js providers.js config.example.js index.html styles.css data/latest.json data/taifex-latest.json
-          git commit -m "feat: refresh TAIFEX data and settlement NDF panel"
+          git commit -m "feat: refresh TAIFEX data and settlement NDF formula tokens"
           git push
