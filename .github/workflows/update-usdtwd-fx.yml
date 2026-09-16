@@ -16,6 +16,7 @@ on:
       - 'scripts/patch-screen-lock.mjs'
       - 'scripts/patch-overview-major-fx.mjs'
       - 'scripts/patch-overview-equities.mjs'
+      - 'scripts/patch-overview-commodities.mjs'
       - 'scripts/fix-usdtwd-toggle.mjs'
       - 'scripts/patch-fx-v11.mjs'
       - '.github/workflows/update-usdtwd-fx.yml'
@@ -61,6 +62,8 @@ jobs:
         run: node scripts/patch-overview-major-fx.mjs
       - name: Restore overview equity market bridge
         run: node scripts/patch-overview-equities.mjs
+      - name: Restore overview commodity market bridge
+        run: node scripts/patch-overview-commodities.mjs
       - name: Install USD TWD toggle binding
         run: node scripts/fix-usdtwd-toggle.mjs
       - name: Apply FX V1.1 labels
@@ -79,6 +82,7 @@ jobs:
           node --check scripts/patch-screen-lock.mjs
           node --check scripts/patch-overview-major-fx.mjs
           node --check scripts/patch-overview-equities.mjs
+          node --check scripts/patch-overview-commodities.mjs
           grep -q "function syncUsdtwdVisibility" app.js
           grep -q "function renderTaifexSettlementNdf" app.js
           grep -q "TAIFEX settlement NDF render failed" app.js
@@ -100,6 +104,8 @@ jobs:
           grep -q "usdtwdFxPanel" index.html
           grep -q "mergeMajorFx(base,majorFx)" providers.js
           grep -q "mergeOverviewEquities(base,delayed,taifex)" providers.js
+          grep -q "mergeOverviewCommodities(base,commodityData)" providers.js
+          grep -q "commodities-latest.json" providers.js
       - name: Commit FX data and UI
         run: |
           git add data/usdtwd-fx.json index.html app.js providers.js styles.css scripts/fetch-overseas-delayed.mjs
