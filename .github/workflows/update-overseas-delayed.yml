@@ -5,6 +5,8 @@ on:
   push:
     paths:
       - 'scripts/fetch-overseas-delayed.mjs'
+      - 'scripts/patch-overview-equities.mjs'
+      - 'providers.js'
       - '.github/workflows/update-overseas-delayed.yml'
   schedule:
     - cron: '*/15 * * * 1-5'
@@ -24,18 +26,25 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Fetch Yahoo / Investing delayed futures
+      - name: Install overview equity bridge
+        run: node scripts/patch-overview-equities.mjs
+      - name: Fetch Yahoo / JPX delayed futures and cash indices
         run: node scripts/fetch-overseas-delayed.mjs
-      - name: Validate JSON
-        run: node -e "JSON.parse(require('fs').readFileSync('data/overseas-delayed.json','utf8'))"
+      - name: Validate market data
+        run: |
+          node --check scripts/fetch-overseas-delayed.mjs
+          node --check scripts/patch-overview-equities.mjs
+          node --check providers.js
+          node -e "const d=JSON.parse(require('fs').readFileSync('data/overseas-delayed.json','utf8')); const idx=Object.values(d.indices||{}).filter(x=>x.last!=null); const fut=['CME_MES','CME_MNQ','CME_SOX','JPX_NIKKEI225_MINI','JPX_MINI_TOPIX'].filter(k=>d.products?.[k]?.contracts?.length); if(idx.length<4) process.exit(1); console.log('valid cash indices:',idx.length,'overview futures:',fut.length);"
+          grep -q "mergeOverviewEquities(base,delayed,taifex)" providers.js
       - name: Commit delayed data
         run: |
-          git add data/overseas-delayed.json
+          git add data/overseas-delayed.json scripts/fetch-overseas-delayed.mjs providers.js
           if git diff --cached --quiet; then
             echo "No delayed-data changes"
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "data: refresh overseas delayed futures"
+          git commit -m "data: refresh overview equity cash and futures"
           git push
