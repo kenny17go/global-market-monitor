@@ -9,6 +9,7 @@ on:
       - 'scripts/patch-ui-target.mjs'
       - 'scripts/apply-market-connections-safe.mjs'
       - 'scripts/patch-source-status-ui.mjs'
+      - 'scripts/fix-runtime-regressions.mjs'
       - '.github/workflows/update-taifex-data.yml'
   schedule:
     - cron: '35 7 * * 1-5'
@@ -37,6 +38,8 @@ jobs:
         run: node scripts/apply-market-connections-safe.mjs
       - name: Apply quote source status UI
         run: node scripts/patch-source-status-ui.mjs
+      - name: Fix browser runtime regressions
+        run: node scripts/fix-runtime-regressions.mjs
       - name: Validate JavaScript
         run: |
           node --check app.js
@@ -44,6 +47,8 @@ jobs:
           node --check scripts/patch-ui-target.mjs
           node --check scripts/apply-market-connections-safe.mjs
           node --check scripts/patch-source-status-ui.mjs
+          node --check scripts/fix-runtime-regressions.mjs
+          node -e "const fs=require('fs');const s=fs.readFileSync('app.js','utf8');if(s.includes(\"function switchView(name){$('.view').forEach\"))throw new Error('runtime regression: switchView uses querySelector.forEach');"
       - name: Commit integration/data changes
         run: |
           if git diff --quiet -- app.js providers.js config.example.js index.html styles.css data/latest.json data/taifex-latest.json; then
@@ -53,5 +58,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add app.js providers.js config.example.js index.html styles.css data/latest.json data/taifex-latest.json
-          git commit -m "feat: show quote source status and timestamps"
+          git commit -m "fix: repair browser runtime navigation"
           git push
