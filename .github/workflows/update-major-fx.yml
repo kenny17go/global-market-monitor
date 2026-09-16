@@ -8,6 +8,8 @@ on:
       - 'scripts/patch-overview-major-fx.mjs'
       - 'scripts/patch-overview-equities.mjs'
       - 'providers.js'
+      - 'app.js'
+      - 'styles.css'
       - '.github/workflows/update-major-fx.yml'
   schedule:
     - cron: '*/5 * * * 1-5'
@@ -43,16 +45,19 @@ jobs:
           node -e "const d=JSON.parse(require('fs').readFileSync('data/fx-latest.json','utf8')); const spot=d.quotes.filter(x=>x.bid!=null&&x.ask!=null); const fwd=d.quotes.filter(x=>x.p1m!=null||x.p3m!=null||x.p6m!=null||x.p1y!=null); if(spot.length<5) process.exit(1); console.log('valid FX spot pairs:',spot.length,'forward curves:',fwd.length);"
           grep -q "mergeMajorFx(base,majorFx)" providers.js
           grep -q "mergeOverviewEquities(base,delayed,taifex)" providers.js
+          grep -q "data.seriesMeta\[m.idx\]" providers.js
+          grep -q "盤中線暫無資料" app.js
+          grep -q "real-intraday-sparklines" styles.css
           grep -q "fx-latest.json" providers.js
           grep -q "fxPoint2(x.p1m)" app.js
       - name: Commit FX quotes
         run: |
-          git add data/fx-latest.json providers.js app.js scripts/fetch-overseas-delayed.mjs
+          git add data/fx-latest.json providers.js app.js styles.css scripts/fetch-overseas-delayed.mjs
           if git diff --cached --quiet; then
             echo "No FX quote changes"
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "data: refresh overview FX and preserve 2-decimal swap points"
+          git commit -m "data: refresh overview FX and preserve intraday cards"
           git push
