@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generatedAt": "2026-09-16T22:25:07.069Z",
+    "generatedAt": "2026-09-16T22:39:17.964Z",
     "realtime": false,
     "spotValidated": true,
     "sourcePolicy": "Offshore = NetDania; fallback whole curve to Barchart. Onshore = Investing.com; fallback whole curve to Cbonds; final fallback to Bank of Taiwan exact-tenor forwards minus same-bank spot.",
@@ -11,7 +11,7 @@
     "bid": 31.832,
     "ask": 31.932,
     "mid": 31.881999999999998,
-    "time": "16-September-26 15:24:00",
+    "time": "16-September-26 17:38:25",
     "raw": "USD/TWD 31.8320/9320",
     "source": "NetDania",
     "mode": "WEB QUOTE"
@@ -99,14 +99,14 @@
       },
       "1Y": {
         "bid": -0.23,
-        "ask": -0.2,
-        "mid": -0.21500000000000002,
+        "ask": -0.21,
+        "mid": -0.22,
         "outrightBid": 31.602,
-        "outrightAsk": 31.732,
-        "outrightMid": 31.666999999999998
+        "outrightAsk": 31.721999999999998,
+        "outrightMid": 31.662
       }
     },
-    "rawRow": "USD/TWD 0.01 0.01 -0.01 -0.01 -0.05 -0.05 -0.13 -0.12 -0.23 -0.20"
+    "rawRow": "USD/TWD 0.01 0.01 -0.01 -0.01 -0.05 -0.05 -0.13 -0.12 -0.23 -0.21"
   },
   "spread": {
     "1W": {
