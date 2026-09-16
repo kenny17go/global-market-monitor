@@ -19,7 +19,7 @@ if(!index.includes('id="indicatorName"')){
             </div>
             <div id="indicatorAlertList" class="indicator-alert-list"></div>
           </div>`;
-  const re=/(<div id="formulaResult"[^>]*>[\s\S]*?<\/div>)/;
+  const re=/(<div[^>]*id="formulaResult"[^>]*>[\s\S]*?<\/div>)/;
   if(!re.test(index)) throw new Error('formulaResult anchor not found');
   index=index.replace(re,'$1'+block);
 }
