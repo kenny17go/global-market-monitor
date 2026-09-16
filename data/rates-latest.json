@@ -1,0 +1,44 @@
+{
+  "meta": {
+    "source": "U.S. Department of the Treasury",
+    "mode": "OFFICIAL DAILY",
+    "realtime": false,
+    "asOf": "2026-09-15T00:00:00",
+    "generatedAt": "2026-09-16T14:46:45.769Z",
+    "endpoint": "https://home.treasury.gov/resource-center/data-chart-center/interest-rates/pages/xml?data=daily_treasury_yield_curve&field_tdr_date_value=2026"
+  },
+  "ust": [
+    {
+      "tenor": "1M",
+      "yield": 3.93
+    },
+    {
+      "tenor": "3M",
+      "yield": 4.11
+    },
+    {
+      "tenor": "6M",
+      "yield": 4.17
+    },
+    {
+      "tenor": "1Y",
+      "yield": 4.39
+    },
+    {
+      "tenor": "2Y",
+      "yield": 4.67
+    },
+    {
+      "tenor": "5Y",
+      "yield": 4.83
+    },
+    {
+      "tenor": "10Y",
+      "yield": 5
+    },
+    {
+      "tenor": "30Y",
+      "yield": 5.36
+    }
+  ]
+}
