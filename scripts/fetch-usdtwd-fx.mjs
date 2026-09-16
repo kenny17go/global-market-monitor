@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises';
 
-const UA='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/126 Safari/537.36 global-market-monitor/1.4';
+const UA='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/126 Safari/537.36 global-market-monitor/1.5';
 async function get(url){const r=await fetch(url,{redirect:'follow',headers:{'user-agent':UA,'accept':'text/html,application/xhtml+xml,application/json;q=0.9,*/*;q=0.8','accept-language':'en-US,en;q=0.9'}});if(!r.ok)throw new Error(`${r.status} ${url}`);return await r.text()}
 const num=v=>{if(v==null||v==='')return null;const x=Number(String(v).replace(/,/g,'').trim());return Number.isFinite(x)?x:null};
 const strip=s=>String(s).replace(/<script[\s\S]*?<\/script>/gi,' ').replace(/<style[\s\S]*?<\/style>/gi,' ').replace(/<[^>]+>/g,' ').replace(/&nbsp;|&#160;/gi,' ').replace(/&amp;/gi,'&').replace(/\s+/g,' ').trim();
@@ -24,20 +24,42 @@ async function cbondsOnshore(){try{const text=strip(await get('https://cbonds.co
 
 function parseBotSpot(text){
   const normalized=strip(text);
-  const anchor=normalized.search(/American Dollar\s*\(USD\)/i);
-  if(anchor<0)throw new Error('BOT USD spot anchor not found');
-  const chunk=normalized.slice(anchor,anchor+500);
+  const anchor=normalized.indexOf('(USD)');
+  if(anchor<0)throw new Error('BOT USD code anchor not found');
+  const chunk=normalized.slice(anchor,anchor+800);
   const values=(chunk.match(/\b\d{1,2}\.\d{2,4}\b/g)||[]).map(num).filter(v=>v!=null&&v>=20&&v<=50);
   if(values.length<4)throw new Error(`BOT USD spot values incomplete: ${values.join(',')}`);
   const [cashBid,cashAsk,spotBid,spotAsk]=values;
-  if(!spotOk(spotBid,spotAsk))throw new Error(`BOT invalid spot ${spotBid}/${spotAsk}`);
+  if(!spotOk(spotBid,spotAsk))throw new Error(`BOT invalid spot ${spotBid}/${spotAsk}; raw=${values.slice(0,8).join(',')}`);
   return {cashBid,cashAsk,spotBid,spotAsk};
 }
 
-async function botOnshore(){try{const [spotHtml,fwdHtml]=await Promise.all([get('https://rate.bot.com.tw/xrt?Lang=en-US'),get('https://rate.bot.com.tw/xrt/forward/USD?Lang=en-US')]);const {spotBid,spotAsk}=parseBotSpot(spotHtml);const fwdText=strip(fwdHtml),dayMap={'1M':30,'3M':90,'6M':180},curve={};for(const [tenor,days] of Object.entries(dayMap)){const m=fwdText.match(new RegExp(`Forward-\\s*${days}\\s*Days\\s+([\\d,.]+)\\s+([\\d,.]+)`,'i'));if(!m)continue;const fwdBid=num(m[1]),fwdAsk=num(m[2]);const bid=fwdBid-spotBid,ask=fwdAsk-spotAsk;if(fwdBid>=20&&fwdBid<=50&&fwdAsk>=fwdBid&&fwdOk(bid,ask))curve[tenor]={bid,ask,mid:mid(bid,ask),outrightBid:fwdBid,outrightAsk:fwdAsk,outrightMid:mid(fwdBid,fwdAsk),spotBid,spotAsk,actualTenor:`${days}D`}}if(!Object.keys(curve).length)throw new Error('BOT exact tenor forwards unavailable');return {source:'Bank of Taiwan USD Forward / Spot',market:'ONSHORE TAIPEI',mode:'BANK QUOTE',quoteType:'FORWARD POINTS',fallback:true,curve,note:'Exact tenor mapping only: 1M=30D, 3M=90D, 6M=180D. 1W and 1Y intentionally unavailable.'}}catch(e){console.warn('BOT onshore failed:',e.message);return {source:'Bank of Taiwan USD Forward / Spot',market:'ONSHORE TAIPEI',mode:'UNAVAILABLE',quoteType:'FORWARD POINTS',fallback:true,curve:{}}}}
+function parseBotForwardPair(text,days){
+  const normalized=strip(text);
+  const patterns=[
+    new RegExp(`Forward-\\s*${days}\\s*Days\\s+([\\d,.]+)\\s+([\\d,.]+)`,'i'),
+    new RegExp(`遠期\\s*${days}\\s*天\\s+([\\d,.]+)\\s+([\\d,.]+)`,'i'),
+    new RegExp(`${days}\\s*(?:Days|天)\\s+([\\d,.]+)\\s+([\\d,.]+)`,'i')
+  ];
+  for(const re of patterns){const m=normalized.match(re);if(m)return [num(m[1]),num(m[2])];}
+  return [null,null];
+}
+
+async function botOnshore(){try{
+  const [spotHtml,fwdHtml]=await Promise.all([get('https://rate.bot.com.tw/xrt?Lang=en-US'),get('https://rate.bot.com.tw/xrt/forward/USD?Lang=en-US')]);
+  const {spotBid,spotAsk}=parseBotSpot(spotHtml),dayMap={'1M':30,'3M':90,'6M':180},curve={};
+  for(const [tenor,days] of Object.entries(dayMap)){
+    const [fwdBid,fwdAsk]=parseBotForwardPair(fwdHtml,days);
+    if(fwdBid==null||fwdAsk==null)continue;
+    const bid=fwdBid-spotBid,ask=fwdAsk-spotAsk;
+    if(fwdBid>=20&&fwdBid<=50&&fwdAsk>=fwdBid&&fwdOk(bid,ask))curve[tenor]={bid,ask,mid:mid(bid,ask),outrightBid:fwdBid,outrightAsk:fwdAsk,outrightMid:mid(fwdBid,fwdAsk),spotBid,spotAsk,actualTenor:`${days}D`};
+  }
+  if(!Object.keys(curve).length)throw new Error(`BOT exact tenor forwards unavailable; spot=${spotBid}/${spotAsk}`);
+  return {source:'Bank of Taiwan USD Forward / Spot',market:'ONSHORE TAIPEI',mode:'BANK QUOTE',quoteType:'FORWARD POINTS',fallback:true,curve,note:'Exact tenor mapping only: 1M=30D, 3M=90D, 6M=180D. 1W and 1Y intentionally unavailable.'}
+}catch(e){console.warn('BOT onshore failed:',e.message);return {source:'Bank of Taiwan USD Forward / Spot',market:'ONSHORE TAIPEI',mode:'UNAVAILABLE',quoteType:'FORWARD POINTS',fallback:true,curve:{}}}}
 
 const spot=await netdaniaSpot();let offshore=await netdaniaOffshore();if(!Object.keys(offshore.curve||{}).length)offshore=await barchartOffshore();let onshore=await investingOnshore();if(!Object.keys(onshore.curve||{}).length)onshore=await cbondsOnshore();if(!Object.keys(onshore.curve||{}).length)onshore=await botOnshore();const validSpot=spotOk(spot.bid,spot.ask);
 for(const t of TENORS){for(const bucket of [offshore,onshore]){const p=bucket.curve?.[t];if(!p||bucket.quoteType==='OUTRIGHT BENCHMARK'||p.outrightMid!=null)continue;if(validSpot&&p.mid!=null){p.outrightBid=p.bid!=null?outright(spot.bid,p.bid):null;p.outrightAsk=p.ask!=null?outright(spot.ask,p.ask):null;p.outrightMid=outright(spot.mid,p.mid)}else{p.outrightBid=null;p.outrightAsk=null;p.outrightMid=null}}}
 const spread={};for(const t of TENORS){const on=onshore.curve?.[t]||{},off=offshore.curve?.[t]||{};spread[t]={pointsMid:on.mid!=null&&off.mid!=null?off.mid-on.mid:null,outrightMid:on.outrightMid!=null&&off.outrightMid!=null?off.outrightMid-on.outrightMid:null}}
-const out={meta:{generatedAt:new Date().toISOString(),realtime:false,spotValidated:validSpot,sourcePolicy:'Offshore = NetDania; fallback whole curve to Barchart. Onshore = Investing.com; fallback whole curve to Cbonds; final fallback to Bank of Taiwan exact-tenor forwards minus same-bank spot.',note:'BOT parser locks to the USD row, takes the first four USD rates as cash bid/ask and spot bid/ask, then uses exact 30D/90D/180D forwards for 1M/3M/6M.'},spot,onshore,offshore,spread};
+const out={meta:{generatedAt:new Date().toISOString(),realtime:false,spotValidated:validSpot,sourcePolicy:'Offshore = NetDania; fallback whole curve to Barchart. Onshore = Investing.com; fallback whole curve to Cbonds; final fallback to Bank of Taiwan exact-tenor forwards minus same-bank spot.',note:'BOT parser anchors on (USD) regardless of page language, then uses exact 30D/90D/180D forwards for 1M/3M/6M.'},spot,onshore,offshore,spread};
 await fs.mkdir('data',{recursive:true});await fs.writeFile('data/usdtwd-fx.json',JSON.stringify(out,null,2)+'\n');console.log('Wrote data/usdtwd-fx.json');console.log('spot',spot.bid,spot.ask,spot.mode);console.log('onshore',onshore.source,onshore.mode,JSON.stringify(onshore.curve));console.log('offshore',offshore.source,offshore.mode,JSON.stringify(offshore.curve));
