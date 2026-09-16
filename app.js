@@ -145,7 +145,46 @@ function sparkSvg(arr,color){const w=160,h=34,min=Math.min(...arr),max=Math.max(
 function topUniverse(){const map={};(DATA.top||[]).forEach(x=>map[x.id]=x);const add=(id,label,value,pct,change=0)=>{if(!map[id])map[id]={id,label,value,pct,change}};const eq=n=>DATA.equities.find(x=>x.name===n),cmd=n=>DATA.commodities.find(x=>x.name===n),fx=p=>DATA.fx.find(x=>x.pair===p);if(eq('Nasdaq-100'))add('NDX','Nasdaq-100',eq('Nasdaq-100').cash,eq('Nasdaq-100').pct);if(eq('東證 TOPIX'))add('TOPIX','東證 TOPIX',eq('東證 TOPIX').cash,eq('東證 TOPIX').pct);if(cmd('白銀'))add('SILVER','白銀 XAG/USD',cmd('白銀').spot,cmd('白銀').pct);if(cmd('Brent 原油'))add('BRENT','Brent 原油',cmd('Brent 原油').spot,cmd('Brent 原油').pct);if(fx('USD/JPY'))add('USDJPY','USD/JPY',fx('USD/JPY').bid,0,fx('USD/JPY').change);if(fx('EUR/USD'))add('EURUSD','EUR/USD',fx('EUR/USD').bid,0,fx('EUR/USD').change);return map}
 function renderTopPicker(){const u=topUniverse(),order=['SPX','NDX','SOX','TAIEX','NIKKEI','TOPIX','GOLD','SILVER','WTI','BRENT','USDTWD','USDJPY','EURUSD'];$('#topPicker').innerHTML=`<div class="picker-head"><b>選擇最上方行情</b><span>最多 8 個，設定會保存在此瀏覽器</span></div><div class="picker-grid">${order.filter(id=>u[id]).map(id=>`<label class="chip"><input type="checkbox" data-top="${id}" ${selectedTop.includes(id)?'checked':''}>${u[id].label}</label>`).join('')}</div>`;$$('[data-top]').forEach(cb=>cb.onchange=()=>{const id=cb.dataset.top;if(cb.checked){if(selectedTop.length>=8){cb.checked=false;return alert('最上方最多顯示 8 個項目')}selectedTop.push(id)}else{selectedTop=selectedTop.filter(x=>x!==id);if(!selectedTop.length)selectedTop=['SPX']}localStorage.setItem('gmmTopCards',JSON.stringify(selectedTop));renderTopCards()})}
 function renderTopCards(){const u=topUniverse(),items=selectedTop.map(id=>u[id]).filter(Boolean);$('#topCards').innerHTML=items.map(x=>{const d=['USDTWD','USDJPY','EURUSD'].includes(x.id)?3:2,arr=DATA.series?.[x.id]||[x.value*.998,x.value*.999,x.value];return `<div class="card"><div class="label">${x.label}</div><div class="value">${fmt(x.value,d)}</div><div class="${cls(x.pct||x.change)}">${x.change>=0?'+':''}${fmt(x.change||0,d)}　${x.pct!=null?`${x.pct>=0?'+':''}${fmt(x.pct,2)}%`:''}</div><div class="spark">${sparkSvg(arr,(x.pct||x.change)>=0?'#22df91':'#ff5b62')}</div></div>`}).join('')}
-function renderYield(){drawLine($('#yieldCanvas'),DATA.ust.map(x=>x.yield),{color:'#56aef7'})}
+function renderYield(){
+  const rows=Array.isArray(DATA?.ust)?DATA.ust.filter(x=>Number.isFinite(Number(x.yield))):[];
+  const canvas=$('#yieldCanvas');
+  if(!canvas||rows.length<2)return;
+  const dpr=devicePixelRatio||1,w=Math.max(canvas.clientWidth||320,280),h=Math.max(canvas.clientHeight||180,170);
+  canvas.width=w*dpr;canvas.height=h*dpr;
+  const c=canvas.getContext('2d');c.setTransform(dpr,0,0,dpr,0,0);c.clearRect(0,0,w,h);
+  const vals=rows.map(x=>Number(x.yield)),min=Math.min(...vals),max=Math.max(...vals),range=max-min||0.5;
+  const step=Math.max(0.1,Math.ceil((range/4)*10)/10),lo=Math.floor((min-step)*10)/10,hi=Math.ceil((max+step)*10)/10;
+  const left=42,right=10,top=12,bottom=30,pw=w-left-right,ph=h-top-bottom;
+  c.font='10px -apple-system,BlinkMacSystemFont,Segoe UI,sans-serif';c.textBaseline='middle';c.lineWidth=1;
+  const ticks=4;
+  for(let i=0;i<=ticks;i++){
+    const v=lo+(hi-lo)*i/ticks,y=top+ph-(ph*i/ticks);
+    c.strokeStyle='#173b58';c.beginPath();c.moveTo(left,y);c.lineTo(w-right,y);c.stroke();
+    c.fillStyle='#8da7bc';c.textAlign='right';c.fillText(v.toFixed(2)+'%',left-6,y);
+  }
+  c.strokeStyle='#2b5877';c.beginPath();c.moveTo(left,top);c.lineTo(left,top+ph);c.lineTo(w-right,top+ph);c.stroke();
+  const pts=rows.map((r,i)=>({x:left+(rows.length===1?pw/2:i/(rows.length-1)*pw),y:top+ph-((Number(r.yield)-lo)/(hi-lo))*ph,r}));
+  c.strokeStyle='#56aef7';c.lineWidth=2;c.beginPath();pts.forEach((p,i)=>i?c.lineTo(p.x,p.y):c.moveTo(p.x,p.y));c.stroke();
+  pts.forEach(p=>{
+    c.fillStyle='#56aef7';c.beginPath();c.arc(p.x,p.y,3,0,Math.PI*2);c.fill();
+    c.fillStyle='#cfe9fb';c.textAlign='center';c.textBaseline='bottom';c.fillText(Number(p.r.yield).toFixed(2)+'%',p.x,p.y-6);
+    c.fillStyle='#8da7bc';c.textBaseline='top';c.fillText(p.r.tenor,p.x,top+ph+8);
+  });
+  const tenors=$('#ustYieldTenors'),values=$('#ustYieldValues');
+  if(tenors)tenors.innerHTML=rows.map(x=>'<th>'+x.tenor+'</th>').join('');
+  if(values)values.innerHTML=rows.map(x=>'<td>'+Number(x.yield).toFixed(2)+'%</td>').join('');
+  const byTenor=Object.fromEntries(rows.map(x=>[x.tenor,Number(x.yield)]));
+  const s102=Number.isFinite(byTenor['10Y'])&&Number.isFinite(byTenor['2Y'])?byTenor['10Y']-byTenor['2Y']:null;
+  const s305=Number.isFinite(byTenor['30Y'])&&Number.isFinite(byTenor['5Y'])?byTenor['30Y']-byTenor['5Y']:null;
+  if($('#ustSpread102'))$('#ustSpread102').textContent=s102==null?'—':(s102>=0?'+':'')+s102.toFixed(2)+'%';
+  if($('#ustSpread305'))$('#ustSpread305').textContent=s305==null?'—':(s305>=0?'+':'')+s305.toFixed(2)+'%';
+  const meta=DATA?.ratesOverviewMeta||{};
+  if($('#ustYieldStatus'))$('#ustYieldStatus').textContent=meta.mode||'OFFICIAL DAILY';
+  if($('#ustYieldMeta')){
+    const date=meta.asOf?new Date(meta.asOf).toLocaleDateString('zh-TW',{year:'numeric',month:'2-digit',day:'2-digit'}):'—';
+    $('#ustYieldMeta').textContent='Source: '+(meta.source||'U.S. Department of the Treasury')+' · As of: '+date;
+  }
+}
 function catalogRows(){return DATA?.crossMarketCatalog||[]}
 
 const SCREEN_LOCK_PASS='GMM2026';

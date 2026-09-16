@@ -4,7 +4,7 @@
     "mode": "OFFICIAL DAILY",
     "realtime": false,
     "asOf": "2026-09-15T00:00:00",
-    "generatedAt": "2026-09-16T14:46:45.769Z",
+    "generatedAt": "2026-09-16T15:36:35.476Z",
     "endpoint": "https://home.treasury.gov/resource-center/data-chart-center/interest-rates/pages/xml?data=daily_treasury_yield_curve&field_tdr_date_value=2026"
   },
   "ust": [

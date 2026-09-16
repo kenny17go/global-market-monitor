@@ -45,7 +45,7 @@
             <article class="panel"><h3>商品現貨與期貨 / Commodities <small>Spot + Futures</small></h3><div class="table-wrap"><table><thead><tr><th>商品</th><th>Spot</th><th>Futures</th><th>基差</th><th>漲跌</th></tr></thead><tbody id="cmdBody"></tbody></table></div></article>
             <div class="split">
               <article class="panel"><h3>主要利率 / Policy Rate <small>官方基準</small></h3><div class="table-wrap"><table><thead><tr><th>市場</th><th>利率</th><th>下次會議</th></tr></thead><tbody id="rateBody"></tbody></table></div></article>
-              <article class="panel"><h3>美國公債利率 / UST Yield Curve <small>Daily</small></h3><div class="curve"><canvas id="yieldCanvas" class="chart-canvas"></canvas></div></article>
+              <article class="panel ust-yield-panel"><h3><span>美國公債利率 / UST Yield Curve</span><small id="ustYieldStatus">OFFICIAL DAILY</small></h3><div class="ust-yield-meta" id="ustYieldMeta">資料載入中…</div><div class="curve ust-yield-chart"><canvas id="yieldCanvas" class="chart-canvas"></canvas></div><div class="ust-yield-table-wrap"><table class="ust-yield-table"><thead><tr id="ustYieldTenors"></tr></thead><tbody><tr id="ustYieldValues"></tr></tbody></table></div><div class="ust-yield-spreads"><div><span>10Y − 2Y</span><b id="ustSpread102">—</b></div><div><span>30Y − 5Y</span><b id="ustSpread305">—</b></div></div></article>
             </div>
           </div>
         </section>
