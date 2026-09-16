@@ -6,6 +6,7 @@ const ROOTS=[
   {id:'CME_MES',root:'MES',exchange:'CME',range:[100,20000]},
   {id:'CME_MNQ',root:'MNQ',exchange:'CME',range:[1000,100000]},
   {id:'CBOT_MYM',root:'MYM',exchange:'CBOT/CME',range:[1000,100000]},
+  {id:'CME_SOX',root:'SOX',exchange:'CME',range:[100,20000]},
   {id:'COMEX_MGC',root:'MGC',exchange:'COMEX/CME',range:[100,20000]},
   {id:'COMEX_MGC_TWD',root:'MGC',exchange:'COMEX/CME',range:[100,20000]},
   {id:'CME_6E',root:'6E',exchange:'CME',range:[0.1,5]},
@@ -46,6 +47,17 @@ async function yahooApiQuote(symbol,range){
 }
 async function yahooRootProduct(t,source='Yahoo Finance'){let symbols=await yahooChain(t.root);const root=t.root+'=F';if(!symbols.length)symbols=[root];const contracts=[];for(const s of symbols.slice(0,5)){const q=await yahooApiQuote(s,t.range);if(q?.month&&(q.bid!=null||q.ask!=null||q.last!=null))contracts.push(q)}if(!contracts.length&&symbols[0]!==root){const q=await yahooApiQuote(root,t.range);if(q?.month&&(q.bid!=null||q.ask!=null||q.last!=null))contracts.push(q)}contracts.sort((a,b)=>String(a.month).localeCompare(String(b.month)));return {defaultMonth:contracts[0]?.month||null,contracts,source,mode:contracts.length?'DELAYED':'UNAVAILABLE'}}
 
+async function yahooIndexQuote(id,symbol,label,range){
+  try{
+    const j=await fetchJson(`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1m&range=1d`);
+    const m=j?.chart?.result?.[0]?.meta;
+    const last=valid(m?.regularMarketPrice,range),prev=valid(m?.chartPreviousClose??m?.previousClose,range);
+    if(last==null)throw new Error('missing market price');
+    const change=prev!=null?last-prev:null,pct=prev?change/prev*100:null;
+    return {id,symbol,label,last,previousClose:prev,change,pct,timestamp:m?.regularMarketTime?new Date(m.regularMarketTime*1000).toISOString():new Date().toISOString(),source:'Yahoo Finance',mode:'DELAYED'};
+  }catch(e){console.warn('Yahoo index failed',id,symbol,e.message);return {id,symbol,label,last:null,previousClose:null,change:null,pct:null,timestamp:null,source:'Yahoo Finance',mode:'UNAVAILABLE'}}
+}
+
 async function tradingViewContracts({id,url,prefix,range}){
   try{
     const html=await fetchText(url,{headers:{referer:'https://www.tradingview.com/'}}),plain=stripHtml(html);
@@ -60,10 +72,21 @@ async function tradingViewContracts({id,url,prefix,range}){
 }
 async function nikkei225jpMini(){try{const plain=stripHtml(await fetchText('https://nikkei225jp.com/cme/'));const contracts=[];const re=/大証ミニ\s*(\d{2})年(\d{1,2})月限\s*([\d,]+)/g;let m;while((m=re.exec(plain))){const month=`20${m[1]}${String(m[2]).padStart(2,'0')}`,last=valid(m[3],[1000,100000]);if(last!=null)contracts.push({symbol:`OSE Nikkei225 mini ${month}`,month,bid:null,ask:null,last,timestamp:new Date().toISOString(),quoteType:'nikkei225jp public table'})}return {defaultMonth:contracts[0]?.month||null,contracts,source:'nikkei225jp.com · OSE public quote fallback',mode:contracts.length?'DELAYED':'UNAVAILABLE'}}catch(e){console.warn('nikkei225jp fallback failed',e.message);return {defaultMonth:null,contracts:[],source:'nikkei225jp.com · OSE public quote fallback',mode:'UNAVAILABLE'}}}
 
+const INDEX_TARGETS=[
+  {id:'SPX',symbol:'^GSPC',label:'S&P 500',range:[100,20000]},
+  {id:'NDX',symbol:'^NDX',label:'Nasdaq-100',range:[1000,100000]},
+  {id:'SOX',symbol:'^SOX',label:'SOX 費半',range:[100,20000]},
+  {id:'TAIEX',symbol:'^TWII',label:'台灣加權',range:[1000,100000]},
+  {id:'NIKKEI',symbol:'^N225',label:'日經 225',range:[1000,100000]},
+  {id:'TOPIX',symbol:'^TOPX',label:'東證 TOPIX',range:[100,10000]}
+];
+const indices={};
+for(const x of INDEX_TARGETS)indices[x.id]=await yahooIndexQuote(x.id,x.symbol,x.label,x.range);
+
 const products={};for(const t of ROOTS)products[t.id]=await yahooRootProduct(t);
 products.JPX_MINI_TOPIX=await tradingViewContracts({id:'JPX_MINI_TOPIX',url:'https://tw.tradingview.com/symbols/OSE-TOPIXM1!/contracts/',prefix:'TOPIXM',range:[100,10000]});
 products.JPX_NIKKEI225_MINI=await tradingViewContracts({id:'JPX_NIKKEI225_MINI',url:'https://tw.tradingview.com/symbols/OSE-NK225M1!/contracts/',prefix:'NK225M',range:[1000,100000]});
 if(!products.JPX_NIKKEI225_MINI.contracts.length)products.JPX_NIKKEI225_MINI=await nikkei225jpMini();
 products.ICE_BRENT_MINI=await yahooRootProduct({id:'ICE_BRENT_MINI',root:'BZ',exchange:'Brent reference',range:[10,300]},'Yahoo Finance · Brent delayed benchmark');
-const out={meta:{source:'Yahoo Finance + JPX delayed fallbacks',mode:'DELAYED',realtime:false,generatedAt:new Date().toISOString(),note:'Yahoo Bid/Ask uses cookie/crumb quote sessions when available; Last falls back to Yahoo chart data. JPX/OSE fallbacks expose delayed last prices/contract months only and do not synthesize Bid/Ask. Sanity ranges reject obviously wrong values. LIVE broker connectors can override delayed data.'},products};
+const out={meta:{source:'Yahoo Finance + JPX delayed fallbacks',mode:'DELAYED',realtime:false,generatedAt:new Date().toISOString(),note:'Yahoo cash indices and futures are public delayed/web data, not a licensed realtime feed. Yahoo Bid/Ask uses cookie/crumb quote sessions when available; Last falls back to Yahoo chart data. JPX/OSE fallbacks expose delayed last prices/contract months only and do not synthesize Bid/Ask. Sanity ranges reject obviously wrong values. LIVE broker connectors can override delayed data.'},indices,products};
 await fs.mkdir('data',{recursive:true});await fs.writeFile('data/overseas-delayed.json',JSON.stringify(out,null,2)+'\n');console.log('Wrote data/overseas-delayed.json');for(const [id,p] of Object.entries(products))console.log(id,p.defaultMonth,p.contracts?.length||0,p.contracts?.[0]?.bid,p.contracts?.[0]?.ask,p.contracts?.[0]?.last,p.source,p.contracts?.[0]?.quoteType||'');
