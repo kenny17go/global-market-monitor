@@ -4,8 +4,9 @@ const UA='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/12
 const num=v=>{if(v==null)return null;const n=Number(String(v).replace(/,/g,''));return Number.isFinite(n)?n:null};
 const inRange=(v,[lo,hi])=>{const n=num(v);return n!=null&&n>=lo&&n<=hi?n:null};
 
-async function fetchJson(url){const r=await fetch(url,{headers:{'user-agent':UA,'accept':'application/json,text/plain,*/*','accept-language':'en-US,en;q=0.9'},redirect:'follow'});if(!r.ok)throw new Error(`HTTP ${r.status}`);return await r.json()}
-async function fetchText(url){const r=await fetch(url,{headers:{'user-agent':UA,'accept':'text/csv,text/plain,*/*','accept-language':'en-US,en;q=0.9'},redirect:'follow'});if(!r.ok)throw new Error(`HTTP ${r.status}`);return await r.text()}
+async function request(url,{accept='application/json,text/plain,*/*',timeout=15000}={}){const r=await fetch(url,{headers:{'user-agent':UA,accept,'accept-language':'en-US,en;q=0.9'},redirect:'follow',signal:AbortSignal.timeout(timeout)});if(!r.ok)throw new Error(`HTTP ${r.status}`);return r}
+async function fetchJson(url,opt={}){return await (await request(url,opt)).json()}
+async function fetchText(url,opt={}){return await (await request(url,{accept:'text/csv,text/plain,*/*',...opt})).text()}
 
 async function yahooChart(symbol,range,label){
   try{
@@ -18,9 +19,24 @@ async function yahooChart(symbol,range,label){
   }catch(e){console.warn('Yahoo commodity quote failed',label,symbol,e.message);return {label,symbol,last:null,previousClose:null,change:null,pct:null,timestamp:null,source:'Yahoo Finance',mode:'UNAVAILABLE'}}
 }
 
+async function stooqQuote(symbols,range,label){
+  for(const symbol of symbols){
+    try{
+      const csv=await fetchText(`https://stooq.com/q/l/?s=${encodeURIComponent(symbol)}&f=sd2t2ohlcv&h&e=csv`,{timeout:12000});
+      const lines=csv.trim().split(/\r?\n/);if(lines.length<2)throw new Error('empty CSV');
+      const headers=lines[0].split(',').map(x=>x.trim().toLowerCase()),vals=lines[1].split(',').map(x=>x.trim());
+      const row=Object.fromEntries(headers.map((h,i)=>[h,vals[i]]));
+      const last=inRange(row.close,range),open=inRange(row.open,range);if(last==null)throw new Error('missing close');
+      const change=open!=null?last-open:null,pct=open?change/open*100:null;
+      return {label,symbol,last,previousClose:null,change,pct,timestamp:row.date&&row.time?`${row.date}T${row.time}Z`:row.date?`${row.date}T00:00:00Z`:new Date().toISOString(),source:'Stooq public quote',mode:'DELAYED',changeBasis:'session open'};
+    }catch(e){console.warn('Stooq commodity quote failed',label,symbol,e.message)}
+  }
+  return {label,symbol:symbols[0],last:null,previousClose:null,change:null,pct:null,timestamp:null,source:'Stooq public quote',mode:'UNAVAILABLE'};
+}
+
 async function fredLatest(series,label,range){
   try{
-    const csv=await fetchText(`https://fred.stlouisfed.org/graph/fredgraph.csv?id=${series}`);
+    const csv=await fetchText(`https://fred.stlouisfed.org/graph/fredgraph.csv?id=${series}`,{timeout:12000});
     const rows=csv.trim().split(/\r?\n/).slice(1).map(line=>line.split(',')).filter(x=>x.length>=2&&x[1]!=='.');
     const validRows=rows.map(([date,value])=>({date,value:inRange(value,range)})).filter(x=>x.value!=null);
     const a=validRows.at(-1),b=validRows.at(-2);if(!a)throw new Error('missing FRED observation');
@@ -29,11 +45,13 @@ async function fredLatest(series,label,range){
   }catch(e){console.warn('FRED commodity spot failed',label,series,e.message);return {label,series,last:null,previousClose:null,change:null,pct:null,timestamp:null,source:'FRED / EIA daily spot',mode:'UNAVAILABLE'}}
 }
 
+async function oilSpot(stooqSymbols,fredSeries,label){const s=await stooqQuote(stooqSymbols,[5,300],label);if(s.last!=null)return s;return await fredLatest(fredSeries,label,[5,300])}
+
 const [goldSpot,silverSpot,wtiSpot,brentSpot,goldFuture,silverFuture,wtiFuture,brentFuture]=await Promise.all([
-  yahooChart('XAUUSD=X',[100,10000],'Gold spot XAU/USD'),
-  yahooChart('XAGUSD=X',[1,300],'Silver spot XAG/USD'),
-  fredLatest('DCOILWTICO','WTI Cushing spot',[5,300]),
-  fredLatest('DCOILBRENTEU','Brent Europe spot',[5,300]),
+  stooqQuote(['xauusd'],[100,10000],'Gold spot XAU/USD'),
+  stooqQuote(['xagusd'],[1,300],'Silver spot XAG/USD'),
+  oilSpot(['cl.c','wti'],'DCOILWTICO','WTI Cushing spot'),
+  oilSpot(['brent.c','brn.c','brent'],'DCOILBRENTEU','Brent Europe spot'),
   yahooChart('MGC=F',[100,10000],'COMEX Micro Gold futures'),
   yahooChart('SI=F',[1,300],'COMEX Silver futures'),
   yahooChart('MCL=F',[5,300],'NYMEX Micro WTI futures'),
@@ -46,7 +64,7 @@ const commodities={
   WTI:{id:'WTI',name:'WTI 原油',spot:wtiSpot,future:wtiFuture,futureCode:'MCL'},
   BRENT:{id:'BRENT',name:'Brent 原油',spot:brentSpot,future:brentFuture,futureCode:'BRN'}
 };
-const out={meta:{source:'Yahoo Finance + FRED/EIA',mode:'MIXED DELAYED/DAILY',realtime:false,generatedAt:new Date().toISOString(),note:'Gold and silver spot plus commodity futures use public Yahoo delayed/web data when available. WTI and Brent spot use FRED/EIA daily spot series. Missing quotes remain null; no synthetic values are created.'},commodities};
+const out={meta:{source:'Stooq + FRED/EIA + Yahoo Finance',mode:'MIXED DELAYED/DAILY',realtime:false,generatedAt:new Date().toISOString(),note:'Gold and silver spot use Stooq public quotes. Oil spot first tries public Stooq cash symbols and falls back to FRED/EIA daily spot observations. Futures use Yahoo public delayed/web data. Missing quotes remain null; no synthetic values are created.'},commodities};
 await fs.mkdir('data',{recursive:true});
 await fs.writeFile('data/commodities-latest.json',JSON.stringify(out,null,2)+'\n');
 console.log('Wrote data/commodities-latest.json');
