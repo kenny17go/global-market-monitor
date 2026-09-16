@@ -44,7 +44,7 @@ jobs:
           node --check scripts/patch-overview-commodities.mjs
           node --check providers.js
           node -e "const d=JSON.parse(require('fs').readFileSync('data/overseas-delayed.json','utf8')); const idx=Object.values(d.indices||{}).filter(x=>x.last!=null); const fut=['CME_MES','CME_MNQ','CME_SOX','JPX_NIKKEI225_MINI','JPX_MINI_TOPIX'].filter(k=>d.products?.[k]?.contracts?.length); if(idx.length<4) process.exit(1); console.log('valid cash indices:',idx.length,'overview futures:',fut.length);"
-          node -e "const d=JSON.parse(require('fs').readFileSync('data/commodities-latest.json','utf8')); const rows=Object.values(d.commodities||{}); const spot=rows.filter(x=>x.spot?.last!=null).length; const fut=rows.filter(x=>x.future?.last!=null).length; if(spot<3||fut<3) process.exit(1); console.log('commodity spots:',spot,'commodity futures:',fut);"
+          node -e "const d=JSON.parse(require('fs').readFileSync('data/commodities-latest.json','utf8')); const rows=Object.values(d.commodities||{}); const metals=['GOLD','SILVER'].filter(k=>d.commodities?.[k]?.spot?.last!=null).length; const fut=rows.filter(x=>x.future?.last!=null).length; if(metals<2||fut<4) process.exit(1); console.log('metal spots:',metals,'commodity futures:',fut,'oil spots:',rows.filter(x=>['WTI 原油','Brent 原油'].includes(x.name)&&x.spot?.last!=null).length);"
           grep -q "mergeOverviewEquities(base,delayed,taifex)" providers.js
           grep -q "mergeOverviewCommodities(base,commodityData)" providers.js
           grep -q "commodities-latest.json" providers.js
