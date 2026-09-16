@@ -18,6 +18,7 @@ on:
       - 'scripts/patch-overview-equities.mjs'
       - 'scripts/patch-overview-commodities.mjs'
       - 'scripts/patch-overview-rates.mjs'
+      - 'scripts/patch-ust-yield-panel.mjs'
       - 'scripts/fix-usdtwd-toggle.mjs'
       - 'scripts/patch-fx-v11.mjs'
       - '.github/workflows/update-usdtwd-fx.yml'
@@ -67,6 +68,8 @@ jobs:
         run: node scripts/patch-overview-commodities.mjs
       - name: Restore overview rates market bridge
         run: node scripts/patch-overview-rates.mjs
+      - name: Restore UST yield chart and tenor table
+        run: node scripts/patch-ust-yield-panel.mjs
       - name: Install USD TWD toggle binding
         run: node scripts/fix-usdtwd-toggle.mjs
       - name: Apply FX V1.1 labels
@@ -87,6 +90,7 @@ jobs:
           node --check scripts/patch-overview-equities.mjs
           node --check scripts/patch-overview-commodities.mjs
           node --check scripts/patch-overview-rates.mjs
+          node --check scripts/patch-ust-yield-panel.mjs
           grep -q "function syncUsdtwdVisibility" app.js
           grep -q "function renderTaifexSettlementNdf" app.js
           grep -q "TAIFEX settlement NDF render failed" app.js
@@ -106,6 +110,9 @@ jobs:
           grep -q "DOMContentLoaded',syncUsdtwdVisibility" app.js
           grep -q "toggleUsdtwdFx" index.html
           grep -q "usdtwdFxPanel" index.html
+          grep -q "ustYieldValues" index.html
+          grep -q "ustYieldTenors" app.js
+          grep -q "ust-yield-panel" styles.css
           grep -q "mergeMajorFx(base,majorFx)" providers.js
           grep -q "mergeOverviewEquities(base,delayed,taifex)" providers.js
           grep -q "mergeOverviewCommodities(base,commodityData)" providers.js
