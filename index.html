@@ -1,10 +1,10 @@
 <!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#071422"><title>Global Market Monitor</title><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="v1.4.css"><link rel="stylesheet" href="v1.5.css"><link rel="stylesheet" href="v1.6.css"></head><body>
 <div class="app">
   <aside class="sidebar"><div class="brand">Global Market Monitor<small>Markets in One View</small></div><div class="nav">
-    <button class="active" data-view="dashboard">⌂ 首頁 Dashboard</button><button data-view="spread">⇄ 價差比較 Spread</button><button>◉ 外匯 FX</button><button>▥ 股市 Equity</button><button>◫ 商品 Commodities</button><button>≋ 利率 Rates</button><button>▦ 經濟數據 Macro</button><button>☆ 自選 Watchlist</button><button>♢ 我的警示 Alerts</button><div class="spacer"></div><button data-view="connections">⚙ 行情連線 Connections</button><button>ⓘ 關於 About</button>
+    <button class="active" data-view="dashboard">⌂ 首頁 Dashboard</button><button data-view="spread">⇄ 價差比較 Spread</button><button data-view="indicators">◆ 自訂指標 Indicators</button><button>◉ 外匯 FX</button><button>▥ 股市 Equity</button><button>◫ 商品 Commodities</button><button>≋ 利率 Rates</button><button>▦ 經濟數據 Macro</button><button>☆ 自選 Watchlist</button><button>♢ 我的警示 Alerts</button><div class="spacer"></div><button data-view="connections">⚙ 行情連線 Connections</button><button>ⓘ 關於 About</button>
   </div></aside>
   <main class="main">
-    <header class="topbar"><div class="tabs"><span class="active" data-view="dashboard">總覽</span><span data-view="spread">價差比較</span><span data-view="connections">行情連線</span><span>外匯</span><span>股市</span><span>商品</span><span>利率</span><span>經濟數據</span><span>我的監控</span></div><div class="status"><span id="asof">—</span><span><i class="dot"></i><span id="feedStatus">資料更新中</span></span></div></header>
+    <header class="topbar"><div class="tabs"><span class="active" data-view="dashboard">總覽</span><span data-view="spread">價差比較</span><span data-view="indicators">自訂指標</span><span data-view="connections">行情連線</span><span>外匯</span><span>股市</span><span>商品</span><span>利率</span><span>經濟數據</span><span>我的監控</span></div><div class="status"><span id="asof">—</span><span><i class="dot"></i><span id="feedStatus">資料更新中</span></span></div></header>
     <div class="content">
       <section id="dashboardView" class="view active">
         <section class="top-market-section">
@@ -114,7 +114,24 @@
       </section>
 
 
-      <section id="connectionsView" class="view">
+      
+      <section id="indicatorsView" class="view">
+        <section class="indicator-dashboard-hero panel">
+          <div><h2>自訂指標 Dashboard</h2><p>集中查看所有自設公式的即時計算值、門檻監控與通知狀態。指標公式仍在「價差比較 → Formula Lab」建立與修改。</p></div>
+          <button id="goFormulaLab" class="secondary-btn">＋ 建立 / 編輯指標</button>
+        </section>
+        <section id="indicatorDashboardSummary" class="spread-kpis"></section>
+        <section class="panel">
+          <div class="formula-lab-head"><div><h3>我的指標 / My Indicators</h3><p>數值會隨行情更新重新計算；監控條件以重新穿越門檻時觸發。</p></div><button id="indicatorDashboardNotify" class="secondary-btn">啟用通知</button></div>
+          <div id="indicatorDashboardGrid" class="indicator-dashboard-grid"></div>
+        </section>
+        <section class="panel">
+          <div class="formula-lab-head"><div><h3>監控條件 / Alert Rules</h3><p>查看每一個新指標目前的門檻、現值與觸發狀態。</p></div></div>
+          <div id="indicatorDashboardAlerts" class="indicator-dashboard-alerts"></div>
+        </section>
+      </section>
+
+<section id="connectionsView" class="view">
         <section class="connections-hero panel">
           <div><h2>行情連線 / Market Data Connections</h2><p>預設使用免費延遲或官方資料；有券商或行情帳號時，可透過自己的 Local Bridge / Private Gateway 切換至 LIVE。GitHub Pages 不儲存券商帳號、密碼、API Secret 或憑證。</p></div>
           <div class="connection-mode-box"><label><input id="preferLive" type="checkbox"> 優先使用 LIVE，失敗自動回退 DELAYED</label><span id="activeConnectionStatus" class="connection-status">免費模式</span></div>
@@ -130,7 +147,7 @@
         </article>
       </section>
 
-      <footer class="footer"><span>Global Market Monitor v1.6 · Single app.js?v=20260916-indicator1"tag">Provider 可替換</span></span><span>僅供資訊參考，不構成投資建議</span></footer>
+      <footer class="footer"><span>Global Market Monitor v1.6 · Single app.js?v=20260916-indicator-dashboard1"tag">Provider 可替換</span></span><span>僅供資訊參考，不構成投資建議</span></footer>
     </div>
   </main>
 </div>
