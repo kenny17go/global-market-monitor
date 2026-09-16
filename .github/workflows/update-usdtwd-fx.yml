@@ -5,6 +5,7 @@ on:
   push:
     paths:
       - 'scripts/fetch-usdtwd-fx.mjs'
+      - 'scripts/apply-bot-onshore-fallback.mjs'
       - 'scripts/apply-fx-v1.mjs'
       - 'scripts/fix-usdtwd-toggle.mjs'
       - 'scripts/patch-fx-v11.mjs'
@@ -29,6 +30,8 @@ jobs:
           node-version: '22'
       - name: Fetch USD TWD spot and curves
         run: node scripts/fetch-usdtwd-fx.mjs
+      - name: Apply BOT plain-text onshore fallback
+        run: node scripts/apply-bot-onshore-fallback.mjs
       - name: Apply USD TWD panel
         run: node scripts/apply-fx-v1.mjs
       - name: Install USD TWD toggle binding
@@ -37,7 +40,7 @@ jobs:
         run: node scripts/patch-fx-v11.mjs
       - name: Validate
         run: |
-          node -e "JSON.parse(require('fs').readFileSync('data/usdtwd-fx.json','utf8'))"
+          node -e "const d=JSON.parse(require('fs').readFileSync('data/usdtwd-fx.json','utf8')); if(!d.onshore||!d.onshore.curve) process.exit(1);"
           node --check app.js
           grep -q "function syncUsdtwdVisibility" app.js
           grep -q "DOMContentLoaded',syncUsdtwdVisibility" app.js
