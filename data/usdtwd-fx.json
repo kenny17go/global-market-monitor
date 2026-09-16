@@ -1,17 +1,17 @@
 {
   "meta": {
-    "generatedAt": "2026-09-16T03:09:58.363Z",
+    "generatedAt": "2026-09-16T03:27:00.904Z",
     "realtime": false,
     "spotValidated": true,
     "sourcePolicy": "Offshore = NetDania 1W/1M/3M/6M/1Y. Onshore = Investing.com; fallback whole curve to Cbonds Taipei daily close when Investing is unavailable.",
     "note": "Cbonds values are outright daily benchmarks, never treated as forward points. Spread is shown only where both selected sources provide comparable values."
   },
   "spot": {
-    "bid": 31.812,
-    "ask": 31.912,
-    "mid": 31.862000000000002,
-    "time": "15-September-26 20:07:59",
-    "raw": "USD/TWD 31.8120/9120",
+    "bid": 31.805,
+    "ask": 31.905,
+    "mid": 31.855,
+    "time": "15-September-26 22:26:57",
+    "raw": "USD/TWD 31.8050/9050",
     "source": "NetDania",
     "mode": "WEB QUOTE"
   },
@@ -30,47 +30,47 @@
     "quoteType": "FORWARD POINTS",
     "curve": {
       "1W": {
-        "bid": 0.04,
+        "bid": -0.04,
         "ask": 0,
-        "mid": 0.02,
-        "outrightBid": 31.852,
-        "outrightAsk": 31.912,
-        "outrightMid": 31.882
+        "mid": -0.02,
+        "outrightBid": 31.765,
+        "outrightAsk": 31.905,
+        "outrightMid": 31.835
       },
       "1M": {
-        "bid": 0.04,
+        "bid": -0.04,
         "ask": -0.02,
-        "mid": 0.01,
-        "outrightBid": 31.852,
-        "outrightAsk": 31.892,
-        "outrightMid": 31.872000000000003
+        "mid": -0.03,
+        "outrightBid": 31.765,
+        "outrightAsk": 31.885,
+        "outrightMid": 31.825
       },
       "3M": {
         "bid": 0.01,
-        "ask": 0.04,
-        "mid": 0.025,
-        "outrightBid": 31.822000000000003,
-        "outrightAsk": 31.951999999999998,
-        "outrightMid": 31.887
+        "ask": -0.07,
+        "mid": -0.030000000000000002,
+        "outrightBid": 31.815,
+        "outrightAsk": 31.835,
+        "outrightMid": 31.825
       },
       "6M": {
-        "bid": -0.05,
-        "ask": -0.03,
-        "mid": -0.04,
-        "outrightBid": 31.762,
-        "outrightAsk": 31.881999999999998,
-        "outrightMid": 31.822000000000003
+        "bid": -0.06,
+        "ask": -0.04,
+        "mid": -0.05,
+        "outrightBid": 31.745,
+        "outrightAsk": 31.865000000000002,
+        "outrightMid": 31.805
       },
       "1Y": {
         "bid": -0.27,
-        "ask": -0.2,
-        "mid": -0.23500000000000001,
-        "outrightBid": 31.542,
-        "outrightAsk": 31.712,
-        "outrightMid": 31.627000000000002
+        "ask": -0.21,
+        "mid": -0.24,
+        "outrightBid": 31.535,
+        "outrightAsk": 31.695,
+        "outrightMid": 31.615000000000002
       }
     },
-    "rawRow": "USD/TWD 0.04 0.00 0.04 -0.02 0.01 0.04 -0.05 -0.03 -0.27 -0.20"
+    "rawRow": "USD/TWD -0.04 0.00 -0.04 -0.02 0.01 -0.07 -0.06 -0.04 -0.27 -0.21"
   },
   "spread": {
     "1W": {
