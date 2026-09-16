@@ -3,7 +3,7 @@
     "source": "Stooq + FRED/EIA + Yahoo Finance",
     "mode": "MIXED DELAYED/DAILY",
     "realtime": false,
-    "generatedAt": "2026-09-16T14:51:16.761Z",
+    "generatedAt": "2026-09-16T15:03:27.905Z",
     "note": "Gold/silver and selected cash references use Stooq public quotes when available. Oil and natural-gas spot can fall back to FRED/EIA daily observations. Futures use Yahoo public delayed/web data. Copper spot is left unavailable if no comparable public cash quote is found; no futures quote is relabeled as spot and no synthetic values are created."
   },
   "commodities": {
@@ -24,11 +24,11 @@
       "future": {
         "label": "COMEX Micro Gold futures",
         "symbol": "MGC=F",
-        "last": 4385.3,
+        "last": 4393.4,
         "previousClose": 4332.8,
-        "change": 52.5,
-        "pct": 1.2116875923190547,
-        "timestamp": "2026-09-16T14:41:03.000Z",
+        "change": 60.599999999999454,
+        "pct": 1.3986336779911246,
+        "timestamp": "2026-09-16T14:53:13.000Z",
         "source": "Yahoo Finance",
         "mode": "DELAYED"
       },
@@ -51,11 +51,11 @@
       "future": {
         "label": "COMEX Silver futures",
         "symbol": "SI=F",
-        "last": 64.915,
+        "last": 65.065,
         "previousClose": 63.856,
-        "change": 1.0590000000000046,
-        "pct": 1.6584189426209044,
-        "timestamp": "2026-09-16T14:41:03.000Z",
+        "change": 1.208999999999996,
+        "pct": 1.8933224755700264,
+        "timestamp": "2026-09-16T14:53:09.000Z",
         "source": "Yahoo Finance",
         "mode": "DELAYED"
       },
@@ -78,11 +78,11 @@
       "future": {
         "label": "NYMEX Micro WTI futures",
         "symbol": "MCL=F",
-        "last": 102.98,
+        "last": 102.85,
         "previousClose": 105.83,
-        "change": -2.8499999999999943,
-        "pct": -2.6929982046678584,
-        "timestamp": "2026-09-16T14:41:03.000Z",
+        "change": -2.980000000000004,
+        "pct": -2.8158367192667524,
+        "timestamp": "2026-09-16T14:53:14.000Z",
         "source": "Yahoo Finance",
         "mode": "DELAYED"
       },
@@ -105,11 +105,11 @@
       "future": {
         "label": "Brent futures benchmark",
         "symbol": "BZ=F",
-        "last": 106.65,
+        "last": 106.21,
         "previousClose": 108.75,
-        "change": -2.0999999999999943,
-        "pct": -1.9310344827586157,
-        "timestamp": "2026-09-16T14:41:03.000Z",
+        "change": -2.5400000000000063,
+        "pct": -2.335632183908052,
+        "timestamp": "2026-09-16T14:53:11.000Z",
         "source": "Yahoo Finance",
         "mode": "DELAYED"
       },
@@ -132,11 +132,11 @@
       "future": {
         "label": "COMEX Copper futures",
         "symbol": "HG=F",
-        "last": 6.5015,
+        "last": 6.504,
         "previousClose": 6.4435,
-        "change": 0.05799999999999983,
-        "pct": 0.9001319158842218,
-        "timestamp": "2026-09-16T14:40:50.000Z",
+        "change": 0.06049999999999933,
+        "pct": 0.9389307053619823,
+        "timestamp": "2026-09-16T14:53:02.000Z",
         "source": "Yahoo Finance",
         "mode": "DELAYED"
       },
@@ -159,11 +159,11 @@
       "future": {
         "label": "NYMEX Natural Gas futures",
         "symbol": "NG=F",
-        "last": 2.919,
+        "last": 2.916,
         "previousClose": 2.919,
-        "change": 0,
-        "pct": 0,
-        "timestamp": "2026-09-16T14:41:00.000Z",
+        "change": -0.0030000000000001137,
+        "pct": -0.1027749229188117,
+        "timestamp": "2026-09-16T14:53:13.000Z",
         "source": "Yahoo Finance",
         "mode": "DELAYED"
       },
