@@ -56,12 +56,10 @@ async function yahooIndexQuote(id,symbol,label,range){
     const change=prev!=null?last-prev:null,pct=prev?change/prev*100:null;
     const ts=Array.isArray(r?.timestamp)?r.timestamp:[];
     const close=Array.isArray(r?.indicators?.quote?.[0]?.close)?r.indicators.quote[0].close:[];
-    const regular=m?.currentTradingPeriod?.regular||null;
     const points=[];
     for(let i=0;i<Math.min(ts.length,close.length);i++){
       const t=Number(ts[i]),v=valid(close[i],range);
       if(!Number.isFinite(t)||v==null)continue;
-      if(regular?.start&&regular?.end&&(t<regular.start||t>regular.end))continue;
       points.push({t,v});
     }
     return {
@@ -70,11 +68,11 @@ async function yahooIndexQuote(id,symbol,label,range){
       source:'Yahoo Finance',mode:'DELAYED',
       series:points.map(x=>x.v),
       seriesTimes:points.map(x=>new Date(x.t*1000).toISOString()),
-      seriesMeta:{range:'1D',interval:'5m',session:'REGULAR',source:'Yahoo Finance',mode:'DELAYED',timezone:m?.exchangeTimezoneName||null,points:points.length}
+      seriesMeta:{range:'1D',interval:'5m',session:'LATEST_SESSION',source:'Yahoo Finance',mode:'DELAYED',timezone:m?.exchangeTimezoneName||null,points:points.length}
     };
   }catch(e){
     console.warn('Yahoo index failed',id,symbol,e.message);
-    return {id,symbol,label,last:null,previousClose:null,change:null,pct:null,timestamp:null,source:'Yahoo Finance',mode:'UNAVAILABLE',series:[],seriesTimes:[],seriesMeta:{range:'1D',interval:'5m',session:'REGULAR',source:'Yahoo Finance',mode:'UNAVAILABLE',points:0}};
+    return {id,symbol,label,last:null,previousClose:null,change:null,pct:null,timestamp:null,source:'Yahoo Finance',mode:'UNAVAILABLE',series:[],seriesTimes:[],seriesMeta:{range:'1D',interval:'5m',session:'LATEST_SESSION',source:'Yahoo Finance',mode:'UNAVAILABLE',points:0}};
   }
 }
 
