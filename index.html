@@ -82,6 +82,7 @@
         <section class="formula-lab panel">
           <div class="formula-lab-head"><div><h3>自訂比較公式 / Formula Lab</h3><p>任意插入商品欄位與運算符號。支援 + − × ÷、括號與 &gt; &lt; &gt;= &lt;= ==。公式只使用你選的原始行情，不預設比較邏輯。</p></div><button id="clearFormula" class="secondary-btn">清除</button></div>
           <div class="formula-tools">
+            <select id="tokenCategory" aria-label="產品類別"><option value="all">全部產品</option><option value="台灣指數">台灣指數</option><option value="股價指數">股價指數</option><option value="匯率">匯率</option><option value="貴金屬">貴金屬</option><option value="能源">能源</option><option value="結算日NDF">結算日 NDF</option></select>
             <select id="tokenSelect"><option value="">選擇報價欄位…</option></select><button id="insertToken">插入欄位</button>
             <button data-op=" + ">＋</button><button data-op=" - ">−</button><button data-op=" * ">×</button><button data-op=" / ">÷</button><button data-op="(">(</button><button data-op=")">)</button>
             <button data-op=" > ">&gt;</button><button data-op=" < ">&lt;</button><button data-op=" >= ">&gt;=</button><button data-op=" <= ">&lt;=</button>
@@ -116,7 +117,7 @@
         </article>
       </section>
 
-      <footer class="footer"><span>Global Market Monitor v1.6 · Single app.js?v=20260916-ndf4"tag">Provider 可替換</span></span><span>僅供資訊參考，不構成投資建議</span></footer>
+      <footer class="footer"><span>Global Market Monitor v1.6 · Single app.js?v=20260916-formula-cat1"tag">Provider 可替換</span></span><span>僅供資訊參考，不構成投資建議</span></footer>
     </div>
   </main>
 </div>
