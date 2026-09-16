@@ -1,0 +1,45 @@
+name: Update overview FX quotes
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'scripts/fetch-major-fx.mjs'
+      - 'providers.js'
+      - '.github/workflows/update-major-fx.yml'
+  schedule:
+    - cron: '*/5 * * * 1-5'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-major-fx
+  cancel-in-progress: true
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Fetch major FX quotes
+        run: node scripts/fetch-major-fx.mjs
+      - name: Validate FX data
+        run: |
+          node --check scripts/fetch-major-fx.mjs
+          node --check providers.js
+          node -e "const d=JSON.parse(require('fs').readFileSync('data/fx-latest.json','utf8')); const ok=d.quotes.filter(x=>x.bid!=null&&x.ask!=null); if(ok.length<5) process.exit(1); console.log('valid FX pairs:',ok.length);"
+      - name: Commit FX quotes
+        run: |
+          git add data/fx-latest.json
+          if git diff --cached --quiet; then
+            echo "No FX quote changes"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "data: refresh overview FX quotes"
+          git push
