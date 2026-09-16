@@ -3,7 +3,7 @@ import fs from 'node:fs/promises';
 let p=await fs.readFile('providers.js','utf8');
 let app=await fs.readFile('app.js','utf8');
 
-const mergeFn="function mergeMajorFx(data,fx){if(!Array.isArray(data?.fx)||!Array.isArray(fx?.quotes))return data;data.fxMeta=fx.meta||null;for(const q of fx.quotes){const row=data.fx.find(x=>x.pair===q.pair);if(!row)continue;if(q.bid!=null&&q.ask!=null){row.bid=q.bid;row.ask=q.ask;row.change=q.change??null;row.pct=q.pct??null;row.source=q.source||fx.meta?.source||'FX web quote';row.quoteMode=q.mode||fx.meta?.quoteMode||'PUBLIC WEB QUOTE';row.quoteTime=q.time||fx.meta?.generatedAt||null}row.p1m=q.p1m??'—';row.p3m=q.p3m??'—';row.p6m=q.p6m??'—';row.p1y=q.p1y??'—';row.forwardSource=q.forwardSource||fx.meta?.forwardSource||null;row.forwardMode=q.forwardMode||null;row.forwards=q.forwards||{}}return data}";
+const mergeFn="function mergeMajorFx(data,fx){if(!Array.isArray(data?.fx)||!Array.isArray(fx?.quotes))return data;data.fxMeta=fx.meta||null;data.series=data.series||{};data.seriesTimes=data.seriesTimes||{};data.seriesMeta=data.seriesMeta||{};const topId={'EUR/USD':'EURUSD','USD/JPY':'USDJPY'};for(const q of fx.quotes){const row=data.fx.find(x=>x.pair===q.pair);if(!row)continue;if(q.bid!=null&&q.ask!=null){row.bid=q.bid;row.ask=q.ask;row.change=q.change??null;row.pct=q.pct??null;row.source=q.source||fx.meta?.source||'FX web quote';row.quoteMode=q.mode||fx.meta?.quoteMode||'PUBLIC WEB QUOTE';row.quoteTime=q.time||fx.meta?.generatedAt||null}row.p1m=q.p1m??'—';row.p3m=q.p3m??'—';row.p6m=q.p6m??'—';row.p1y=q.p1y??'—';row.forwardSource=q.forwardSource||fx.meta?.forwardSource||null;row.forwardMode=q.forwardMode||null;row.forwards=q.forwards||{};const id=topId[q.pair];if(id&&Array.isArray(q.series)&&q.series.length>=2){data.series[id]=q.series;data.seriesTimes[id]=Array.isArray(q.seriesTimes)?q.seriesTimes:[];data.seriesMeta[id]=q.seriesMeta||{range:'1D',interval:'5m',source:'Yahoo Finance',mode:'DELAYED',points:q.series.length};const top=Array.isArray(data.top)?data.top.find(x=>x.id===id):null;if(top){top.value=q.bid??top.value;top.change=q.change??top.change;top.pct=q.pct??top.pct}}}return data}";
 const twdFn="function mergeUsdtwd(data,fx){const s=fx?.spot;if(!data?.twd||!s||s.bid==null||s.ask==null)return data;data.twd.spotBid=s.bid;data.twd.spotAsk=s.ask;const top=Array.isArray(data.top)?data.top.find(x=>x.id==='USDTWD'):null;if(top)top.value=s.mid??((s.bid+s.ask)/2);return data}";
 
 if(/function mergeMajorFx\([^]*?return data\}/.test(p))p=p.replace(/function mergeMajorFx\([^]*?return data\}/,mergeFn);
@@ -20,8 +20,8 @@ const fmtPoints="<td>${fxPoint2(x.p1m)}</td><td>${fxPoint2(x.p3m)}</td><td>${fxP
 if(app.includes(rawPoints))app=app.replace(rawPoints,fmtPoints);
 
 if(!p.includes("fetchJson('./data/fx-latest.json',false)"))throw new Error('major FX fetch patch failed');
-if(!p.includes('mergeMajorFx(base,majorFx)'))throw new Error('major FX merge patch failed');
+if(!p.includes('data.seriesMeta[id]'))throw new Error('major FX intraday merge patch failed');
 if(!app.includes('fxPoint2(x.p1m)'))throw new Error('overview FX 2-decimal formatter patch failed');
 await fs.writeFile('providers.js',p);
 await fs.writeFile('app.js',app);
-console.log('Overview major FX spot + forward bridge installed; swap points formatted to 2 decimals.');
+console.log('Overview major FX spot + forward + real 1D/5m card series bridge installed.');
