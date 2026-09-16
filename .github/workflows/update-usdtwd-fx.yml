@@ -7,7 +7,7 @@ on:
       - 'scripts/fetch-usdtwd-fx.mjs'
       - 'scripts/apply-bot-onshore-fallback.mjs'
       - 'scripts/apply-fx-v1.mjs'
-      - 'scripts/patch-broken-date-forward.mjs'
+      - 'scripts/patch-taifex-settlement-ndf.mjs'
       - 'scripts/fix-usdtwd-toggle.mjs'
       - 'scripts/patch-fx-v11.mjs'
       - '.github/workflows/update-usdtwd-fx.yml'
@@ -35,19 +35,20 @@ jobs:
         run: node scripts/apply-bot-onshore-fallback.mjs
       - name: Apply USD TWD panel
         run: node scripts/apply-fx-v1.mjs
-      - name: Install broken-date forward calculator
-        run: node scripts/patch-broken-date-forward.mjs
+      - name: Install TAIFEX settlement NDF panel
+        run: node scripts/patch-taifex-settlement-ndf.mjs
       - name: Install USD TWD toggle binding
         run: node scripts/fix-usdtwd-toggle.mjs
       - name: Apply FX V1.1 labels
         run: node scripts/patch-fx-v11.mjs
       - name: Validate
         run: |
-          node -e "const d=JSON.parse(require('fs').readFileSync('data/usdtwd-fx.json','utf8')); if(!d.onshore||!d.onshore.curve) process.exit(1);"
+          node -e "const d=JSON.parse(require('fs').readFileSync('data/usdtwd-fx.json','utf8')); if(!d.offshore||!d.offshore.curve) process.exit(1);"
           node --check app.js
+          node --check scripts/patch-taifex-settlement-ndf.mjs
           grep -q "function syncUsdtwdVisibility" app.js
-          grep -q "function brokenDateInterpolate" app.js
-          grep -q "brokenDateForward" index.html
+          grep -q "function renderTaifexSettlementNdf" app.js
+          grep -q "taifexSettlementNdf" index.html
           grep -q "DOMContentLoaded',syncUsdtwdVisibility" app.js
           grep -q "toggleUsdtwdFx" index.html
           grep -q "usdtwdFxPanel" index.html
@@ -60,5 +61,5 @@ jobs:
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "data: refresh USD TWD FX curves and panel"
+          git commit -m "data: refresh USD TWD FX curves and settlement NDF panel"
           git push
