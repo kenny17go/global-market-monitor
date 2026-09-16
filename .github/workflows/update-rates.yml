@@ -6,6 +6,7 @@ on:
     paths:
       - 'scripts/fetch-overview-rates.mjs'
       - 'scripts/patch-overview-rates.mjs'
+      - 'scripts/patch-ust-yield-panel.mjs'
       - '.github/workflows/update-rates.yml'
   schedule:
     - cron: '15 22 * * 1-5'
@@ -29,22 +30,31 @@ jobs:
         run: node scripts/fetch-overview-rates.mjs
       - name: Install overview rates bridge
         run: node scripts/patch-overview-rates.mjs
-      - name: Validate rates data
+      - name: Install UST curve axes and tenor table
+        run: node scripts/patch-ust-yield-panel.mjs
+      - name: Validate rates data and UI
         run: |
           node --check scripts/fetch-overview-rates.mjs
           node --check scripts/patch-overview-rates.mjs
+          node --check scripts/patch-ust-yield-panel.mjs
           node --check providers.js
+          node --check app.js
           node -e "const d=JSON.parse(require('fs').readFileSync('data/rates-latest.json','utf8')); const need=['1M','3M','6M','1Y','2Y','5Y','10Y','30Y']; const ok=need.filter(t=>d.ust?.find(x=>x.tenor===t&&x.yield!=null)); if(ok.length<8) process.exit(1); console.log('UST tenors:',ok.length,'asOf:',d.meta?.asOf);"
           grep -q "mergeOverviewRates(base,ratesData)" providers.js
           grep -q "rates-latest.json" providers.js
-      - name: Commit rates data
+          grep -q "ustYieldValues" index.html
+          grep -q "ustSpread102" index.html
+          grep -q "ustYieldTenors" app.js
+          grep -q "ratesOverviewMeta" app.js
+          grep -q "ust-yield-panel" styles.css
+      - name: Commit rates data and UI
         run: |
-          git add data/rates-latest.json providers.js
+          git add data/rates-latest.json providers.js index.html app.js styles.css
           if git diff --cached --quiet; then
             echo "No rates changes"
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "data: refresh official US Treasury yield curve"
+          git commit -m "feat: refresh UST curve with axes and tenor table"
           git push
