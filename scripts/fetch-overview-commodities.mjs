@@ -45,26 +45,32 @@ async function fredLatest(series,label,range){
   }catch(e){console.warn('FRED commodity spot failed',label,series,e.message);return {label,series,last:null,previousClose:null,change:null,pct:null,timestamp:null,source:'FRED / EIA daily spot',mode:'UNAVAILABLE'}}
 }
 
-async function oilSpot(stooqSymbols,fredSeries,label){const s=await stooqQuote(stooqSymbols,[5,300],label);if(s.last!=null)return s;return await fredLatest(fredSeries,label,[5,300])}
+async function fallbackSpot(stooqSymbols,fredSeries,label,range){const s=await stooqQuote(stooqSymbols,range,label);if(s.last!=null)return s;return fredSeries?await fredLatest(fredSeries,label,range):s}
 
-const [goldSpot,silverSpot,wtiSpot,brentSpot,goldFuture,silverFuture,wtiFuture,brentFuture]=await Promise.all([
+const [goldSpot,silverSpot,wtiSpot,brentSpot,copperSpot,gasSpot,goldFuture,silverFuture,wtiFuture,brentFuture,copperFuture,gasFuture]=await Promise.all([
   stooqQuote(['xauusd'],[100,10000],'Gold spot XAU/USD'),
   stooqQuote(['xagusd'],[1,300],'Silver spot XAG/USD'),
-  oilSpot(['cl.c','wti'],'DCOILWTICO','WTI Cushing spot'),
-  oilSpot(['brent.c','brn.c','brent'],'DCOILBRENTEU','Brent Europe spot'),
+  fallbackSpot(['cl.c','wti'],'DCOILWTICO','WTI Cushing spot',[5,300]),
+  fallbackSpot(['brent.c','brn.c','brent'],'DCOILBRENTEU','Brent Europe spot',[5,300]),
+  fallbackSpot(['copper','copper.usd'],null,'Copper spot reference',[1,20]),
+  fallbackSpot(['naturalgas','natgas'], 'DHHNGSP','Henry Hub natural gas spot',[0.5,30]),
   yahooChart('MGC=F',[100,10000],'COMEX Micro Gold futures'),
   yahooChart('SI=F',[1,300],'COMEX Silver futures'),
   yahooChart('MCL=F',[5,300],'NYMEX Micro WTI futures'),
-  yahooChart('BZ=F',[5,300],'Brent futures benchmark')
+  yahooChart('BZ=F',[5,300],'Brent futures benchmark'),
+  yahooChart('HG=F',[1,20],'COMEX Copper futures'),
+  yahooChart('NG=F',[0.5,30],'NYMEX Natural Gas futures')
 ]);
 
 const commodities={
   GOLD:{id:'GOLD',name:'黃金',spot:goldSpot,future:goldFuture,futureCode:'MGC'},
   SILVER:{id:'SILVER',name:'白銀',spot:silverSpot,future:silverFuture,futureCode:'SI'},
   WTI:{id:'WTI',name:'WTI 原油',spot:wtiSpot,future:wtiFuture,futureCode:'MCL'},
-  BRENT:{id:'BRENT',name:'Brent 原油',spot:brentSpot,future:brentFuture,futureCode:'BRN'}
+  BRENT:{id:'BRENT',name:'Brent 原油',spot:brentSpot,future:brentFuture,futureCode:'BRN'},
+  COPPER:{id:'COPPER',name:'銅',spot:copperSpot,future:copperFuture,futureCode:'HG'},
+  NATGAS:{id:'NATGAS',name:'天然氣',spot:gasSpot,future:gasFuture,futureCode:'NG'}
 };
-const out={meta:{source:'Stooq + FRED/EIA + Yahoo Finance',mode:'MIXED DELAYED/DAILY',realtime:false,generatedAt:new Date().toISOString(),note:'Gold and silver spot use Stooq public quotes. Oil spot first tries public Stooq cash symbols and falls back to FRED/EIA daily spot observations. Futures use Yahoo public delayed/web data. Missing quotes remain null; no synthetic values are created.'},commodities};
+const out={meta:{source:'Stooq + FRED/EIA + Yahoo Finance',mode:'MIXED DELAYED/DAILY',realtime:false,generatedAt:new Date().toISOString(),note:'Gold/silver and selected cash references use Stooq public quotes when available. Oil and natural-gas spot can fall back to FRED/EIA daily observations. Futures use Yahoo public delayed/web data. Copper spot is left unavailable if no comparable public cash quote is found; no futures quote is relabeled as spot and no synthetic values are created.'},commodities};
 await fs.mkdir('data',{recursive:true});
 await fs.writeFile('data/commodities-latest.json',JSON.stringify(out,null,2)+'\n');
 console.log('Wrote data/commodities-latest.json');
