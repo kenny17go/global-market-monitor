@@ -14,6 +14,7 @@ on:
       - 'scripts/patch-ndf-runtime-cache.mjs'
       - 'scripts/patch-ndf-formula-tokens.mjs'
       - 'scripts/patch-formula-category-filter.mjs'
+      - 'scripts/patch-custom-indicators.mjs'
       - 'scripts/fix-runtime-regressions.mjs'
       - '.github/workflows/update-taifex-data.yml'
   schedule:
@@ -53,6 +54,8 @@ jobs:
         run: node scripts/patch-ndf-formula-tokens.mjs
       - name: Install Formula Lab category filter
         run: node scripts/patch-formula-category-filter.mjs
+      - name: Install named indicators and alerts
+        run: node scripts/patch-custom-indicators.mjs
       - name: Fix browser runtime regressions
         run: node scripts/fix-runtime-regressions.mjs
       - name: Validate JavaScript
@@ -67,6 +70,7 @@ jobs:
           node --check scripts/patch-ndf-runtime-cache.mjs
           node --check scripts/patch-ndf-formula-tokens.mjs
           node --check scripts/patch-formula-category-filter.mjs
+          node --check scripts/patch-custom-indicators.mjs
           node --check scripts/fix-runtime-regressions.mjs
           grep -q "function renderTaifexSettlementNdf" app.js
           grep -q "TAIFEX settlement NDF render failed" app.js
@@ -74,7 +78,10 @@ jobs:
           grep -q "BRF_NEXT_NDF" app.js
           grep -q "tokenCategory" index.html
           grep -q "tokenCategory" app.js
-          grep -q "app.js?v=20260916-formula-cat1" index.html
+          grep -q "indicatorName" index.html
+          grep -q "renderCustomIndicators" app.js
+          grep -q "evaluateIndicatorAlerts" app.js
+          grep -q "app.js?v=20260916-indicator1" index.html
           grep -q "taifexSettlementNdf" index.html
       - name: Commit integration/data changes
         run: |
@@ -85,5 +92,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add app.js providers.js config.example.js index.html styles.css data/latest.json data/taifex-latest.json
-          git commit -m "feat: refresh TAIFEX data and Formula Lab filters"
+          git commit -m "feat: refresh TAIFEX data and named indicators"
           git push
