@@ -8,6 +8,7 @@ on:
       - 'scripts/apply-bot-onshore-fallback.mjs'
       - 'scripts/apply-fx-v1.mjs'
       - 'scripts/patch-taifex-settlement-ndf.mjs'
+      - 'scripts/patch-ndf-runtime-cache.mjs'
       - 'scripts/fix-usdtwd-toggle.mjs'
       - 'scripts/patch-fx-v11.mjs'
       - '.github/workflows/update-usdtwd-fx.yml'
@@ -37,6 +38,8 @@ jobs:
         run: node scripts/apply-fx-v1.mjs
       - name: Install TAIFEX settlement NDF panel
         run: node scripts/patch-taifex-settlement-ndf.mjs
+      - name: Force-refresh NDF frontend assets
+        run: node scripts/patch-ndf-runtime-cache.mjs
       - name: Install USD TWD toggle binding
         run: node scripts/fix-usdtwd-toggle.mjs
       - name: Apply FX V1.1 labels
@@ -46,8 +49,11 @@ jobs:
           node -e "const d=JSON.parse(require('fs').readFileSync('data/usdtwd-fx.json','utf8')); if(!d.offshore||!d.offshore.curve) process.exit(1);"
           node --check app.js
           node --check scripts/patch-taifex-settlement-ndf.mjs
+          node --check scripts/patch-ndf-runtime-cache.mjs
           grep -q "function syncUsdtwdVisibility" app.js
           grep -q "function renderTaifexSettlementNdf" app.js
+          grep -q "TAIFEX settlement NDF render failed" app.js
+          grep -q "app.js?v=20260916-ndf3" index.html
           grep -q "taifexSettlementNdf" index.html
           grep -q "DOMContentLoaded',syncUsdtwdVisibility" app.js
           grep -q "toggleUsdtwdFx" index.html
