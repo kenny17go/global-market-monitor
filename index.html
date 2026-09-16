@@ -12,6 +12,14 @@
           <div id="topPicker" class="top-picker hidden"></div>
           <section id="topCards" class="cards"></section>
         </section>
+
+        <section id="usdtwdFxPanel" class="panel usdtwd-fx-panel">
+          <div class="fx-focus-head"><div><h2>USD/TWD 專區</h2><p>Spot、境內 Onshore Forward 與境外 Offshore NDF/Forward 分開顯示，不互相混用。</p></div><div id="usdtwdFxFreshness" class="source-note">資料載入中…</div></div>
+          <div id="usdtwdSpotCards" class="fx-spot-cards"></div>
+          <div class="table-wrap"><table class="fx-curve-table"><thead><tr><th>Tenor</th><th colspan="3">Onshore Forward · Investing.com</th><th colspan="3">Offshore NDF / Forward · NetDania</th><th>Offshore − Onshore</th></tr><tr><th></th><th>Bid</th><th>Ask</th><th>Mid Outright</th><th>Bid</th><th>Ask</th><th>Mid Outright</th><th>Points Mid</th></tr></thead><tbody id="usdtwdCurveBody"></tbody></table></div>
+          <div class="fx-focus-note">Forward points 與 outright 皆以各來源原始報價計算；若來源暫時無法取得，顯示「—」，不使用模擬值補齊。</div>
+        </section>
+
         <section class="grid-main">
           <article class="panel"><h3>外匯 / FX & Forward Points <small>Spot + Swap Points</small></h3><div class="table-wrap"><table><thead><tr><th>貨幣對</th><th>Bid</th><th>Ask</th><th>變動</th><th>1M</th><th>3M</th><th>6M</th><th>1Y</th></tr></thead><tbody id="fxBody"></tbody></table></div></article>
           <article class="panel"><h3>全球股價指數 / Equity Indices & Futures <small>Cash + Futures</small></h3><div class="table-wrap"><table><thead><tr><th>指數</th><th>現貨</th><th>期貨</th><th>基差</th><th>漲跌</th></tr></thead><tbody id="eqBody"></tbody></table></div></article>
