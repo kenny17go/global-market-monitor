@@ -10,13 +10,19 @@ async function fetchText(url,opt={}){return await (await request(url,{accept:'te
 
 async function yahooChart(symbol,range,label){
   try{
-    const j=await fetchJson(`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1m&range=1d`);
-    const m=j?.chart?.result?.[0]?.meta;
+    const j=await fetchJson(`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=5m&range=1d`);
+    const r=j?.chart?.result?.[0],m=r?.meta;
     const last=inRange(m?.regularMarketPrice,range),prev=inRange(m?.chartPreviousClose??m?.previousClose,range);
     if(last==null)throw new Error('missing market price');
     const change=prev!=null?last-prev:null,pct=prev?change/prev*100:null;
-    return {label,symbol,last,previousClose:prev,change,pct,timestamp:m?.regularMarketTime?new Date(m.regularMarketTime*1000).toISOString():new Date().toISOString(),source:'Yahoo Finance',mode:'DELAYED'};
-  }catch(e){console.warn('Yahoo commodity quote failed',label,symbol,e.message);return {label,symbol,last:null,previousClose:null,change:null,pct:null,timestamp:null,source:'Yahoo Finance',mode:'UNAVAILABLE'}}
+    const ts=Array.isArray(r?.timestamp)?r.timestamp:[],close=Array.isArray(r?.indicators?.quote?.[0]?.close)?r.indicators.quote[0].close:[];
+    const points=[];
+    for(let i=0;i<Math.min(ts.length,close.length);i++){
+      const t=Number(ts[i]),v=inRange(close[i],range);
+      if(Number.isFinite(t)&&v!=null)points.push({t,v});
+    }
+    return {label,symbol,last,previousClose:prev,change,pct,timestamp:m?.regularMarketTime?new Date(m.regularMarketTime*1000).toISOString():new Date().toISOString(),source:'Yahoo Finance',mode:'DELAYED',series:points.map(x=>x.v),seriesTimes:points.map(x=>new Date(x.t*1000).toISOString()),seriesMeta:{range:'1D',interval:'5m',source:'Yahoo Finance',mode:'DELAYED',points:points.length,instrument:'FUTURES'}};
+  }catch(e){console.warn('Yahoo commodity quote failed',label,symbol,e.message);return {label,symbol,last:null,previousClose:null,change:null,pct:null,timestamp:null,source:'Yahoo Finance',mode:'UNAVAILABLE',series:[],seriesTimes:[],seriesMeta:{range:'1D',interval:'5m',source:'Yahoo Finance',mode:'UNAVAILABLE',points:0,instrument:'FUTURES'}}}
 }
 
 async function stooqQuote(symbols,range,label){
@@ -66,12 +72,12 @@ const commodities={
   GOLD:{id:'GOLD',name:'黃金',spot:goldSpot,future:goldFuture,futureCode:'MGC'},
   SILVER:{id:'SILVER',name:'白銀',spot:silverSpot,future:silverFuture,futureCode:'SI'},
   WTI:{id:'WTI',name:'WTI 原油',spot:wtiSpot,future:wtiFuture,futureCode:'MCL'},
-  BRENT:{id:'BRENT',name:'Brent 原油',spot:brentSpot,future:brentFuture,futureCode:'BRN'},
+  BRENT:{id:'BRENT',name:'Brent 原油',spot:brentSpot,future:brentFuture,futureCode:'BZ'},
   COPPER:{id:'COPPER',name:'銅',spot:copperSpot,future:copperFuture,futureCode:'HG'},
   NATGAS:{id:'NATGAS',name:'天然氣',spot:gasSpot,future:gasFuture,futureCode:'NG'}
 };
-const out={meta:{source:'Stooq + FRED/EIA + Yahoo Finance',mode:'MIXED DELAYED/DAILY',realtime:false,generatedAt:new Date().toISOString(),note:'Gold/silver and selected cash references use Stooq public quotes when available. Oil and natural-gas spot can fall back to FRED/EIA daily observations. Futures use Yahoo public delayed/web data. Copper spot is left unavailable if no comparable public cash quote is found; no futures quote is relabeled as spot and no synthetic values are created.'},commodities};
+const out={meta:{source:'Stooq + FRED/EIA + Yahoo Finance',mode:'MIXED DELAYED/DAILY',realtime:false,generatedAt:new Date().toISOString(),note:'Spot/reference quotes remain separate from futures. Commodity overview sparklines use genuine Yahoo 1D / 5m futures chart points when public spot intraday history is unavailable, and the card is relabeled as a futures card to avoid mixing spot price with futures history. No synthetic path is created.'},commodities};
 await fs.mkdir('data',{recursive:true});
 await fs.writeFile('data/commodities-latest.json',JSON.stringify(out,null,2)+'\n');
 console.log('Wrote data/commodities-latest.json');
-for(const [id,x] of Object.entries(commodities))console.log(id,'spot',x.spot.last,x.spot.source,'future',x.future.last,x.future.source);
+for(const [id,x] of Object.entries(commodities))console.log(id,'spot',x.spot.last,x.spot.source,'future',x.future.last,x.future.source,'series',x.future.series?.length||0);
