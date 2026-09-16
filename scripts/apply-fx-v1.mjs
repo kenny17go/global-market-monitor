@@ -6,25 +6,41 @@ let styles=await fs.readFile('styles.css','utf8');
 const extract=fn=>fn.toString().match(/\/\*([\s\S]*?)\*\//)[1];
 
 const panel=extract(function(){/*
-        <section id="usdtwdFxPanel" class="panel usdtwd-fx-panel">
-          <div class="fx-focus-head"><div><h2>USD/TWD 專區</h2><p>Spot、境內 Onshore Forward 與境外 Offshore NDF/Forward 分開顯示，不互相混用。</p></div><div id="usdtwdFxFreshness" class="source-note">資料載入中…</div></div>
+        <section id="usdtwdFxPanel" class="panel usdtwd-fx-panel is-hidden">
+          <div class="fx-focus-head"><div><h2>USD/TWD 台幣專區</h2><p>Spot、境內 Onshore Forward 與 NetDania USD/TWD Forward 分開顯示；NetDania 公開頁未標示 onshore/offshore，因此暫不替它指定市場屬性。</p></div><div id="usdtwdFxFreshness" class="source-note">資料載入中…</div></div>
           <div id="usdtwdSpotCards" class="fx-spot-cards"></div>
-          <div class="table-wrap"><table class="fx-curve-table"><thead><tr><th>Tenor</th><th colspan="3">Onshore Forward · Investing.com</th><th colspan="3">Offshore NDF / Forward · NetDania</th><th>Offshore − Onshore</th></tr><tr><th></th><th>Bid</th><th>Ask</th><th>Mid Outright</th><th>Bid</th><th>Ask</th><th>Mid Outright</th><th>Points Mid</th></tr></thead><tbody id="usdtwdCurveBody"></tbody></table></div>
-          <div class="fx-focus-note">Forward points 與 outright 皆以各來源原始報價計算；來源暫時無法取得或報價驗證失敗時顯示「—」，不使用模擬值補齊。</div>
+          <div class="table-wrap"><table class="fx-curve-table"><thead><tr><th>Tenor</th><th colspan="3">Onshore Forward · Investing.com</th><th colspan="3">NetDania USD/TWD Forward</th><th>NetDania − Onshore</th></tr><tr><th></th><th>Bid</th><th>Ask</th><th>Mid Outright</th><th>Bid</th><th>Ask</th><th>Mid Outright</th><th>Points Mid</th></tr></thead><tbody id="usdtwdCurveBody"></tbody></table></div>
+          <div class="fx-focus-note">Forward points 與 outright 皆以各來源原始報價計算；來源暫時無法取得或報價驗證失敗時顯示「—」，不使用模擬值補齊。NetDania 市場屬性確認前不標示為境內或境外。</div>
         </section>
 */});
-if(!index.includes('id="usdtwdFxPanel"')) index=index.replace('        <section class="grid-main">',panel+'\n        <section class="grid-main">');
+
+// Remove any older standalone USD/TWD panel and toggle before reinserting it directly below FX.
+index=index.replace(/\s*<section id="usdtwdFxPanel"[\s\S]*?<\/section>\s*/g,'\n');
+index=index.replace(/<button id="toggleUsdtwdFx"[\s\S]*?<\/button>/g,'');
+const fxArticleRe=/(<article class="panel"><h3>外匯 \/ FX & Forward Points <small>Spot \+ Swap Points<\/small>)(<\/h3><div class="table-wrap"><table><thead><tr><th>貨幣對<\/th><th>Bid<\/th><th>Ask<\/th><th>變動<\/th><th>1M<\/th><th>3M<\/th><th>6M<\/th><th>1Y<\/th><\/tr><\/thead><tbody id="fxBody"><\/tbody><\/table><\/div><\/article>)/;
+if(fxArticleRe.test(index)){
+  index=index.replace(fxArticleRe,`$1<button id="toggleUsdtwdFx" class="secondary-btn fx-twd-toggle" type="button" aria-expanded="false">顯示台幣專區</button>$2\n${panel}`);
+}
 
 const fxCode=extract(function(){/*
+function syncUsdtwdVisibility(){
+  const panel=$('#usdtwdFxPanel'),btn=$('#toggleUsdtwdFx');if(!panel||!btn)return;
+  let show=false;try{show=localStorage.getItem('gmmShowUsdtwdFx')==='1'}catch{}
+  panel.classList.toggle('is-hidden',!show);
+  btn.textContent=show?'隱藏台幣專區':'顯示台幣專區';
+  btn.setAttribute('aria-expanded',show?'true':'false');
+  if(!btn.dataset.bound){btn.dataset.bound='1';btn.addEventListener('click',()=>{const next=panel.classList.contains('is-hidden');try{localStorage.setItem('gmmShowUsdtwdFx',next?'1':'0')}catch{}panel.classList.toggle('is-hidden',!next);btn.textContent=next?'隱藏台幣專區':'顯示台幣專區';btn.setAttribute('aria-expanded',next?'true':'false')})}
+}
 function renderUsdtwdFx(){
+  syncUsdtwdVisibility();
   const p=DATA?.usdtwdFx;if(!$('#usdtwdCurveBody'))return;
   const spot=p?.spot||{},tenors=['1W','1M','3M','6M','1Y'];
   const f=v=>v==null?'—':tidy(v,4);
   const outright=v=>v==null?'—':tidy(v,4);
   $('#usdtwdSpotCards').innerHTML=`<div class="fx-spot-card"><span>USD/TWD Spot Bid</span><b>${f(spot.bid)}</b><small>${spot.source||'—'}</small></div><div class="fx-spot-card"><span>Spot Ask</span><b>${f(spot.ask)}</b><small>${spot.mode||'—'}</small></div><div class="fx-spot-card"><span>Spot Mid</span><b>${f(spot.mid)}</b><small>Bid/Ask midpoint</small></div>`;
-  $('#usdtwdCurveBody').innerHTML=tenors.map(t=>{const on=p?.onshore?.curve?.[t]||{},off=p?.offshore?.curve?.[t]||{},sp=p?.spread?.[t]||{};return `<tr><td><b>${t}</b></td><td>${f(on.bid)}</td><td>${f(on.ask)}</td><td>${outright(on.outrightMid)}</td><td>${f(off.bid)}</td><td>${f(off.ask)}</td><td>${outright(off.outrightMid)}</td><td class="${sp.pointsMid==null?'':cls(sp.pointsMid)}">${sp.pointsMid==null?'—':(sp.pointsMid>=0?'+':'')+tidy(sp.pointsMid,4)}</td></tr>`}).join('');
+  $('#usdtwdCurveBody').innerHTML=tenors.map(t=>{const on=p?.onshore?.curve?.[t]||{},nd=p?.offshore?.curve?.[t]||{},sp=p?.spread?.[t]||{};return `<tr><td><b>${t}</b></td><td>${f(on.bid)}</td><td>${f(on.ask)}</td><td>${outright(on.outrightMid)}</td><td>${f(nd.bid)}</td><td>${f(nd.ask)}</td><td>${outright(nd.outrightMid)}</td><td class="${sp.pointsMid==null?'':cls(sp.pointsMid)}">${sp.pointsMid==null?'—':(sp.pointsMid>=0?'+':'')+tidy(sp.pointsMid,4)}</td></tr>`}).join('');
   const dt=p?.meta?.generatedAt?new Date(p.meta.generatedAt):null;
-  $('#usdtwdFxFreshness').textContent=(dt&&!Number.isNaN(dt.getTime())?`更新 ${dt.toLocaleString('zh-TW')}`:'更新時間 —')+` · Onshore ${p?.onshore?.mode||'UNAVAILABLE'} · Offshore ${p?.offshore?.mode||'UNAVAILABLE'}`;
+  $('#usdtwdFxFreshness').textContent=(dt&&!Number.isNaN(dt.getTime())?`更新 ${dt.toLocaleString('zh-TW')}`:'更新時間 —')+` · Onshore ${p?.onshore?.mode||'UNAVAILABLE'} · NetDania ${p?.offshore?.mode||'UNAVAILABLE'}`;
 }
 */});
 if(!app.includes('function renderUsdtwdFx()')) app=app.replace('function render(){if(!DATA)return;',fxCode+'\nfunction render(){if(!DATA)return;');
@@ -48,12 +64,12 @@ const providers=`window.MarketProviders = (() => {
 
 const css=`
 /* USD/TWD FX focus */
-.usdtwd-fx-panel{margin:12px 0;padding:0 0 10px}.fx-focus-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;padding:14px;border-bottom:1px solid var(--line)}.fx-focus-head h2{margin:0 0 4px;font-size:19px}.fx-focus-head p{margin:0;color:var(--muted);font-size:12px}.fx-spot-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;padding:12px}.fx-spot-card{background:#071827;border:1px solid var(--line);border-radius:8px;padding:10px;display:grid;gap:4px}.fx-spot-card span,.fx-spot-card small{color:var(--muted);font-size:10px}.fx-spot-card b{font-size:19px}.fx-curve-table th{text-align:right}.fx-curve-table th:first-child,.fx-curve-table td:first-child{text-align:left}.fx-curve-table td{text-align:right}.fx-focus-note{margin:9px 12px 0;color:#7895aa;font-size:10px}.usdtwd-fx-panel .table-wrap{padding:0 12px}@media(max-width:700px){.fx-focus-head{flex-direction:column}.fx-spot-cards{grid-template-columns:1fr}.usdtwd-fx-panel .table-wrap{overflow:auto}.fx-curve-table{min-width:820px}}
+.usdtwd-fx-panel{grid-column:1;margin:0;padding:0 0 10px}.usdtwd-fx-panel.is-hidden{display:none!important}.fx-twd-toggle{margin-left:auto;padding:4px 8px;font-size:10px;white-space:nowrap}.fx-focus-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;padding:14px;border-bottom:1px solid var(--line)}.fx-focus-head h2{margin:0 0 4px;font-size:19px}.fx-focus-head p{margin:0;color:var(--muted);font-size:12px}.fx-spot-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;padding:12px}.fx-spot-card{background:#071827;border:1px solid var(--line);border-radius:8px;padding:10px;display:grid;gap:4px}.fx-spot-card span,.fx-spot-card small{color:var(--muted);font-size:10px}.fx-spot-card b{font-size:19px}.fx-curve-table th{text-align:right}.fx-curve-table th:first-child,.fx-curve-table td:first-child{text-align:left}.fx-curve-table td{text-align:right}.fx-focus-note{margin:9px 12px 0;color:#7895aa;font-size:10px}.usdtwd-fx-panel .table-wrap{padding:0 12px}@media(max-width:700px){.fx-focus-head{flex-direction:column}.fx-spot-cards{grid-template-columns:1fr}.usdtwd-fx-panel .table-wrap{overflow:auto}.fx-curve-table{min-width:820px}}
 `;
-if(!styles.includes('/* USD/TWD FX focus */'))styles+='\n'+css;
+styles=styles.replace(/\/\* USD\/TWD FX focus \*\/[\s\S]*$/,'').trimEnd()+'\n\n'+css;
 
 await fs.writeFile('index.html',index);
 await fs.writeFile('app.js',app);
 await fs.writeFile('providers.js',providers);
 await fs.writeFile('styles.css',styles);
-console.log('Applied USD/TWD FX V1 dashboard integration and final provider pipeline.');
+console.log('Applied USD/TWD FX panel below FX with default-hidden persistent toggle.');
