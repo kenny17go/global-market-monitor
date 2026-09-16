@@ -14,6 +14,7 @@ on:
       - 'scripts/patch-custom-indicators.mjs'
       - 'scripts/patch-indicator-dashboard.mjs'
       - 'scripts/patch-screen-lock.mjs'
+      - 'scripts/patch-overview-major-fx.mjs'
       - 'scripts/fix-usdtwd-toggle.mjs'
       - 'scripts/patch-fx-v11.mjs'
       - '.github/workflows/update-usdtwd-fx.yml'
@@ -55,6 +56,8 @@ jobs:
         run: node scripts/patch-indicator-dashboard.mjs
       - name: Install screen lock demo
         run: node scripts/patch-screen-lock.mjs
+      - name: Restore overview FX market bridge
+        run: node scripts/patch-overview-major-fx.mjs
       - name: Install USD TWD toggle binding
         run: node scripts/fix-usdtwd-toggle.mjs
       - name: Apply FX V1.1 labels
@@ -63,6 +66,7 @@ jobs:
         run: |
           node -e "const d=JSON.parse(require('fs').readFileSync('data/usdtwd-fx.json','utf8')); if(!d.offshore||!d.offshore.curve) process.exit(1);"
           node --check app.js
+          node --check providers.js
           node --check scripts/patch-taifex-settlement-ndf.mjs
           node --check scripts/patch-ndf-runtime-cache.mjs
           node --check scripts/patch-ndf-formula-tokens.mjs
@@ -70,6 +74,7 @@ jobs:
           node --check scripts/patch-custom-indicators.mjs
           node --check scripts/patch-indicator-dashboard.mjs
           node --check scripts/patch-screen-lock.mjs
+          node --check scripts/patch-overview-major-fx.mjs
           grep -q "function syncUsdtwdVisibility" app.js
           grep -q "function renderTaifexSettlementNdf" app.js
           grep -q "TAIFEX settlement NDF render failed" app.js
@@ -89,6 +94,7 @@ jobs:
           grep -q "DOMContentLoaded',syncUsdtwdVisibility" app.js
           grep -q "toggleUsdtwdFx" index.html
           grep -q "usdtwdFxPanel" index.html
+          grep -q "mergeMajorFx(base,majorFx)" providers.js
       - name: Commit FX data and UI
         run: |
           git add data/usdtwd-fx.json index.html app.js providers.js styles.css
@@ -98,5 +104,5 @@ jobs:
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "data: refresh USD TWD FX curves and screen lock demo"
+          git commit -m "data: refresh USD TWD FX curves and preserve overview FX"
           git push
