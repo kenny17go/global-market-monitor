@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises';
 
-const UA='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/126 Safari/537.36 global-market-monitor/1.3';
+const UA='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/126 Safari/537.36 global-market-monitor/1.4';
 async function get(url){const r=await fetch(url,{redirect:'follow',headers:{'user-agent':UA,'accept':'text/html,application/xhtml+xml,application/json;q=0.9,*/*;q=0.8','accept-language':'en-US,en;q=0.9'}});if(!r.ok)throw new Error(`${r.status} ${url}`);return await r.text()}
 const num=v=>{if(v==null||v==='')return null;const x=Number(String(v).replace(/,/g,'').trim());return Number.isFinite(x)?x:null};
 const strip=s=>String(s).replace(/<script[\s\S]*?<\/script>/gi,' ').replace(/<style[\s\S]*?<\/style>/gi,' ').replace(/<[^>]+>/g,' ').replace(/&nbsp;|&#160;/gi,' ').replace(/&amp;/gi,'&').replace(/\s+/g,' ').trim();
@@ -16,51 +16,28 @@ async function netdaniaSpot(){try{const text=strip(await get('https://m.netdania
 
 async function netdaniaOffshore(){try{const text=strip(await get('https://www.netdania.com/quotes/forex-usdforwards'));const tableStart=text.search(/Name\s+1W Bid\s+1W Ask\s+1M Bid/i);if(tableStart<0)throw new Error('forward table header not found');const tableEnd=text.indexOf('Comments',tableStart),tableText=text.slice(tableStart,tableEnd>tableStart?tableEnd:tableStart+12000);const m=tableText.match(/USD\/TWD\s+(-?[\d,.]+)\s+(-?[\d,.]+)\s+(-?[\d,.]+)\s+(-?[\d,.]+)\s+(-?[\d,.]+)\s+(-?[\d,.]+)\s+(-?[\d,.]+)\s+(-?[\d,.]+)\s+(-?[\d,.]+)\s+(-?[\d,.]+)/i);if(!m)throw new Error('USD/TWD row not found');const curve={};TENORS.forEach((t,i)=>{const bid=num(m[1+i*2]),ask=num(m[2+i*2]);curve[t]=fwdOk(bid,ask)?{bid,ask,mid:mid(bid,ask)}:{bid:null,ask:null,mid:null,invalidRaw:[bid,ask]}});if(!Object.values(curve).some(x=>x.mid!=null))throw new Error('NetDania curve empty');return {source:'NetDania USD Forwards',market:'OFFSHORE',mode:'WEB QUOTE',quoteType:'FORWARD POINTS',curve,rawRow:m[0]}}catch(e){console.warn('NetDania offshore failed:',e.message);return {source:'NetDania USD Forwards',market:'OFFSHORE',mode:'UNAVAILABLE',quoteType:'FORWARD POINTS',curve:{}}}}
 
-async function barchartOffshore(){
-  const symbols={'1W':'USDTWD.B','1M':'USDTWD.E','3M':'USDTWD.H','6M':'USDTWD.M','1Y':'USDTWD.1'},curve={};
-  for(const [tenor,symbol] of Object.entries(symbols)){
-    try{const text=strip(await get(`https://www.barchart.com/forex/quotes/${symbol}`));const m=text.match(/Last Price\s+(-?[\d,.]+)/i);const v=num(m?.[1]);if(v!=null&&Math.abs(v)<=5)curve[tenor]={bid:null,ask:null,mid:v,last:v,symbol,sourceMode:'LAST ONLY'}}catch(e){console.warn(`Barchart ${tenor} failed:`,e.message)}
-  }
-  return {source:'Barchart USD/TWD Forward Rates',market:'OFFSHORE',mode:Object.keys(curve).length?'DELAYED 10-15M':'UNAVAILABLE',quoteType:'FORWARD POINTS',fallback:true,curve};
-}
+async function barchartOffshore(){const symbols={'1W':'USDTWD.B','1M':'USDTWD.E','3M':'USDTWD.H','6M':'USDTWD.M','1Y':'USDTWD.1'},curve={};for(const [tenor,symbol] of Object.entries(symbols)){try{const text=strip(await get(`https://www.barchart.com/forex/quotes/${symbol}`));const m=text.match(/Last Price\s+(-?[\d,.]+)/i);const v=num(m?.[1]);if(v!=null&&Math.abs(v)<=5)curve[tenor]={bid:null,ask:null,mid:v,last:v,symbol,sourceMode:'LAST ONLY'}}catch(e){console.warn(`Barchart ${tenor} failed:`,e.message)}}return {source:'Barchart USD/TWD Forward Rates',market:'OFFSHORE',mode:Object.keys(curve).length?'DELAYED 10-15M':'UNAVAILABLE',quoteType:'FORWARD POINTS',fallback:true,curve}}
 
 async function investingOnshore(){try{const text=strip(await get('https://www.investing.com/currencies/usd-twd-forward-rates')),curve={};const aliases={'1W':'SW','1M':'1M','3M':'3M','6M':'6M','1Y':'1Y'};for(const [t,label] of Object.entries(aliases)){const m=text.match(new RegExp(`USDTWD\\s*${label}\\s*FWD\\s+(-?[\\d,.]+)\\s+(-?[\\d,.]+)`,'i'));if(m){const bid=num(m[1]),ask=num(m[2]);if(fwdOk(bid,ask))curve[t]={bid,ask,mid:mid(bid,ask)}}}if(!Object.keys(curve).length)throw new Error('Investing curve unavailable');return {source:'Investing.com USD/TWD Forward Rates',market:'ONSHORE TAIPEI',mode:'WEB QUOTE',quoteType:'FORWARD POINTS',curve}}catch(e){console.warn('Investing onshore failed:',e.message);return {source:'Investing.com USD/TWD Forward Rates',market:'ONSHORE TAIPEI',mode:'UNAVAILABLE',quoteType:'FORWARD POINTS',curve:{}}}}
 
 async function cbondsOnshore(){try{const text=strip(await get('https://cbonds.com/indexes/219633/')),curve={};for(const t of TENORS){const m=text.match(new RegExp(`USD/TWD\\s+${t}\\s+FX Forward Rate\\s+([\\d,.]+)\\s+(\\d{2}/\\d{2}/\\d{4})`,'i'));if(m){const value=num(m[1]);if(value>=20&&value<=50)curve[t]={bid:null,ask:null,mid:null,outrightMid:value,date:m[2],benchmark:true}}}if(!Object.keys(curve).length)throw new Error('Cbonds subgroup values not found');return {source:'Cbonds USD/TWD FX Forward Rate (Onshore Taipei)',market:'ONSHORE TAIPEI',mode:'DAILY CLOSE',quoteType:'OUTRIGHT BENCHMARK',fallback:true,curve}}catch(e){console.warn('Cbonds onshore failed:',e.message);return {source:'Cbonds Onshore Taipei',market:'ONSHORE TAIPEI',mode:'UNAVAILABLE',quoteType:'OUTRIGHT BENCHMARK',fallback:true,curve:{}}}}
 
-async function botOnshore(){
-  try{
-    const [spotText,fwdText]=await Promise.all([
-      get('https://rate.bot.com.tw/xrt?Lang=en-US'),
-      get('https://rate.bot.com.tw/xrt/forward/USD?Lang=en-US')
-    ]).then(xs=>xs.map(strip));
-    const sm=spotText.match(/American Dollar\s*\(USD\)[\s\S]{0,220}?([\d,.]+)\s+([\d,.]+)\s+([\d,.]+)\s+([\d,.]+)/i);
-    if(!sm)throw new Error('BOT USD spot row not found');
-    const spotBid=num(sm[3]),spotAsk=num(sm[4]);
-    if(!spotOk(spotBid,spotAsk))throw new Error(`BOT invalid spot ${spotBid}/${spotAsk}`);
-    const dayMap={'1M':30,'3M':90,'6M':180},curve={};
-    for(const [tenor,days] of Object.entries(dayMap)){
-      const m=fwdText.match(new RegExp(`Forward-\\s*${days}\\s*Days\\s+([\\d,.]+)\\s+([\\d,.]+)`,'i'));
-      if(!m)continue;
-      const fwdBid=num(m[1]),fwdAsk=num(m[2]);
-      const bid=fwdBid-spotBid,ask=fwdAsk-spotAsk;
-      if(fwdBid>=20&&fwdBid<=50&&fwdAsk>=fwdBid&&fwdOk(bid,ask))curve[tenor]={bid,ask,mid:mid(bid,ask),outrightBid:fwdBid,outrightAsk:fwdAsk,outrightMid:mid(fwdBid,fwdAsk),spotBid,spotAsk,actualTenor:`${days}D`};
-    }
-    if(!Object.keys(curve).length)throw new Error('BOT exact tenor forwards unavailable');
-    return {source:'Bank of Taiwan USD Forward / Spot',market:'ONSHORE TAIPEI',mode:'BANK QUOTE',quoteType:'FORWARD POINTS',fallback:true,curve,note:'Exact tenor mapping only: 1M=30D, 3M=90D, 6M=180D. 1W and 1Y are intentionally left unavailable.'};
-  }catch(e){console.warn('BOT onshore failed:',e.message);return {source:'Bank of Taiwan USD Forward / Spot',market:'ONSHORE TAIPEI',mode:'UNAVAILABLE',quoteType:'FORWARD POINTS',fallback:true,curve:{}}}
+function parseBotSpot(text){
+  const normalized=strip(text);
+  const anchor=normalized.search(/American Dollar\s*\(USD\)/i);
+  if(anchor<0)throw new Error('BOT USD spot anchor not found');
+  const chunk=normalized.slice(anchor,anchor+500);
+  const values=(chunk.match(/\b\d{1,2}\.\d{2,4}\b/g)||[]).map(num).filter(v=>v!=null&&v>=20&&v<=50);
+  if(values.length<4)throw new Error(`BOT USD spot values incomplete: ${values.join(',')}`);
+  const [cashBid,cashAsk,spotBid,spotAsk]=values;
+  if(!spotOk(spotBid,spotAsk))throw new Error(`BOT invalid spot ${spotBid}/${spotAsk}`);
+  return {cashBid,cashAsk,spotBid,spotAsk};
 }
 
-const spot=await netdaniaSpot();
-let offshore=await netdaniaOffshore();
-if(!Object.keys(offshore.curve||{}).length)offshore=await barchartOffshore();
-let onshore=await investingOnshore();
-if(!Object.keys(onshore.curve||{}).length)onshore=await cbondsOnshore();
-if(!Object.keys(onshore.curve||{}).length)onshore=await botOnshore();
-const validSpot=spotOk(spot.bid,spot.ask);
+async function botOnshore(){try{const [spotHtml,fwdHtml]=await Promise.all([get('https://rate.bot.com.tw/xrt?Lang=en-US'),get('https://rate.bot.com.tw/xrt/forward/USD?Lang=en-US')]);const {spotBid,spotAsk}=parseBotSpot(spotHtml);const fwdText=strip(fwdHtml),dayMap={'1M':30,'3M':90,'6M':180},curve={};for(const [tenor,days] of Object.entries(dayMap)){const m=fwdText.match(new RegExp(`Forward-\\s*${days}\\s*Days\\s+([\\d,.]+)\\s+([\\d,.]+)`,'i'));if(!m)continue;const fwdBid=num(m[1]),fwdAsk=num(m[2]);const bid=fwdBid-spotBid,ask=fwdAsk-spotAsk;if(fwdBid>=20&&fwdBid<=50&&fwdAsk>=fwdBid&&fwdOk(bid,ask))curve[tenor]={bid,ask,mid:mid(bid,ask),outrightBid:fwdBid,outrightAsk:fwdAsk,outrightMid:mid(fwdBid,fwdAsk),spotBid,spotAsk,actualTenor:`${days}D`}}if(!Object.keys(curve).length)throw new Error('BOT exact tenor forwards unavailable');return {source:'Bank of Taiwan USD Forward / Spot',market:'ONSHORE TAIPEI',mode:'BANK QUOTE',quoteType:'FORWARD POINTS',fallback:true,curve,note:'Exact tenor mapping only: 1M=30D, 3M=90D, 6M=180D. 1W and 1Y intentionally unavailable.'}}catch(e){console.warn('BOT onshore failed:',e.message);return {source:'Bank of Taiwan USD Forward / Spot',market:'ONSHORE TAIPEI',mode:'UNAVAILABLE',quoteType:'FORWARD POINTS',fallback:true,curve:{}}}}
+
+const spot=await netdaniaSpot();let offshore=await netdaniaOffshore();if(!Object.keys(offshore.curve||{}).length)offshore=await barchartOffshore();let onshore=await investingOnshore();if(!Object.keys(onshore.curve||{}).length)onshore=await cbondsOnshore();if(!Object.keys(onshore.curve||{}).length)onshore=await botOnshore();const validSpot=spotOk(spot.bid,spot.ask);
 for(const t of TENORS){for(const bucket of [offshore,onshore]){const p=bucket.curve?.[t];if(!p||bucket.quoteType==='OUTRIGHT BENCHMARK'||p.outrightMid!=null)continue;if(validSpot&&p.mid!=null){p.outrightBid=p.bid!=null?outright(spot.bid,p.bid):null;p.outrightAsk=p.ask!=null?outright(spot.ask,p.ask):null;p.outrightMid=outright(spot.mid,p.mid)}else{p.outrightBid=null;p.outrightAsk=null;p.outrightMid=null}}}
-const spread={};
-for(const t of TENORS){const on=onshore.curve?.[t]||{},off=offshore.curve?.[t]||{};spread[t]={pointsMid:on.mid!=null&&off.mid!=null?off.mid-on.mid:null,outrightMid:on.outrightMid!=null&&off.outrightMid!=null?off.outrightMid-on.outrightMid:null}}
-const out={meta:{generatedAt:new Date().toISOString(),realtime:false,spotValidated:validSpot,sourcePolicy:'Offshore = NetDania; fallback whole curve to Barchart. Onshore = Investing.com; fallback whole curve to Cbonds; final fallback to Bank of Taiwan exact-tenor forwards minus same-bank spot.',note:'Barchart public pages may provide delayed last/mid only. BOT fallback uses Forward Buying - Spot Buying and Forward Selling - Spot Selling; only exact 30D/90D/180D mappings are used for 1M/3M/6M.'},spot,onshore,offshore,spread};
-await fs.mkdir('data',{recursive:true});await fs.writeFile('data/usdtwd-fx.json',JSON.stringify(out,null,2)+'\n');
-console.log('Wrote data/usdtwd-fx.json');console.log('spot',spot.bid,spot.ask,spot.mode);console.log('onshore',onshore.source,onshore.mode,JSON.stringify(onshore.curve));console.log('offshore',offshore.source,offshore.mode,JSON.stringify(offshore.curve));
+const spread={};for(const t of TENORS){const on=onshore.curve?.[t]||{},off=offshore.curve?.[t]||{};spread[t]={pointsMid:on.mid!=null&&off.mid!=null?off.mid-on.mid:null,outrightMid:on.outrightMid!=null&&off.outrightMid!=null?off.outrightMid-on.outrightMid:null}}
+const out={meta:{generatedAt:new Date().toISOString(),realtime:false,spotValidated:validSpot,sourcePolicy:'Offshore = NetDania; fallback whole curve to Barchart. Onshore = Investing.com; fallback whole curve to Cbonds; final fallback to Bank of Taiwan exact-tenor forwards minus same-bank spot.',note:'BOT parser locks to the USD row, takes the first four USD rates as cash bid/ask and spot bid/ask, then uses exact 30D/90D/180D forwards for 1M/3M/6M.'},spot,onshore,offshore,spread};
+await fs.mkdir('data',{recursive:true});await fs.writeFile('data/usdtwd-fx.json',JSON.stringify(out,null,2)+'\n');console.log('Wrote data/usdtwd-fx.json');console.log('spot',spot.bid,spot.ask,spot.mode);console.log('onshore',onshore.source,onshore.mode,JSON.stringify(onshore.curve));console.log('offshore',offshore.source,offshore.mode,JSON.stringify(offshore.curve));
