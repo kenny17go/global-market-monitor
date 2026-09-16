@@ -17,8 +17,9 @@ function parseUsdLine(text){
   const line=String(text).replace(/^\uFEFF/,'').split(/\r?\n/).find(x=>/^USD\s+/i.test(x.trim()));
   if(!line)throw new Error('BOT plain-text USD row not found');
   const t=line.trim().split(/\s+/);
-  // USD Buying cash spot 10D 30D 60D 90D 120D 150D 180D Selling cash spot 10D 30D 60D 90D 120D 150D 180D
-  if(t.length<21||t[1]!=='Buying'||t[11]!=='Selling')throw new Error(`BOT USD row unexpected: ${line}`);
+  // Stable field positions in BOT plain-text file, independent of Chinese/English labels:
+  // USD [buy-label] cash spot 10D 30D 60D 90D 120D 150D 180D [sell-label] cash spot 10D 30D 60D 90D 120D 150D 180D
+  if(t.length<21||String(t[0]).toUpperCase()!=='USD')throw new Error(`BOT USD row unexpected: ${line}`);
   const values={
     spotBid:num(t[3]), spotAsk:num(t[13]),
     f30Bid:num(t[5]), f30Ask:num(t[15]),
@@ -54,7 +55,7 @@ try{
   };
   data.meta=data.meta||{};
   data.meta.botFallback='PLAIN_TEXT';
-  data.meta.note='BOT fallback uses official plain-text daily quote file; exact 30D/90D/180D only.';
+  data.meta.note='BOT fallback uses official plain-text quote file; exact 30D/90D/180D only.';
   const tenors=['1W','1M','3M','6M','1Y'];
   data.spread=data.spread||{};
   for(const t of tenors){
