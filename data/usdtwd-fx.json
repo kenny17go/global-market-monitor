@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generatedAt": "2026-09-16T22:09:31.134Z",
+    "generatedAt": "2026-09-16T22:25:07.069Z",
     "realtime": false,
     "spotValidated": true,
     "sourcePolicy": "Offshore = NetDania; fallback whole curve to Barchart. Onshore = Investing.com; fallback whole curve to Cbonds; final fallback to Bank of Taiwan exact-tenor forwards minus same-bank spot.",
@@ -11,7 +11,7 @@
     "bid": 31.832,
     "ask": 31.932,
     "mid": 31.881999999999998,
-    "time": "16-September-26 18:09:18",
+    "time": "16-September-26 15:24:00",
     "raw": "USD/TWD 31.8320/9320",
     "source": "NetDania",
     "mode": "WEB QUOTE"
@@ -66,20 +66,20 @@
     "quoteType": "FORWARD POINTS",
     "curve": {
       "1W": {
-        "bid": -0.02,
+        "bid": 0.01,
         "ask": 0.01,
-        "mid": -0.005,
-        "outrightBid": 31.812,
+        "mid": 0.01,
+        "outrightBid": 31.842000000000002,
         "outrightAsk": 31.942,
-        "outrightMid": 31.877
+        "outrightMid": 31.892
       },
       "1M": {
         "bid": -0.01,
-        "ask": 0,
-        "mid": -0.005,
+        "ask": -0.01,
+        "mid": -0.01,
         "outrightBid": 31.822,
-        "outrightAsk": 31.932,
-        "outrightMid": 31.877
+        "outrightAsk": 31.921999999999997,
+        "outrightMid": 31.871999999999996
       },
       "3M": {
         "bid": -0.05,
@@ -99,14 +99,14 @@
       },
       "1Y": {
         "bid": -0.23,
-        "ask": -0.21,
-        "mid": -0.22,
+        "ask": -0.2,
+        "mid": -0.21500000000000002,
         "outrightBid": 31.602,
-        "outrightAsk": 31.721999999999998,
-        "outrightMid": 31.662
+        "outrightAsk": 31.732,
+        "outrightMid": 31.666999999999998
       }
     },
-    "rawRow": "USD/TWD -0.02 0.01 -0.01 0.00 -0.05 -0.05 -0.13 -0.12 -0.23 -0.21"
+    "rawRow": "USD/TWD 0.01 0.01 -0.01 -0.01 -0.05 -0.05 -0.13 -0.12 -0.23 -0.20"
   },
   "spread": {
     "1W": {
@@ -114,8 +114,8 @@
       "outrightMid": null
     },
     "1M": {
-      "pointsMid": 0.05950000000000067,
-      "outrightMid": 0.05150000000000077
+      "pointsMid": 0.054500000000000666,
+      "outrightMid": 0.04649999999999821
     },
     "3M": {
       "pointsMid": 0.13950000000000068,
