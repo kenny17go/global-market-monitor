@@ -15,6 +15,7 @@ on:
       - 'scripts/patch-indicator-dashboard.mjs'
       - 'scripts/patch-screen-lock.mjs'
       - 'scripts/patch-overview-major-fx.mjs'
+      - 'scripts/patch-overview-equities.mjs'
       - 'scripts/fix-usdtwd-toggle.mjs'
       - 'scripts/patch-fx-v11.mjs'
       - '.github/workflows/update-usdtwd-fx.yml'
@@ -58,6 +59,8 @@ jobs:
         run: node scripts/patch-screen-lock.mjs
       - name: Restore overview FX market bridge
         run: node scripts/patch-overview-major-fx.mjs
+      - name: Restore overview equity market bridge
+        run: node scripts/patch-overview-equities.mjs
       - name: Install USD TWD toggle binding
         run: node scripts/fix-usdtwd-toggle.mjs
       - name: Apply FX V1.1 labels
@@ -75,6 +78,7 @@ jobs:
           node --check scripts/patch-indicator-dashboard.mjs
           node --check scripts/patch-screen-lock.mjs
           node --check scripts/patch-overview-major-fx.mjs
+          node --check scripts/patch-overview-equities.mjs
           grep -q "function syncUsdtwdVisibility" app.js
           grep -q "function renderTaifexSettlementNdf" app.js
           grep -q "TAIFEX settlement NDF render failed" app.js
@@ -95,14 +99,15 @@ jobs:
           grep -q "toggleUsdtwdFx" index.html
           grep -q "usdtwdFxPanel" index.html
           grep -q "mergeMajorFx(base,majorFx)" providers.js
+          grep -q "mergeOverviewEquities(base,delayed,taifex)" providers.js
       - name: Commit FX data and UI
         run: |
-          git add data/usdtwd-fx.json index.html app.js providers.js styles.css
+          git add data/usdtwd-fx.json index.html app.js providers.js styles.css scripts/fetch-overseas-delayed.mjs
           if git diff --cached --quiet; then
             echo "No FX changes"
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "data: refresh USD TWD FX curves and preserve overview FX"
+          git commit -m "data: refresh USD TWD FX curves and preserve overview market bridges"
           git push
