@@ -1,19 +1,20 @@
 {
   "meta": {
-    "generatedAt": "2026-09-16T19:50:41.875Z",
+    "generatedAt": "2026-09-16T20:10:52.760Z",
     "realtime": false,
-    "spotValidated": false,
+    "spotValidated": true,
     "sourcePolicy": "Offshore = NetDania; fallback whole curve to Barchart. Onshore = Investing.com; fallback whole curve to Cbonds; final fallback to Bank of Taiwan exact-tenor forwards minus same-bank spot.",
     "note": "BOT fallback uses official plain-text quote file; exact 30D/90D/180D only.",
     "botFallback": "PLAIN_TEXT"
   },
   "spot": {
-    "bid": null,
-    "ask": null,
-    "mid": null,
-    "time": null,
+    "bid": 31.85,
+    "ask": 31.92,
+    "mid": 31.885,
+    "time": "16-September-26 13:09:14",
+    "raw": "USD/TWD 31.8500/920",
     "source": "NetDania",
-    "mode": "UNAVAILABLE"
+    "mode": "WEB QUOTE"
   },
   "onshore": {
     "source": "Bank of Taiwan plain-text FX rates",
@@ -68,44 +69,44 @@
         "bid": 0,
         "ask": 0,
         "mid": 0,
-        "outrightBid": null,
-        "outrightAsk": null,
-        "outrightMid": null
+        "outrightBid": 31.85,
+        "outrightAsk": 31.92,
+        "outrightMid": 31.885
       },
       "1M": {
         "bid": -0.01,
         "ask": -0.02,
         "mid": -0.015,
-        "outrightBid": null,
-        "outrightAsk": null,
-        "outrightMid": null
+        "outrightBid": 31.84,
+        "outrightAsk": 31.900000000000002,
+        "outrightMid": 31.87
       },
       "3M": {
         "bid": -0.06,
         "ask": -0.06,
         "mid": -0.06,
-        "outrightBid": null,
-        "outrightAsk": null,
-        "outrightMid": null
+        "outrightBid": 31.790000000000003,
+        "outrightAsk": 31.860000000000003,
+        "outrightMid": 31.825000000000003
       },
       "6M": {
-        "bid": -0.14,
+        "bid": -0.13,
         "ask": -0.13,
-        "mid": -0.135,
-        "outrightBid": null,
-        "outrightAsk": null,
-        "outrightMid": null
+        "mid": -0.13,
+        "outrightBid": 31.720000000000002,
+        "outrightAsk": 31.790000000000003,
+        "outrightMid": 31.755000000000003
       },
       "1Y": {
-        "bid": -0.24,
-        "ask": -0.21,
-        "mid": -0.22499999999999998,
-        "outrightBid": null,
-        "outrightAsk": null,
-        "outrightMid": null
+        "bid": -0.23,
+        "ask": -0.22,
+        "mid": -0.225,
+        "outrightBid": 31.62,
+        "outrightAsk": 31.700000000000003,
+        "outrightMid": 31.66
       }
     },
-    "rawRow": "USD/TWD 0.00 0.00 -0.01 -0.02 -0.06 -0.06 -0.14 -0.13 -0.24 -0.21"
+    "rawRow": "USD/TWD 0.00 0.00 -0.01 -0.02 -0.06 -0.06 -0.13 -0.13 -0.23 -0.22"
   },
   "spread": {
     "1W": {
@@ -114,15 +115,15 @@
     },
     "1M": {
       "pointsMid": 0.04950000000000067,
-      "outrightMid": null
+      "outrightMid": 0.04450000000000287
     },
     "3M": {
       "pointsMid": 0.12950000000000067,
-      "outrightMid": null
+      "outrightMid": 0.12450000000000472
     },
     "6M": {
-      "pointsMid": 0.2430000000000001,
-      "outrightMid": null
+      "pointsMid": 0.2480000000000001,
+      "outrightMid": 0.2430000000000021
     },
     "1Y": {
       "pointsMid": null,
