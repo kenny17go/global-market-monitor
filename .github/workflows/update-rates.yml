@@ -1,0 +1,50 @@
+name: Update rates and bond yields
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'scripts/fetch-overview-rates.mjs'
+      - 'scripts/patch-overview-rates.mjs'
+      - '.github/workflows/update-rates.yml'
+  schedule:
+    - cron: '15 22 * * 1-5'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-rates
+  cancel-in-progress: true
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Fetch official US Treasury yield curve
+        run: node scripts/fetch-overview-rates.mjs
+      - name: Install overview rates bridge
+        run: node scripts/patch-overview-rates.mjs
+      - name: Validate rates data
+        run: |
+          node --check scripts/fetch-overview-rates.mjs
+          node --check scripts/patch-overview-rates.mjs
+          node --check providers.js
+          node -e "const d=JSON.parse(require('fs').readFileSync('data/rates-latest.json','utf8')); const need=['1M','3M','6M','1Y','2Y','5Y','10Y','30Y']; const ok=need.filter(t=>d.ust?.find(x=>x.tenor===t&&x.yield!=null)); if(ok.length<8) process.exit(1); console.log('UST tenors:',ok.length,'asOf:',d.meta?.asOf);"
+          grep -q "mergeOverviewRates(base,ratesData)" providers.js
+          grep -q "rates-latest.json" providers.js
+      - name: Commit rates data
+        run: |
+          git add data/rates-latest.json providers.js
+          if git diff --cached --quiet; then
+            echo "No rates changes"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "data: refresh official US Treasury yield curve"
+          git push
