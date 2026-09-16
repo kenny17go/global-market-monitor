@@ -24,10 +24,10 @@ const newRenderer=`function renderTokenOptions(){
     if(filter===x.category){addTw();addOs()}
   });
   let html='<option value="">選擇報價欄位…</option>';
-  html+=Object.entries(groups).map(([g,arr])=>\`<optgroup label="${'${g}'}">${'${arr.map(q=>[\'BID\',\'ASK\',\'LAST\'].map(f=>`<option value="${q.id}.${f}">${q.label} · ${f}</option>`).join(\'\')).join(\'\')}'} </optgroup>\`).join('');
+  html+=Object.entries(groups).map(([g,arr])=>\`<optgroup label="${'${g}'}">${'${arr.map(q=>[\'BID\',\'ASK\',\'LAST\'].map(f=>`<option value="${q.id}.${f}">${q.label} · ${f}</option>`).join(\'\')).join(\'\')}'}</optgroup>\`).join('');
   if(filter==='all'||filter==='結算日NDF')html+='<optgroup label="結算日 NDF"><option value="TGF_NEAR_NDF">TGF 近月 NDF Mid</option><option value="TGF_NEXT_NDF">TGF 次月 NDF Mid</option><option value="BRF_NEAR_NDF">BRF 近月 NDF Mid</option><option value="BRF_NEXT_NDF">BRF 次月 NDF Mid</option></optgroup>';
   if(filter==='all'||filter==='匯率')html+='<optgroup label="匯率"><option value="USD_TWD_SPOT">USD/TWD Spot</option></optgroup>';
-  s.innerHTML=html.replace(/>\s+<\/optgroup>/g,'></optgroup>');
+  s.innerHTML=html;
   if([...s.options].some(o=>o.value===cur))s.value=cur;
 }`;
 
