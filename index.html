@@ -12,16 +12,16 @@
           <div id="topPicker" class="top-picker hidden"></div>
           <section id="topCards" class="cards"></section>
         </section>
+<section class="grid-main">
+          <article class="panel"><h3>外匯 / FX & Forward Points <small>Spot + Swap Points</small><button id="toggleUsdtwdFx" class="secondary-btn fx-twd-toggle" type="button" aria-expanded="false">顯示台幣專區</button></h3><div class="table-wrap"><table><thead><tr><th>貨幣對</th><th>Bid</th><th>Ask</th><th>變動</th><th>1M</th><th>3M</th><th>6M</th><th>1Y</th></tr></thead><tbody id="fxBody"></tbody></table></div></article>
 
-        <section id="usdtwdFxPanel" class="panel usdtwd-fx-panel">
-          <div class="fx-focus-head"><div><h2>USD/TWD 專區</h2><p>Spot、境內 Onshore Forward 與境外 Offshore NDF/Forward 分開顯示，不互相混用。</p></div><div id="usdtwdFxFreshness" class="source-note">資料載入中…</div></div>
+        <section id="usdtwdFxPanel" class="panel usdtwd-fx-panel is-hidden">
+          <div class="fx-focus-head"><div><h2>USD/TWD 台幣專區</h2><p>Spot、境內 Onshore Forward 與 NetDania USD/TWD Forward 分開顯示；NetDania 公開頁未標示 onshore/offshore，因此暫不替它指定市場屬性。</p></div><div id="usdtwdFxFreshness" class="source-note">資料載入中…</div></div>
           <div id="usdtwdSpotCards" class="fx-spot-cards"></div>
-          <div class="table-wrap"><table class="fx-curve-table"><thead><tr><th>Tenor</th><th colspan="3">Onshore Forward · Investing.com</th><th colspan="3">Offshore NDF / Forward · NetDania</th><th>Offshore − Onshore</th></tr><tr><th></th><th>Bid</th><th>Ask</th><th>Mid Outright</th><th>Bid</th><th>Ask</th><th>Mid Outright</th><th>Points Mid</th></tr></thead><tbody id="usdtwdCurveBody"></tbody></table></div>
-          <div class="fx-focus-note">Forward points 與 outright 皆以各來源原始報價計算；若來源暫時無法取得，顯示「—」，不使用模擬值補齊。</div>
+          <div class="table-wrap"><table class="fx-curve-table"><thead><tr><th>Tenor</th><th colspan="3">Onshore Forward · Investing.com</th><th colspan="3">NetDania USD/TWD Forward</th><th>NetDania − Onshore</th></tr><tr><th></th><th>Bid</th><th>Ask</th><th>Mid Outright</th><th>Bid</th><th>Ask</th><th>Mid Outright</th><th>Points Mid</th></tr></thead><tbody id="usdtwdCurveBody"></tbody></table></div>
+          <div class="fx-focus-note">Forward points 與 outright 皆以各來源原始報價計算；來源暫時無法取得或報價驗證失敗時顯示「—」，不使用模擬值補齊。NetDania 市場屬性確認前不標示為境內或境外。</div>
         </section>
 
-        <section class="grid-main">
-          <article class="panel"><h3>外匯 / FX & Forward Points <small>Spot + Swap Points</small></h3><div class="table-wrap"><table><thead><tr><th>貨幣對</th><th>Bid</th><th>Ask</th><th>變動</th><th>1M</th><th>3M</th><th>6M</th><th>1Y</th></tr></thead><tbody id="fxBody"></tbody></table></div></article>
           <article class="panel"><h3>全球股價指數 / Equity Indices & Futures <small>Cash + Futures</small></h3><div class="table-wrap"><table><thead><tr><th>指數</th><th>現貨</th><th>期貨</th><th>基差</th><th>漲跌</th></tr></thead><tbody id="eqBody"></tbody></table></div></article>
           <div class="right-stack">
             <article class="panel"><h3>商品現貨與期貨 / Commodities <small>Spot + Futures</small></h3><div class="table-wrap"><table><thead><tr><th>商品</th><th>Spot</th><th>Futures</th><th>基差</th><th>漲跌</th></tr></thead><tbody id="cmdBody"></tbody></table></div></article>
