@@ -5,7 +5,9 @@ on:
   push:
     paths:
       - 'scripts/fetch-overseas-delayed.mjs'
+      - 'scripts/fetch-overview-commodities.mjs'
       - 'scripts/patch-overview-equities.mjs'
+      - 'scripts/patch-overview-commodities.mjs'
       - 'providers.js'
       - '.github/workflows/update-overseas-delayed.yml'
   schedule:
@@ -28,23 +30,32 @@ jobs:
           node-version: '22'
       - name: Install overview equity bridge
         run: node scripts/patch-overview-equities.mjs
+      - name: Install overview commodity bridge
+        run: node scripts/patch-overview-commodities.mjs
       - name: Fetch Yahoo / JPX delayed futures and cash indices
         run: node scripts/fetch-overseas-delayed.mjs
+      - name: Fetch commodity spot and futures
+        run: node scripts/fetch-overview-commodities.mjs
       - name: Validate market data
         run: |
           node --check scripts/fetch-overseas-delayed.mjs
+          node --check scripts/fetch-overview-commodities.mjs
           node --check scripts/patch-overview-equities.mjs
+          node --check scripts/patch-overview-commodities.mjs
           node --check providers.js
           node -e "const d=JSON.parse(require('fs').readFileSync('data/overseas-delayed.json','utf8')); const idx=Object.values(d.indices||{}).filter(x=>x.last!=null); const fut=['CME_MES','CME_MNQ','CME_SOX','JPX_NIKKEI225_MINI','JPX_MINI_TOPIX'].filter(k=>d.products?.[k]?.contracts?.length); if(idx.length<4) process.exit(1); console.log('valid cash indices:',idx.length,'overview futures:',fut.length);"
+          node -e "const d=JSON.parse(require('fs').readFileSync('data/commodities-latest.json','utf8')); const rows=Object.values(d.commodities||{}); const spot=rows.filter(x=>x.spot?.last!=null).length; const fut=rows.filter(x=>x.future?.last!=null).length; if(spot<3||fut<3) process.exit(1); console.log('commodity spots:',spot,'commodity futures:',fut);"
           grep -q "mergeOverviewEquities(base,delayed,taifex)" providers.js
+          grep -q "mergeOverviewCommodities(base,commodityData)" providers.js
+          grep -q "commodities-latest.json" providers.js
       - name: Commit delayed data
         run: |
-          git add data/overseas-delayed.json scripts/fetch-overseas-delayed.mjs providers.js
+          git add data/overseas-delayed.json data/commodities-latest.json scripts/fetch-overseas-delayed.mjs providers.js
           if git diff --cached --quiet; then
             echo "No delayed-data changes"
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "data: refresh overview equity cash and futures"
+          git commit -m "data: refresh overview equity and commodity markets"
           git push
