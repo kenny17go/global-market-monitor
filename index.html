@@ -16,13 +16,13 @@
           <article class="panel"><h3>外匯 / FX & Forward Points <small>Spot + Swap Points</small><button id="toggleUsdtwdFx" class="secondary-btn fx-twd-toggle" type="button" aria-expanded="false">顯示台幣專區</button></h3><div class="table-wrap"><table><thead><tr><th>貨幣對</th><th>Bid</th><th>Ask</th><th>變動</th><th>1M</th><th>3M</th><th>6M</th><th>1Y</th></tr></thead><tbody id="fxBody"></tbody></table></div></article>
 
         <section id="usdtwdFxPanel" class="panel usdtwd-fx-panel is-hidden">
-          <div class="fx-focus-head"><div><h2>USD/TWD 台幣專區</h2><p>Spot、境內 Onshore Forward 與 NetDania USD/TWD Forward 分開顯示；NetDania 公開頁未標示 onshore/offshore，因此暫不替它指定市場屬性。</p></div><div id="usdtwdFxFreshness" class="source-note">資料載入中…</div></div>
+          <div class="fx-focus-head"><div><h2>USD/TWD 台幣專區</h2><p>Offshore 固定使用 NetDania；Onshore 優先 Investing.com，無法取得時整條曲線改用 Cbonds Taipei daily close。</p></div><div id="usdtwdFxFreshness" class="source-note">資料載入中…</div></div>
           <div id="usdtwdSpotCards" class="fx-spot-cards"></div>
-          <div class="table-wrap"><table class="fx-curve-table"><thead><tr><th>Tenor</th><th colspan="3">Onshore Taipei · Investing / Cbonds</th><th colspan="3">NetDania USD/TWD Forward</th><th>Cross-market spread</th></tr><tr><th></th><th>Bid</th><th>Ask</th><th>Mid Outright</th><th>Bid</th><th>Ask</th><th>Mid Outright</th><th>Points Mid</th></tr></thead><tbody id="usdtwdCurveBody"></tbody></table></div>
-          <div class="fx-focus-note">Onshore Taipei：Investing.com 盤中 Forward Points 優先；無法取得時使用 Cbonds Taipei DAILY outright benchmark。NetDania 市場屬性確認前不標示境內或境外，也不計算跨市場 spread。</div>
+          <div class="table-wrap"><table class="fx-curve-table"><thead><tr><th>Tenor</th><th colspan="3">Onshore Taipei · Investing / Cbonds</th><th colspan="3">Offshore · NetDania</th><th>Offshore − Onshore</th></tr><tr><th></th><th>Bid</th><th>Ask</th><th>Mid Outright</th><th>Bid</th><th>Ask</th><th>Mid Outright</th><th>Spread</th></tr></thead><tbody id="usdtwdCurveBody"></tbody></table></div>
+          <div class="fx-focus-note">期限固定為 1W / 1M / 3M / 6M / 1Y。Cbonds 為 outright daily benchmark，不會當成 forward points；來源無法取得或驗證失敗時顯示「—」，不使用模擬值。</div>
         </section>
 
-          <article class="panel"><h3>全球股價指數 / Equity Indices & Futures <small>Cash + Futures</small></h3><div class="table-wrap"><table><thead><tr><th>指數</th><th>現貨</th><th>期貨</th><th>基差</th><th>漲跌</th></tr></thead><tbody id="eqBody"></tbody></table></div></article>
+<article class="panel"><h3>全球股價指數 / Equity Indices & Futures <small>Cash + Futures</small></h3><div class="table-wrap"><table><thead><tr><th>指數</th><th>現貨</th><th>期貨</th><th>基差</th><th>漲跌</th></tr></thead><tbody id="eqBody"></tbody></table></div></article>
           <div class="right-stack">
             <article class="panel"><h3>商品現貨與期貨 / Commodities <small>Spot + Futures</small></h3><div class="table-wrap"><table><thead><tr><th>商品</th><th>Spot</th><th>Futures</th><th>基差</th><th>漲跌</th></tr></thead><tbody id="cmdBody"></tbody></table></div></article>
             <div class="split">
