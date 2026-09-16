@@ -17,6 +17,7 @@ on:
       - 'scripts/patch-custom-indicators.mjs'
       - 'scripts/patch-indicator-dashboard.mjs'
       - 'scripts/patch-screen-lock.mjs'
+      - 'scripts/patch-overview-major-fx.mjs'
       - 'scripts/fix-runtime-regressions.mjs'
       - '.github/workflows/update-taifex-data.yml'
   schedule:
@@ -62,6 +63,8 @@ jobs:
         run: node scripts/patch-indicator-dashboard.mjs
       - name: Install screen lock demo
         run: node scripts/patch-screen-lock.mjs
+      - name: Restore overview FX market bridge
+        run: node scripts/patch-overview-major-fx.mjs
       - name: Fix browser runtime regressions
         run: node scripts/fix-runtime-regressions.mjs
       - name: Validate JavaScript
@@ -79,6 +82,7 @@ jobs:
           node --check scripts/patch-custom-indicators.mjs
           node --check scripts/patch-indicator-dashboard.mjs
           node --check scripts/patch-screen-lock.mjs
+          node --check scripts/patch-overview-major-fx.mjs
           node --check scripts/fix-runtime-regressions.mjs
           grep -q "function renderTaifexSettlementNdf" app.js
           grep -q "TAIFEX settlement NDF render failed" app.js
@@ -95,6 +99,7 @@ jobs:
           grep -q "SCREEN_LOCK_PASS" app.js
           grep -q "app.js?v=20260916-lockdemo1" index.html
           grep -q "taifexSettlementNdf" index.html
+          grep -q "mergeMajorFx(base,majorFx)" providers.js
       - name: Commit integration/data changes
         run: |
           if git diff --quiet -- app.js providers.js config.example.js index.html styles.css data/latest.json data/taifex-latest.json; then
@@ -104,5 +109,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add app.js providers.js config.example.js index.html styles.css data/latest.json data/taifex-latest.json
-          git commit -m "feat: refresh TAIFEX data and screen lock demo"
+          git commit -m "feat: refresh TAIFEX data and preserve overview FX"
           git push
