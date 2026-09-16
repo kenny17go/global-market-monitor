@@ -30,31 +30,17 @@ async function yahooAuth(){
   if(yahooSession)return yahooSession;
   try{
     let cookie='';
-    for(const seedUrl of ['https://finance.yahoo.com/quote/MES=F/','https://finance.yahoo.com/']){
-      try{const seed=await request(seedUrl,{accept:'text/html,*/*'});cookie=mergeCookies(cookie,cookiesFrom(seed.headers));if(cookie)break}catch{}
-    }
+    for(const seedUrl of ['https://finance.yahoo.com/quote/MES=F/','https://finance.yahoo.com/']){try{const seed=await request(seedUrl,{accept:'text/html,*/*'});cookie=mergeCookies(cookie,cookiesFrom(seed.headers));if(cookie)break}catch{}}
     let crumb='';
-    for(const host of ['https://query2.finance.yahoo.com','https://query1.finance.yahoo.com']){
-      try{crumb=(await fetchText(`${host}/v1/test/getcrumb`,{cookie,accept:'text/plain,*/*'})).trim();if(crumb&&!crumb.includes('<'))break}catch{}
-    }
+    for(const host of ['https://query2.finance.yahoo.com','https://query1.finance.yahoo.com']){try{crumb=(await fetchText(`${host}/v1/test/getcrumb`,{cookie,accept:'text/plain,*/*'})).trim();if(crumb&&!crumb.includes('<'))break}catch{}}
     if(!crumb)throw new Error('missing Yahoo crumb');
-    yahooSession={cookie,crumb};
-    console.log('Yahoo authenticated quote session ready',cookie?'with cookie':'crumb-only');
-    return yahooSession;
+    yahooSession={cookie,crumb};console.log('Yahoo authenticated quote session ready',cookie?'with cookie':'crumb-only');return yahooSession;
   }catch(e){console.warn('Yahoo crumb session unavailable',e.message);yahooSession={cookie:'',crumb:''};return yahooSession}
 }
 async function yahooChain(root){try{const html=await fetchText(`https://finance.yahoo.com/quote/${encodeURIComponent(root+'=F')}/futures/`);const rx=new RegExp(`${root}[FGHJKMNQUVXZ]\\d{2}\\.[A-Z]+`,'gi');return [...new Set(html.match(rx)||[])].slice(0,8)}catch(e){console.warn('Yahoo chain failed',root,e.message);return []}}
 async function yahooApiQuote(symbol,range){
   const sess=await yahooAuth();
-  if(sess.crumb){
-    for(const host of ['https://query2.finance.yahoo.com','https://query1.finance.yahoo.com']){
-      try{
-        const url=`${host}/v7/finance/quote?symbols=${encodeURIComponent(symbol)}&crumb=${encodeURIComponent(sess.crumb)}`;
-        const j=await fetchJson(url,{cookie:sess.cookie});const q=j?.quoteResponse?.result?.[0];
-        if(q)return {symbol,month:symbolMonth(symbol)||dateMonth(q.expireDate),bid:valid(q.bid,range),ask:valid(q.ask,range),last:valid(q.regularMarketPrice,range),timestamp:q.regularMarketTime?new Date(q.regularMarketTime*1000).toISOString():null,quoteType:'Yahoo authenticated quote'};
-      }catch(e){console.warn('Yahoo authenticated quote failed',host,symbol,e.message)}
-    }
-  }
+  if(sess.crumb){for(const host of ['https://query2.finance.yahoo.com','https://query1.finance.yahoo.com']){try{const j=await fetchJson(`${host}/v7/finance/quote?symbols=${encodeURIComponent(symbol)}&crumb=${encodeURIComponent(sess.crumb)}`,{cookie:sess.cookie});const q=j?.quoteResponse?.result?.[0];if(q)return {symbol,month:symbolMonth(symbol)||dateMonth(q.expireDate),bid:valid(q.bid,range),ask:valid(q.ask,range),last:valid(q.regularMarketPrice,range),timestamp:q.regularMarketTime?new Date(q.regularMarketTime*1000).toISOString():null,quoteType:'Yahoo authenticated quote'}}catch(e){console.warn('Yahoo authenticated quote failed',host,symbol,e.message)}}}
   try{const j=await fetchJson(`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1m&range=1d`);const m=j?.chart?.result?.[0]?.meta;if(m)return {symbol,month:symbolMonth(symbol)||dateMonth(m.expireDate),bid:null,ask:null,last:valid(m.regularMarketPrice,range),timestamp:m.regularMarketTime?new Date(m.regularMarketTime*1000).toISOString():null,quoteType:'Yahoo chart fallback'}}catch(e){console.warn('Yahoo chart API failed',symbol,e.message)}
   return null;
 }
@@ -64,15 +50,15 @@ async function tradingViewContracts({id,url,prefix,range}){
   try{
     const html=await fetchText(url,{headers:{referer:'https://www.tradingview.com/'}}),plain=stripHtml(html);
     const rx=new RegExp(`${prefix}[FGHJKMNQUVXZ]20\\d{2}`,'gi');const symbols=[...new Set((html.match(rx)||[]).concat(plain.match(rx)||[]))].slice(0,12);const contracts=[];
-    for(const symbol of symbols){let last=null;const pos=Math.max(html.indexOf(symbol),plain.indexOf(symbol));const chunk=(pos>=0?(html.includes(symbol)?html:plain).slice(pos,pos+8000):'');for(const re of [/"close"\s*:\s*(-?[\d.]+)/i,/"lp"\s*:\s*(-?[\d.]+)/i,/"price"\s*:\s*(-?[\d.]+)/i,new RegExp(`${symbol.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}[^0-9]{0,200}([\\d,]+(?:\\.\\d+)?)`,'i')]){const m=chunk.match(re);if(m){last=valid(m[1],range);if(last!=null)break}}const month=tvMonth(symbol);if(month&&last!=null)contracts.push({symbol,month,bid:null,ask:null,last,timestamp:new Date().toISOString(),quoteType:'TradingView delayed page'})}
+    for(const symbol of symbols){const month=tvMonth(symbol);if(!month)continue;const esc=symbol.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');let last=null;
+      const plainPos=plain.indexOf(symbol);if(plainPos>=0){const chunk=plain.slice(plainPos,plainPos+1200);const m=chunk.match(new RegExp(`${esc}[\\s\\S]{0,500}?20\\d{2}-\\d{2}-\\d{2}\\s+([\\d,]+(?:\\.\\d+)?)`,'i'));if(m)last=valid(m[1],range)}
+      if(last==null){const htmlPos=html.indexOf(symbol);const chunk=htmlPos>=0?html.slice(htmlPos,htmlPos+8000):'';for(const re of [/"close"\s*:\s*(-?[\d.]+)/i,/"lp"\s*:\s*(-?[\d.]+)/i,/"price"\s*:\s*(-?[\d.]+)/i]){const m=chunk.match(re);if(m){last=valid(m[1],range);if(last!=null)break}}}
+      if(last!=null)contracts.push({symbol,month,bid:null,ask:null,last,timestamp:new Date().toISOString(),quoteType:'TradingView delayed page'});
+    }
     contracts.sort((a,b)=>a.month.localeCompare(b.month));return {defaultMonth:contracts[0]?.month||null,contracts,source:'TradingView · OSE delayed fallback',mode:contracts.length?'DELAYED':'UNAVAILABLE'};
   }catch(e){console.warn('TradingView JPX fallback failed',id,e.message);return {defaultMonth:null,contracts:[],source:'TradingView · OSE delayed fallback',mode:'UNAVAILABLE'}}
 }
-async function nikkei225jpMini(){
-  try{
-    const plain=stripHtml(await fetchText('https://nikkei225jp.com/cme/'));const contracts=[];const re=/大証ミニ\s*(\d{2})年(\d{1,2})月限\s*([\d,]+)/g;let m;while((m=re.exec(plain))){const month=`20${m[1]}${String(m[2]).padStart(2,'0')}`,last=valid(m[3],[1000,100000]);if(last!=null)contracts.push({symbol:`OSE Nikkei225 mini ${month}`,month,bid:null,ask:null,last,timestamp:new Date().toISOString(),quoteType:'nikkei225jp public table'})}return {defaultMonth:contracts[0]?.month||null,contracts,source:'nikkei225jp.com · OSE public quote fallback',mode:contracts.length?'DELAYED':'UNAVAILABLE'};
-  }catch(e){console.warn('nikkei225jp fallback failed',e.message);return {defaultMonth:null,contracts:[],source:'nikkei225jp.com · OSE public quote fallback',mode:'UNAVAILABLE'}}
-}
+async function nikkei225jpMini(){try{const plain=stripHtml(await fetchText('https://nikkei225jp.com/cme/'));const contracts=[];const re=/大証ミニ\s*(\d{2})年(\d{1,2})月限\s*([\d,]+)/g;let m;while((m=re.exec(plain))){const month=`20${m[1]}${String(m[2]).padStart(2,'0')}`,last=valid(m[3],[1000,100000]);if(last!=null)contracts.push({symbol:`OSE Nikkei225 mini ${month}`,month,bid:null,ask:null,last,timestamp:new Date().toISOString(),quoteType:'nikkei225jp public table'})}return {defaultMonth:contracts[0]?.month||null,contracts,source:'nikkei225jp.com · OSE public quote fallback',mode:contracts.length?'DELAYED':'UNAVAILABLE'}}catch(e){console.warn('nikkei225jp fallback failed',e.message);return {defaultMonth:null,contracts:[],source:'nikkei225jp.com · OSE public quote fallback',mode:'UNAVAILABLE'}}}
 
 const products={};for(const t of ROOTS)products[t.id]=await yahooRootProduct(t);
 products.JPX_MINI_TOPIX=await tradingViewContracts({id:'JPX_MINI_TOPIX',url:'https://tw.tradingview.com/symbols/OSE-TOPIXM1!/contracts/',prefix:'TOPIXM',range:[100,10000]});
