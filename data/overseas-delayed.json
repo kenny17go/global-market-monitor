@@ -1,10 +1,10 @@
 {
   "meta": {
-    "source": "Yahoo Finance + Investing.com fallback",
+    "source": "Yahoo Finance + JPX delayed fallbacks",
     "mode": "DELAYED",
     "realtime": false,
-    "generatedAt": "2026-09-16T00:02:37.095Z",
-    "note": "CME delayed quotes and contract months are sourced from Yahoo Finance. Invalid/out-of-range values are discarded. JPX attempts Investing.com and remains unavailable when automation is blocked. Brent uses Yahoo BZ delayed benchmark as quote reference for the mini contract. LIVE broker connectors override delayed data."
+    "generatedAt": "2026-09-16T00:04:28.237Z",
+    "note": "CME contract months come from Yahoo Finance futures chains. Yahoo Bid/Ask uses a cookie+crumb quote session when available and falls back to Last-only chart data. JPX/OSE uses delayed public-page fallbacks and does not synthesize Bid/Ask. Values outside instrument-specific sanity ranges are discarded. LIVE broker connectors can override delayed data."
   },
   "products": {
     "CME_MES": {
@@ -15,16 +15,18 @@
           "month": "202609",
           "bid": null,
           "ask": null,
-          "last": 7598,
-          "timestamp": "2026-09-15T23:52:15.000Z"
+          "last": 7599.25,
+          "timestamp": "2026-09-15T23:54:11.000Z",
+          "quoteType": "Yahoo chart fallback"
         },
         {
           "symbol": "MESZ26.CME",
           "month": "202612",
           "bid": null,
           "ask": null,
-          "last": 7665.25,
-          "timestamp": "2026-09-15T23:52:27.000Z"
+          "last": 7666.25,
+          "timestamp": "2026-09-15T23:54:17.000Z",
+          "quoteType": "Yahoo chart fallback"
         }
       ],
       "source": "Yahoo Finance",
@@ -38,16 +40,18 @@
           "month": "202609",
           "bid": null,
           "ask": null,
-          "last": 28986.75,
-          "timestamp": "2026-09-15T23:52:25.000Z"
+          "last": 28990.5,
+          "timestamp": "2026-09-15T23:54:17.000Z",
+          "quoteType": "Yahoo chart fallback"
         },
         {
           "symbol": "MNQZ26.CME",
           "month": "202612",
           "bid": null,
           "ask": null,
-          "last": 29279.75,
-          "timestamp": "2026-09-15T23:52:29.000Z"
+          "last": 29283.5,
+          "timestamp": "2026-09-15T23:54:18.000Z",
+          "quoteType": "Yahoo chart fallback"
         }
       ],
       "source": "Yahoo Finance",
@@ -61,16 +65,18 @@
           "month": "202609",
           "bid": null,
           "ask": null,
-          "last": 52177,
-          "timestamp": "2026-09-15T23:52:10.000Z"
+          "last": 52181,
+          "timestamp": "2026-09-15T23:53:32.000Z",
+          "quoteType": "Yahoo chart fallback"
         },
         {
           "symbol": "MYMZ26.CBT",
           "month": "202612",
           "bid": null,
           "ask": null,
-          "last": 52588,
-          "timestamp": "2026-09-15T23:51:43.000Z"
+          "last": 52593,
+          "timestamp": "2026-09-15T23:53:55.000Z",
+          "quoteType": "Yahoo chart fallback"
         }
       ],
       "source": "Yahoo Finance",
@@ -84,8 +90,9 @@
           "month": "202610",
           "bid": null,
           "ask": null,
-          "last": 4290.3,
-          "timestamp": "2026-09-15T23:52:18.000Z"
+          "last": 4290.2,
+          "timestamp": "2026-09-15T23:53:09.000Z",
+          "quoteType": "Yahoo chart fallback"
         },
         {
           "symbol": "MGCZ26.CMX",
@@ -93,7 +100,8 @@
           "bid": null,
           "ask": null,
           "last": 4323.9,
-          "timestamp": "2026-09-15T23:52:29.000Z"
+          "timestamp": "2026-09-15T23:54:19.000Z",
+          "quoteType": "Yahoo chart fallback"
         },
         {
           "symbol": "MGCG27.CMX",
@@ -101,7 +109,8 @@
           "bid": null,
           "ask": null,
           "last": 4362.6,
-          "timestamp": "2026-09-15T23:48:32.000Z"
+          "timestamp": "2026-09-15T23:48:32.000Z",
+          "quoteType": "Yahoo chart fallback"
         },
         {
           "symbol": "MGCJ27.CMX",
@@ -109,7 +118,8 @@
           "bid": null,
           "ask": null,
           "last": 4396,
-          "timestamp": "2026-09-15T23:51:14.000Z"
+          "timestamp": "2026-09-15T23:51:14.000Z",
+          "quoteType": "Yahoo chart fallback"
         },
         {
           "symbol": "MGCM27.CMX",
@@ -117,7 +127,8 @@
           "bid": null,
           "ask": null,
           "last": 4434.8,
-          "timestamp": "2026-09-15T23:45:37.000Z"
+          "timestamp": "2026-09-15T23:45:37.000Z",
+          "quoteType": "Yahoo chart fallback"
         }
       ],
       "source": "Yahoo Finance",
@@ -131,8 +142,9 @@
           "month": "202610",
           "bid": null,
           "ask": null,
-          "last": 4290.3,
-          "timestamp": "2026-09-15T23:52:18.000Z"
+          "last": 4290.2,
+          "timestamp": "2026-09-15T23:53:09.000Z",
+          "quoteType": "Yahoo chart fallback"
         },
         {
           "symbol": "MGCZ26.CMX",
@@ -140,7 +152,8 @@
           "bid": null,
           "ask": null,
           "last": 4323.9,
-          "timestamp": "2026-09-15T23:52:29.000Z"
+          "timestamp": "2026-09-15T23:54:19.000Z",
+          "quoteType": "Yahoo chart fallback"
         },
         {
           "symbol": "MGCG27.CMX",
@@ -148,7 +161,8 @@
           "bid": null,
           "ask": null,
           "last": 4362.6,
-          "timestamp": "2026-09-15T23:48:32.000Z"
+          "timestamp": "2026-09-15T23:48:32.000Z",
+          "quoteType": "Yahoo chart fallback"
         },
         {
           "symbol": "MGCJ27.CMX",
@@ -156,7 +170,8 @@
           "bid": null,
           "ask": null,
           "last": 4396,
-          "timestamp": "2026-09-15T23:51:14.000Z"
+          "timestamp": "2026-09-15T23:51:14.000Z",
+          "quoteType": "Yahoo chart fallback"
         },
         {
           "symbol": "MGCM27.CMX",
@@ -164,7 +179,8 @@
           "bid": null,
           "ask": null,
           "last": 4434.8,
-          "timestamp": "2026-09-15T23:45:37.000Z"
+          "timestamp": "2026-09-15T23:45:37.000Z",
+          "quoteType": "Yahoo chart fallback"
         }
       ],
       "source": "Yahoo Finance",
@@ -178,8 +194,9 @@
           "month": "202612",
           "bid": null,
           "ask": null,
-          "last": 1.1578,
-          "timestamp": "2026-09-15T23:52:30.000Z"
+          "last": 1.15795,
+          "timestamp": "2026-09-15T23:54:24.000Z",
+          "quoteType": "Yahoo chart fallback"
         }
       ],
       "source": "Yahoo Finance",
@@ -193,8 +210,9 @@
           "month": "202612",
           "bid": null,
           "ask": null,
-          "last": 0.006485,
-          "timestamp": "2026-09-15T23:52:31.000Z"
+          "last": 0.006487,
+          "timestamp": "2026-09-15T23:54:24.000Z",
+          "quoteType": "Yahoo chart fallback"
         }
       ],
       "source": "Yahoo Finance",
@@ -209,7 +227,8 @@
           "bid": null,
           "ask": null,
           "last": 1.3476,
-          "timestamp": "2026-09-15T23:52:20.000Z"
+          "timestamp": "2026-09-15T23:53:24.000Z",
+          "quoteType": "Yahoo chart fallback"
         }
       ],
       "source": "Yahoo Finance",
@@ -223,8 +242,9 @@
           "month": "202612",
           "bid": null,
           "ask": null,
-          "last": 0.7116,
-          "timestamp": "2026-09-15T23:50:33.000Z"
+          "last": 0.7117,
+          "timestamp": "2026-09-15T23:54:24.000Z",
+          "quoteType": "Yahoo chart fallback"
         }
       ],
       "source": "Yahoo Finance",
@@ -233,13 +253,13 @@
     "JPX_MINI_TOPIX": {
       "defaultMonth": null,
       "contracts": [],
-      "source": "Investing.com · Tokyo delayed",
+      "source": "TradingView · OSE delayed fallback",
       "mode": "UNAVAILABLE"
     },
     "JPX_NIKKEI225_MINI": {
       "defaultMonth": null,
       "contracts": [],
-      "source": "Investing.com · Tokyo delayed",
+      "source": "nikkei225jp.com · OSE public quote fallback",
       "mode": "UNAVAILABLE"
     },
     "ICE_BRENT_MINI": {
@@ -250,8 +270,9 @@
           "month": "202611",
           "bid": null,
           "ask": null,
-          "last": 108.46,
-          "timestamp": "2026-09-15T23:31:57.000Z"
+          "last": 108.38,
+          "timestamp": "2026-09-15T23:53:21.000Z",
+          "quoteType": "Yahoo chart fallback"
         }
       ],
       "source": "Yahoo Finance · Brent delayed benchmark",
