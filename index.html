@@ -92,7 +92,20 @@
 例 3：(TAIFEX_GDF.LAST / COMEX_MGC.LAST - 1) * 100"></textarea>
           <div class="formula-action-row"><button id="calcSpreadFormula">計算公式</button><button id="saveSpreadFormula" class="secondary-btn">儲存到監控</button><span id="formulaResult" class="formula-result">等待輸入公式</span></div>
           <div class="formula-examples"><button data-example="TAIFEX_SPF.BID - CME_MES.ASK">S&P 可成交價差</button><button data-example="TAIFEX_UNF.LAST / CME_MNQ.LAST - 1">Nasdaq 比率</button><button data-example="TAIFEX_XJF.LAST - (1 / CME_6J.LAST)">JPY 倒數換向</button><button data-example="(TAIFEX_GDF.LAST / COMEX_MGC.LAST - 1) * 100">Gold % 差</button><button data-example="TAIFEX_BRF.BID - ICE_BRENT.ASK">Brent Bid/Ask 價差</button></div>
-        </section>
+        
+          <div class="indicator-lab">
+            <div class="indicator-title-row"><div><b>新指標 / Custom Indicator</b><small>先將上方自設公式命名儲存，再設定門檻監控。</small></div></div>
+            <div class="indicator-save-row"><input id="indicatorName" placeholder="指標名稱，例如：台黃近月價差"><button id="saveIndicator">儲存為新指標</button></div>
+            <div id="indicatorList" class="indicator-list"></div>
+            <div class="indicator-alert-builder">
+              <select id="indicatorAlertSelect"><option value="">選擇新指標…</option></select>
+              <select id="indicatorAlertOp"><option value=">">大於 &gt;</option><option value=">=">大於等於 &gt;=</option><option value="<">小於 &lt;</option><option value="<=">小於等於 &lt;=</option></select>
+              <input id="indicatorAlertThreshold" type="number" step="any" placeholder="門檻值">
+              <select id="indicatorAlertCooldown"><option value="0">每次重新穿越門檻通知</option><option value="300">至少間隔 5 分鐘</option><option value="900">至少間隔 15 分鐘</option><option value="3600">至少間隔 1 小時</option></select>
+              <button id="addIndicatorAlert">＋ 建立監控</button><button id="indicatorNotifyBtn" class="secondary-btn">啟用通知</button>
+            </div>
+            <div id="indicatorAlertList" class="indicator-alert-list"></div>
+          </div></section>
 
         <div class="spread-grid">
           <article class="panel"><h3>比較原則 <small>你決定公式，系統不替你限制</small></h3><div class="info-list"><div><b>同月份</b><span>跨市場期貨最好先確認相同或相近到期月。</span></div><div><b>Bid / Ask / Last</b><span>三種欄位都可直接放入公式；找可成交價差時優先使用 Bid/Ask。</span></div><div><b>報價方向</b><span>例如 TAIFEX USD/JPY 與 CME 6J 的報價方向不同，可自行使用 1 / CME_6J。</span></div><div><b>單位與幣別</b><span>新台幣黃金等商品需自行加入 USD/TWD、單位或合約乘數換算。</span></div></div></article>
@@ -117,7 +130,7 @@
         </article>
       </section>
 
-      <footer class="footer"><span>Global Market Monitor v1.6 · Single app.js?v=20260916-formula-cat1"tag">Provider 可替換</span></span><span>僅供資訊參考，不構成投資建議</span></footer>
+      <footer class="footer"><span>Global Market Monitor v1.6 · Single app.js?v=20260916-indicator1"tag">Provider 可替換</span></span><span>僅供資訊參考，不構成投資建議</span></footer>
     </div>
   </main>
 </div>
