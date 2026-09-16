@@ -10,6 +10,7 @@ on:
       - 'scripts/patch-taifex-settlement-ndf.mjs'
       - 'scripts/patch-ndf-runtime-cache.mjs'
       - 'scripts/patch-ndf-formula-tokens.mjs'
+      - 'scripts/patch-formula-category-filter.mjs'
       - 'scripts/fix-usdtwd-toggle.mjs'
       - 'scripts/patch-fx-v11.mjs'
       - '.github/workflows/update-usdtwd-fx.yml'
@@ -43,6 +44,8 @@ jobs:
         run: node scripts/patch-ndf-runtime-cache.mjs
       - name: Install settlement NDF formula tokens
         run: node scripts/patch-ndf-formula-tokens.mjs
+      - name: Install Formula Lab category filter
+        run: node scripts/patch-formula-category-filter.mjs
       - name: Install USD TWD toggle binding
         run: node scripts/fix-usdtwd-toggle.mjs
       - name: Apply FX V1.1 labels
@@ -54,12 +57,15 @@ jobs:
           node --check scripts/patch-taifex-settlement-ndf.mjs
           node --check scripts/patch-ndf-runtime-cache.mjs
           node --check scripts/patch-ndf-formula-tokens.mjs
+          node --check scripts/patch-formula-category-filter.mjs
           grep -q "function syncUsdtwdVisibility" app.js
           grep -q "function renderTaifexSettlementNdf" app.js
           grep -q "TAIFEX settlement NDF render failed" app.js
           grep -q "TGF_NEAR_NDF" app.js
           grep -q "BRF_NEXT_NDF" app.js
-          grep -q "app.js?v=20260916-ndf4" index.html
+          grep -q "tokenCategory" index.html
+          grep -q "tokenCategory" app.js
+          grep -q "app.js?v=20260916-formula-cat1" index.html
           grep -q "taifexSettlementNdf" index.html
           grep -q "DOMContentLoaded',syncUsdtwdVisibility" app.js
           grep -q "toggleUsdtwdFx" index.html
@@ -73,5 +79,5 @@ jobs:
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "data: refresh USD TWD FX curves and settlement NDF tokens"
+          git commit -m "data: refresh USD TWD FX curves and Formula Lab filters"
           git push
