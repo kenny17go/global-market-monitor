@@ -19,6 +19,13 @@
           <div class="fx-focus-head"><div><h2>USD/TWD 台幣專區</h2><p>Offshore 固定使用 NetDania；Onshore 優先 Investing.com，無法取得時整條曲線改用 Cbonds Taipei daily close。</p></div><div id="usdtwdFxFreshness" class="source-note">資料載入中…</div></div>
           <div id="usdtwdSpotCards" class="fx-spot-cards"></div>
           <div class="table-wrap"><table class="fx-curve-table"><thead><tr><th>Tenor</th><th colspan="3">Onshore Taipei · Investing / Cbonds</th><th colspan="3">Offshore · NetDania</th><th>Offshore − Onshore</th></tr><tr><th></th><th>Bid</th><th>Ask</th><th>Mid Outright</th><th>Bid</th><th>Ask</th><th>Mid Outright</th><th>Spread</th></tr></thead><tbody id="usdtwdCurveBody"></tbody></table></div>
+
+          <div id="taifexSettlementNdf" class="settlement-ndf-box">
+            <div class="settlement-ndf-head"><div><b>TAIFEX 結算日 NDF</b><small>台幣黃金 TGF / 布蘭特原油 BRF · 近月、次月自動 rollover</small></div><div id="settlementNdfSource" class="source-note">載入中…</div></div>
+            <div class="table-wrap"><table class="settlement-ndf-table"><thead><tr><th>商品</th><th>合約</th><th>月份</th><th>預估最後結算日</th><th>天數</th><th>NDF Bid</th><th>NDF Ask</th><th>NDF Mid</th><th>Swap Mid</th></tr></thead><tbody id="settlementNdfBody"></tbody></table></div>
+            <div class="settlement-ndf-note">NDF 使用 Offshore 曲線（NetDania，失效時 Barchart）依實際剩餘日數線性插補。近月/次月直接讀取 TAIFEX 官方有效合約並自動換月。結算日依 TAIFEX 契約規則推算；遇交易所臨時調整時以官方公告為準。</div>
+          </div>
+
           <div class="fx-focus-note">期限固定為 1W / 1M / 3M / 6M / 1Y。Cbonds 為 outright daily benchmark，不會當成 forward points；來源無法取得或驗證失敗時顯示「—」，不使用模擬值。</div>
         </section>
 
