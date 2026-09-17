@@ -47,28 +47,41 @@ async function yahooApiQuote(symbol,range){
 }
 async function yahooRootProduct(t,source='Yahoo Finance'){let symbols=await yahooChain(t.root);const root=t.root+'=F';if(!symbols.length)symbols=[root];const contracts=[];for(const s of symbols.slice(0,5)){const q=await yahooApiQuote(s,t.range);if(q?.month&&(q.bid!=null||q.ask!=null||q.last!=null))contracts.push(q)}if(!contracts.length&&symbols[0]!==root){const q=await yahooApiQuote(root,t.range);if(q?.month&&(q.bid!=null||q.ask!=null||q.last!=null))contracts.push(q)}contracts.sort((a,b)=>String(a.month).localeCompare(String(b.month)));return {defaultMonth:contracts[0]?.month||null,contracts,source,mode:contracts.length?'DELAYED':'UNAVAILABLE'}}
 
+// Yahoo range=1d can return only the elapsed portion of today's session (e.g. 8 points
+// shortly after the US open). Fetch several days, then select the latest complete/active
+// exchange-local session. This keeps a true 5-minute intraday sparkline instead of a few
+// snapshots while still preferring today's session once it has enough observations.
+function localDateKey(sec,timeZone){
+  try{return new Intl.DateTimeFormat('en-CA',{timeZone:timeZone||'UTC',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(sec*1000))}catch{return new Date(sec*1000).toISOString().slice(0,10)}
+}
 async function yahooIndexQuote(id,symbol,label,range){
   try{
-    const j=await fetchJson(`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=5m&range=1d`);
+    const j=await fetchJson(`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=5m&range=5d&includePrePost=false`);
     const r=j?.chart?.result?.[0],m=r?.meta;
     const last=valid(m?.regularMarketPrice,range),prev=valid(m?.chartPreviousClose??m?.previousClose,range);
     if(last==null)throw new Error('missing market price');
     const change=prev!=null?last-prev:null,pct=prev?change/prev*100:null;
     const ts=Array.isArray(r?.timestamp)?r.timestamp:[];
     const close=Array.isArray(r?.indicators?.quote?.[0]?.close)?r.indicators.quote[0].close:[];
-    const points=[];
+    const tz=m?.exchangeTimezoneName||'UTC',byDay=new Map();
     for(let i=0;i<Math.min(ts.length,close.length);i++){
-      const t=Number(ts[i]),v=valid(close[i],range);
-      if(!Number.isFinite(t)||v==null)continue;
-      points.push({t,v});
+      const t=Number(ts[i]),v=valid(close[i],range);if(!Number.isFinite(t)||v==null)continue;
+      const key=localDateKey(t,tz);if(!byDay.has(key))byDay.set(key,[]);byDay.get(key).push({t,v});
     }
+    const days=[...byDay.entries()].sort((a,b)=>a[0].localeCompare(b[0]));
+    if(!days.length)throw new Error('missing intraday series');
+    const latest=days.at(-1),previous=days.length>1?days.at(-2):null;
+    // If today's session has fewer than 24 five-minute bars, show the latest completed
+    // session rather than a misleading 6-8 point smooth line. Once >=24 bars exist,
+    // switch to today's active session and keep growing toward the full day.
+    const chosen=(latest[1].length>=24||!previous)?latest:previous;
+    const points=chosen[1];
     return {
       id,symbol,label,last,previousClose:prev,change,pct,
       timestamp:m?.regularMarketTime?new Date(m.regularMarketTime*1000).toISOString():new Date().toISOString(),
       source:'Yahoo Finance',mode:'DELAYED',
-      series:points.map(x=>x.v),
-      seriesTimes:points.map(x=>new Date(x.t*1000).toISOString()),
-      seriesMeta:{range:'1D',interval:'5m',session:'LATEST_SESSION',source:'Yahoo Finance',mode:'DELAYED',timezone:m?.exchangeTimezoneName||null,points:points.length}
+      series:points.map(x=>x.v),seriesTimes:points.map(x=>new Date(x.t*1000).toISOString()),
+      seriesMeta:{range:'1D',interval:'5m',session:chosen[0]===latest[0]?'ACTIVE_SESSION':'LAST_COMPLETE_SESSION',sessionDate:chosen[0],source:'Yahoo Finance',mode:'DELAYED',timezone:tz,points:points.length}
     };
   }catch(e){
     console.warn('Yahoo index failed',id,symbol,e.message);
@@ -98,13 +111,11 @@ const INDEX_TARGETS=[
   {id:'NIKKEI',symbol:'^N225',label:'日經 225',range:[1000,100000]},
   {id:'TOPIX',symbol:'^TOPX',label:'東證 TOPIX',range:[100,10000]}
 ];
-const indices={};
-for(const x of INDEX_TARGETS)indices[x.id]=await yahooIndexQuote(x.id,x.symbol,x.label,x.range);
-
+const indices={};for(const x of INDEX_TARGETS)indices[x.id]=await yahooIndexQuote(x.id,x.symbol,x.label,x.range);
 const products={};for(const t of ROOTS)products[t.id]=await yahooRootProduct(t);
 products.JPX_MINI_TOPIX=await tradingViewContracts({id:'JPX_MINI_TOPIX',url:'https://tw.tradingview.com/symbols/OSE-TOPIXM1!/contracts/',prefix:'TOPIXM',range:[100,10000]});
 products.JPX_NIKKEI225_MINI=await tradingViewContracts({id:'JPX_NIKKEI225_MINI',url:'https://tw.tradingview.com/symbols/OSE-NK225M1!/contracts/',prefix:'NK225M',range:[1000,100000]});
 if(!products.JPX_NIKKEI225_MINI.contracts.length)products.JPX_NIKKEI225_MINI=await nikkei225jpMini();
 products.ICE_BRENT_MINI=await yahooRootProduct({id:'ICE_BRENT_MINI',root:'BZ',exchange:'Brent reference',range:[10,300]},'Yahoo Finance · Brent delayed benchmark');
-const out={meta:{source:'Yahoo Finance + JPX delayed fallbacks',mode:'DELAYED',realtime:false,generatedAt:new Date().toISOString(),note:'Yahoo cash indices and futures are public delayed/web data, not a licensed realtime feed. Yahoo Bid/Ask uses cookie/crumb quote sessions when available; Last falls back to Yahoo chart data. JPX/OSE fallbacks expose delayed last prices/contract months only and do not synthesize Bid/Ask. Sanity ranges reject obviously wrong values. LIVE broker connectors can override delayed data.'},indices,products};
+const out={meta:{source:'Yahoo Finance + JPX delayed fallbacks',mode:'DELAYED',realtime:false,generatedAt:new Date().toISOString(),note:'Yahoo cash indices and futures are public delayed/web data, not a licensed realtime feed. Intraday index sparklines fetch 5d of 5-minute bars and select the latest sufficiently populated session; early-session cards temporarily show the last completed session instead of a misleading handful of points. JPX/OSE fallbacks expose delayed last prices/contract months only and do not synthesize Bid/Ask. LIVE broker connectors can override delayed data.'},indices,products};
 await fs.mkdir('data',{recursive:true});await fs.writeFile('data/overseas-delayed.json',JSON.stringify(out,null,2)+'\n');console.log('Wrote data/overseas-delayed.json');for(const [id,p] of Object.entries(products))console.log(id,p.defaultMonth,p.contracts?.length||0,p.contracts?.[0]?.bid,p.contracts?.[0]?.ask,p.contracts?.[0]?.last,p.source,p.contracts?.[0]?.quoteType||'');
