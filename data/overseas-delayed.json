@@ -3,7 +3,7 @@
     "source": "Yahoo Finance + JPX delayed fallbacks",
     "mode": "DELAYED",
     "realtime": false,
-    "generatedAt": "2026-09-17T06:44:56.115Z",
+    "generatedAt": "2026-09-17T06:57:43.179Z",
     "note": "Yahoo cash indices and futures are public delayed/web data, not a licensed realtime feed. Yahoo Bid/Ask uses cookie/crumb quote sessions when available; Last falls back to Yahoo chart data. JPX/OSE fallbacks expose delayed last prices/contract months only and do not synthesize Bid/Ask. Sanity ranges reject obviously wrong values. LIVE broker connectors can override delayed data."
   },
   "indices": {
@@ -695,11 +695,11 @@
       "id": "NIKKEI",
       "symbol": "^N225",
       "label": "日經 225",
-      "last": 64098.31,
+      "last": 64136.25,
       "previousClose": 63923,
-      "change": 175.30999999999767,
-      "pct": 0.27425183423806404,
-      "timestamp": "2026-09-17T06:29:45.000Z",
+      "change": 213.25,
+      "pct": 0.33360449290552696,
+      "timestamp": "2026-09-17T06:30:01.000Z",
       "source": "Yahoo Finance",
       "mode": "DELAYED",
       "series": [
@@ -770,7 +770,8 @@
         63971.4296875,
         63984.23828125,
         64090.359375,
-        64098.30859375
+        64098.30859375,
+        64136.25
       ],
       "seriesTimes": [
         "2026-09-17T00:00:00.000Z",
@@ -840,7 +841,8 @@
         "2026-09-17T06:10:00.000Z",
         "2026-09-17T06:15:00.000Z",
         "2026-09-17T06:20:00.000Z",
-        "2026-09-17T06:25:00.000Z"
+        "2026-09-17T06:25:00.000Z",
+        "2026-09-17T06:30:00.000Z"
       ],
       "seriesMeta": {
         "range": "1D",
@@ -849,7 +851,7 @@
         "source": "Yahoo Finance",
         "mode": "DELAYED",
         "timezone": "Asia/Tokyo",
-        "points": 68
+        "points": 69
       }
     },
     "TOPIX": {
@@ -882,19 +884,19 @@
         {
           "symbol": "MESU26.CME",
           "month": "202609",
-          "bid": 7605,
-          "ask": 7605.25,
-          "last": 7605.5,
-          "timestamp": "2026-09-17T06:34:50.000Z",
+          "bid": 7609.25,
+          "ask": 7609.5,
+          "last": 7609.25,
+          "timestamp": "2026-09-17T06:47:33.000Z",
           "quoteType": "Yahoo authenticated quote"
         },
         {
           "symbol": "MESZ26.CME",
           "month": "202612",
-          "bid": 7672,
-          "ask": 7672.25,
-          "last": 7672.75,
-          "timestamp": "2026-09-17T06:34:49.000Z",
+          "bid": 7676.5,
+          "ask": 7676.75,
+          "last": 7676.5,
+          "timestamp": "2026-09-17T06:47:35.000Z",
           "quoteType": "Yahoo authenticated quote"
         }
       ],
@@ -907,19 +909,19 @@
         {
           "symbol": "MNQU26.CME",
           "month": "202609",
-          "bid": 29154.5,
-          "ask": 29155.25,
-          "last": 29152.5,
-          "timestamp": "2026-09-17T06:34:47.000Z",
+          "bid": 29166.5,
+          "ask": 29167,
+          "last": 29166,
+          "timestamp": "2026-09-17T06:47:33.000Z",
           "quoteType": "Yahoo authenticated quote"
         },
         {
           "symbol": "MNQZ26.CME",
           "month": "202612",
-          "bid": 29447.5,
-          "ask": 29447.75,
-          "last": 29450.25,
-          "timestamp": "2026-09-17T06:34:50.000Z",
+          "bid": 29463.75,
+          "ask": 29464,
+          "last": 29463.5,
+          "timestamp": "2026-09-17T06:47:35.000Z",
           "quoteType": "Yahoo authenticated quote"
         }
       ],
@@ -932,19 +934,19 @@
         {
           "symbol": "MYMU26.CBT",
           "month": "202609",
-          "bid": 51874,
-          "ask": 51878,
-          "last": 51878,
-          "timestamp": "2026-09-17T06:34:35.000Z",
+          "bid": 51892,
+          "ask": 51897,
+          "last": 51898,
+          "timestamp": "2026-09-17T06:46:01.000Z",
           "quoteType": "Yahoo authenticated quote"
         },
         {
           "symbol": "MYMZ26.CBT",
           "month": "202612",
-          "bid": 52288,
-          "ask": 52290,
-          "last": 52290,
-          "timestamp": "2026-09-17T06:34:47.000Z",
+          "bid": 52306,
+          "ask": 52308,
+          "last": 52306,
+          "timestamp": "2026-09-17T06:47:33.000Z",
           "quoteType": "Yahoo authenticated quote"
         }
       ],
@@ -982,44 +984,44 @@
         {
           "symbol": "MGCV26.CMX",
           "month": "202610",
-          "bid": 4317.3,
-          "ask": 4317.6,
-          "last": 4317.7,
-          "timestamp": "2026-09-17T06:34:47.000Z",
+          "bid": 4312.6,
+          "ask": 4313,
+          "last": 4312.6,
+          "timestamp": "2026-09-17T06:47:17.000Z",
           "quoteType": "Yahoo authenticated quote"
         },
         {
           "symbol": "MGCZ26.CMX",
           "month": "202612",
-          "bid": 4351.4,
-          "ask": 4351.6,
-          "last": 4351.6,
-          "timestamp": "2026-09-17T06:34:47.000Z",
+          "bid": 4346.7,
+          "ask": 4346.8,
+          "last": 4346.3,
+          "timestamp": "2026-09-17T06:47:36.000Z",
           "quoteType": "Yahoo authenticated quote"
         },
         {
           "symbol": "MGCG27.CMX",
           "month": "202702",
-          "bid": 4387.6,
-          "ask": 4387.9,
-          "last": 4388.5,
-          "timestamp": "2026-09-17T06:33:38.000Z",
+          "bid": 4383,
+          "ask": 4383.2,
+          "last": 4383,
+          "timestamp": "2026-09-17T06:47:03.000Z",
           "quoteType": "Yahoo authenticated quote"
         },
         {
           "symbol": "MGCJ27.CMX",
           "month": "202704",
-          "bid": 4423.5,
-          "ask": 4423.8,
-          "last": 4425.4,
-          "timestamp": "2026-09-17T06:32:26.000Z",
+          "bid": 4418.6,
+          "ask": 4419.1,
+          "last": 4418.7,
+          "timestamp": "2026-09-17T06:43:09.000Z",
           "quoteType": "Yahoo authenticated quote"
         },
         {
           "symbol": "MGCM27.CMX",
           "month": "202706",
-          "bid": 4461.5,
-          "ask": 4461.9,
+          "bid": 4456,
+          "ask": 4456.4,
           "last": 4445,
           "timestamp": "2026-09-17T05:45:57.000Z",
           "quoteType": "Yahoo authenticated quote"
@@ -1034,44 +1036,44 @@
         {
           "symbol": "MGCV26.CMX",
           "month": "202610",
-          "bid": 4317.3,
-          "ask": 4317.6,
-          "last": 4317.7,
-          "timestamp": "2026-09-17T06:34:47.000Z",
+          "bid": 4312.6,
+          "ask": 4313,
+          "last": 4312.6,
+          "timestamp": "2026-09-17T06:47:17.000Z",
           "quoteType": "Yahoo authenticated quote"
         },
         {
           "symbol": "MGCZ26.CMX",
           "month": "202612",
-          "bid": 4351.4,
-          "ask": 4351.6,
-          "last": 4351.6,
-          "timestamp": "2026-09-17T06:34:47.000Z",
+          "bid": 4346.7,
+          "ask": 4346.8,
+          "last": 4346.3,
+          "timestamp": "2026-09-17T06:47:36.000Z",
           "quoteType": "Yahoo authenticated quote"
         },
         {
           "symbol": "MGCG27.CMX",
           "month": "202702",
-          "bid": 4387.6,
-          "ask": 4387.9,
-          "last": 4388.5,
-          "timestamp": "2026-09-17T06:33:38.000Z",
+          "bid": 4383,
+          "ask": 4383.2,
+          "last": 4383,
+          "timestamp": "2026-09-17T06:47:03.000Z",
           "quoteType": "Yahoo authenticated quote"
         },
         {
           "symbol": "MGCJ27.CMX",
           "month": "202704",
-          "bid": 4423.5,
-          "ask": 4423.8,
-          "last": 4425.4,
-          "timestamp": "2026-09-17T06:32:26.000Z",
+          "bid": 4418.6,
+          "ask": 4419.1,
+          "last": 4418.7,
+          "timestamp": "2026-09-17T06:43:09.000Z",
           "quoteType": "Yahoo authenticated quote"
         },
         {
           "symbol": "MGCM27.CMX",
           "month": "202706",
-          "bid": 4461.5,
-          "ask": 4461.9,
+          "bid": 4456,
+          "ask": 4456.4,
           "last": 4445,
           "timestamp": "2026-09-17T05:45:57.000Z",
           "quoteType": "Yahoo authenticated quote"
@@ -1086,10 +1088,10 @@
         {
           "symbol": "6EZ26.CME",
           "month": "202612",
-          "bid": 1.15165,
-          "ask": 1.1517,
-          "last": 1.15165,
-          "timestamp": "2026-09-17T06:34:49.000Z",
+          "bid": 1.15195,
+          "ask": 1.152,
+          "last": 1.152,
+          "timestamp": "2026-09-17T06:47:11.000Z",
           "quoteType": "Yahoo authenticated quote"
         }
       ],
@@ -1102,10 +1104,10 @@
         {
           "symbol": "6JZ26.CME",
           "month": "202612",
-          "bid": 0.006472,
-          "ask": 0.0064725,
-          "last": 0.006473,
-          "timestamp": "2026-09-17T06:34:45.000Z",
+          "bid": 0.0064675,
+          "ask": 0.006468,
+          "last": 0.0064675,
+          "timestamp": "2026-09-17T06:47:34.000Z",
           "quoteType": "Yahoo authenticated quote"
         }
       ],
@@ -1118,10 +1120,10 @@
         {
           "symbol": "6BZ26.CME",
           "month": "202612",
-          "bid": 1.3396,
-          "ask": 1.3397,
-          "last": 1.3396,
-          "timestamp": "2026-09-17T06:34:44.000Z",
+          "bid": 1.3398,
+          "ask": 1.3399,
+          "last": 1.3399,
+          "timestamp": "2026-09-17T06:47:24.000Z",
           "quoteType": "Yahoo authenticated quote"
         }
       ],
@@ -1134,10 +1136,10 @@
         {
           "symbol": "6AZ26.CME",
           "month": "202612",
-          "bid": 0.71085,
-          "ask": 0.7109,
-          "last": 0.71085,
-          "timestamp": "2026-09-17T06:34:50.000Z",
+          "bid": 0.71065,
+          "ask": 0.7107,
+          "last": 0.71075,
+          "timestamp": "2026-09-17T06:47:15.000Z",
           "quoteType": "Yahoo authenticated quote"
         }
       ],
@@ -1152,8 +1154,8 @@
           "month": "202612",
           "bid": null,
           "ask": null,
-          "last": 4065,
-          "timestamp": "2026-09-17T06:44:55.460Z",
+          "last": 4075.25,
+          "timestamp": "2026-09-17T06:57:42.482Z",
           "quoteType": "TradingView delayed page"
         },
         {
@@ -1162,7 +1164,7 @@
           "bid": null,
           "ask": null,
           "last": 4077,
-          "timestamp": "2026-09-17T06:44:55.459Z",
+          "timestamp": "2026-09-17T06:57:42.482Z",
           "quoteType": "TradingView delayed page"
         },
         {
@@ -1171,7 +1173,7 @@
           "bid": null,
           "ask": null,
           "last": 4028.5,
-          "timestamp": "2026-09-17T06:44:55.460Z",
+          "timestamp": "2026-09-17T06:57:42.482Z",
           "quoteType": "TradingView delayed page"
         }
       ],
@@ -1186,8 +1188,8 @@
           "month": "202610",
           "bid": null,
           "ask": null,
-          "last": 63630,
-          "timestamp": "2026-09-17T06:44:55.741Z",
+          "last": 63880,
+          "timestamp": "2026-09-17T06:57:42.779Z",
           "quoteType": "TradingView delayed page"
         },
         {
@@ -1195,8 +1197,8 @@
           "month": "202611",
           "bid": null,
           "ask": null,
-          "last": 63680,
-          "timestamp": "2026-09-17T06:44:55.741Z",
+          "last": 63885,
+          "timestamp": "2026-09-17T06:57:42.779Z",
           "quoteType": "TradingView delayed page"
         },
         {
@@ -1204,8 +1206,8 @@
           "month": "202612",
           "bid": null,
           "ask": null,
-          "last": 63795,
-          "timestamp": "2026-09-17T06:44:55.741Z",
+          "last": 64055,
+          "timestamp": "2026-09-17T06:57:42.779Z",
           "quoteType": "TradingView delayed page"
         },
         {
@@ -1214,7 +1216,7 @@
           "bid": null,
           "ask": null,
           "last": 63750,
-          "timestamp": "2026-09-17T06:44:55.740Z",
+          "timestamp": "2026-09-17T06:57:42.778Z",
           "quoteType": "TradingView delayed page"
         },
         {
@@ -1222,8 +1224,8 @@
           "month": "202703",
           "bid": null,
           "ask": null,
-          "last": 64040,
-          "timestamp": "2026-09-17T06:44:55.740Z",
+          "last": 64255,
+          "timestamp": "2026-09-17T06:57:42.778Z",
           "quoteType": "TradingView delayed page"
         },
         {
@@ -1232,7 +1234,7 @@
           "bid": null,
           "ask": null,
           "last": 63730,
-          "timestamp": "2026-09-17T06:44:55.740Z",
+          "timestamp": "2026-09-17T06:57:42.778Z",
           "quoteType": "TradingView delayed page"
         },
         {
@@ -1241,7 +1243,7 @@
           "bid": null,
           "ask": null,
           "last": 64105,
-          "timestamp": "2026-09-17T06:44:55.741Z",
+          "timestamp": "2026-09-17T06:57:42.778Z",
           "quoteType": "TradingView delayed page"
         },
         {
@@ -1250,7 +1252,7 @@
           "bid": null,
           "ask": null,
           "last": 64345,
-          "timestamp": "2026-09-17T06:44:55.740Z",
+          "timestamp": "2026-09-17T06:57:42.778Z",
           "quoteType": "TradingView delayed page"
         },
         {
@@ -1259,7 +1261,7 @@
           "bid": null,
           "ask": null,
           "last": 64580,
-          "timestamp": "2026-09-17T06:44:55.740Z",
+          "timestamp": "2026-09-17T06:57:42.778Z",
           "quoteType": "TradingView delayed page"
         },
         {
@@ -1268,7 +1270,7 @@
           "bid": null,
           "ask": null,
           "last": 65400,
-          "timestamp": "2026-09-17T06:44:55.740Z",
+          "timestamp": "2026-09-17T06:57:42.778Z",
           "quoteType": "TradingView delayed page"
         },
         {
@@ -1277,7 +1279,7 @@
           "bid": null,
           "ask": null,
           "last": 65690,
-          "timestamp": "2026-09-17T06:44:55.740Z",
+          "timestamp": "2026-09-17T06:57:42.778Z",
           "quoteType": "TradingView delayed page"
         },
         {
@@ -1286,7 +1288,7 @@
           "bid": null,
           "ask": null,
           "last": 66690,
-          "timestamp": "2026-09-17T06:44:55.740Z",
+          "timestamp": "2026-09-17T06:57:42.778Z",
           "quoteType": "TradingView delayed page"
         }
       ],
@@ -1299,10 +1301,10 @@
         {
           "symbol": "BZX26.NYM",
           "month": "202611",
-          "bid": 103.71,
-          "ask": 103.72,
-          "last": 103.74,
-          "timestamp": "2026-09-17T06:34:50.000Z",
+          "bid": 104.12,
+          "ask": 104.14,
+          "last": 104.22,
+          "timestamp": "2026-09-17T06:47:35.000Z",
           "quoteType": "Yahoo authenticated quote"
         }
       ],
