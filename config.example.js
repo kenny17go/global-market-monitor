@@ -6,8 +6,7 @@ window.MARKET_MONITOR_CONFIG = {
   liveEndpoint: '' // Licensed backend gateway for CME / JPX / ICE; never put exchange API keys in GitHub Pages
 };
 
-// v1.6.1: keep the original overview sparklines, but make supported charts
-// tappable/clickable links to the matching TradingView symbol page.
+// v1.6.2: keep original overview sparklines and add an explicit TradingView link.
 (function(){
   const TV_LINKS={
     'S&P 500':'https://tw.tradingview.com/symbols/SP-SPX/',
@@ -39,15 +38,28 @@ window.MARKET_MONITOR_CONFIG = {
       spark.style.cursor='pointer';
       spark.style.borderRadius='6px';
       spark.style.touchAction='manipulation';
-      if(spark.dataset.tvBound==='1')return;
-      spark.dataset.tvBound='1';
-      const open=function(ev){
-        ev.preventDefault();
-        ev.stopPropagation();
-        window.open(url,'_blank','noopener,noreferrer');
-      };
-      spark.addEventListener('click',open);
-      spark.addEventListener('keydown',function(ev){if(ev.key==='Enter'||ev.key===' '){open(ev)}});
+      if(spark.dataset.tvBound!=='1'){
+        spark.dataset.tvBound='1';
+        const open=function(ev){
+          ev.preventDefault();
+          ev.stopPropagation();
+          window.location.href=url;
+        };
+        spark.addEventListener('click',open);
+        spark.addEventListener('keydown',function(ev){if(ev.key==='Enter'||ev.key===' '){open(ev)}});
+      }
+      let link=card.querySelector('.tv-direct-link');
+      if(!link){
+        link=document.createElement('a');
+        link.className='tv-direct-link';
+        link.textContent='TradingView 完整圖表 ↗';
+        link.href=url;
+        link.target='_self';
+        link.rel='noopener noreferrer';
+        link.style.cssText='display:inline-block;margin-top:5px;font-size:11px;color:#79bfff;text-decoration:none;position:relative;z-index:5;';
+        const meta=card.querySelector('.spark-meta');
+        if(meta)meta.insertAdjacentElement('afterend',link);else spark.insertAdjacentElement('afterend',link);
+      }else link.href=url;
     });
   }
   function start(){
