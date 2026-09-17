@@ -96,7 +96,20 @@
           <textarea id="spreadFormula" rows="3" placeholder="例：TAIFEX_TX.BID - CME_ES.ASK × USD_TWD_SPOT / 100"></textarea>
           <div class="formula-action-row"><button id="calcFormula">計算公式</button><button id="saveAsIndicator" class="secondary-btn">儲存為新指標</button><div id="formulaResult" class="formula-result">等待輸入公式</div></div>
           <div class="formula-examples"><button data-formula="TAIFEX_TX.BID-CME_ES.ASK">台指 vs ES 原始價差</button><button data-formula="TAIFEX_UDF.BID-CME_MNQ.ASK">櫃買 vs MNQ 原始價差</button><button data-formula="TAIFEX_GDF.BID-CME_MGC.ASK">黃金原始價差</button><button data-formula="TAIFEX_BRF.BID-ICE_BRENT.ASK">布蘭特原始價差</button></div>
-        </section>
+        
+          <div class="indicator-lab">
+            <div class="indicator-title-row"><div><b>新指標 / Custom Indicator</b><small>先將上方自設公式命名儲存，再設定門檻監控。</small></div></div>
+            <div class="indicator-save-row"><input id="indicatorName" placeholder="指標名稱，例如：台黃近月價差"><button id="saveIndicator">儲存為新指標</button></div>
+            <div id="indicatorList" class="indicator-list"></div>
+            <div class="indicator-alert-builder">
+              <select id="indicatorAlertSelect"><option value="">選擇新指標…</option></select>
+              <select id="indicatorAlertOp"><option value=">">大於 &gt;</option><option value=">=">大於等於 &gt;=</option><option value="<">小於 &lt;</option><option value="<=">小於等於 &lt;=</option></select>
+              <input id="indicatorAlertThreshold" type="number" step="any" placeholder="門檻值">
+              <select id="indicatorAlertCooldown"><option value="0">每次重新穿越門檻通知</option><option value="300">至少間隔 5 分鐘</option><option value="900">至少間隔 15 分鐘</option><option value="3600">至少間隔 1 小時</option></select>
+              <button id="addIndicatorAlert">＋ 建立監控</button><button id="indicatorNotifyBtn" class="secondary-btn">啟用通知</button>
+            </div>
+            <div id="indicatorAlertList" class="indicator-alert-list"></div>
+          </div></section>
 
         <section class="panel custom-products-wrap"><div class="custom-products-head"><div><h3>自訂商品 / Custom Products</h3><p>新增你自己的市場標的與報價欄位，供 Formula Lab 使用。</p></div><button id="addCustomProduct" class="secondary-btn">＋ 新增商品</button></div><div id="customProductEditor" class="custom-editor hidden"></div><div id="customProductList" class="custom-product-list"></div></section>
         <section class="panel custom-compare"><div class="custom-products-head"><div><h3>自訂比較 / Custom Compare</h3><p>選兩個商品與欄位快速比較。</p></div></div><div id="customCompareGrid" class="custom-compare-grid"></div><div class="custom-compare-actions"><button id="calcCustomCompare">計算</button></div><div id="customCompareResults" class="custom-compare-results"></div></section>
@@ -110,4 +123,4 @@
     </div>
   </main>
 </div>
-<script src="config.example.js?v=20260917-tvwidget1"></script><script src="providers.js?v=20260916-ndf3"></script><script src="app.js?v=20260916-ndf4"></script><script src="tv-spark-widget.js?v=20260917-tvwidget1"></script></body></html>
+<script src="config.example.js?v=20260917-tvwidget1"></script><script src="providers.js?v=20260916-ndf3"></script><script src="app.js?v=20260916-lockdemo1"></script><script src="tv-spark-widget.js?v=20260917-tvwidget1"></script></body></html>
