@@ -15,8 +15,8 @@ if(!index.includes('id="indicatorsView"')){
   const view=`
       <section id="indicatorsView" class="view">
         <section class="indicator-dashboard-hero panel">
-          <div><h2>自訂指標 Dashboard</h2><p>集中查看所有自設公式的即時計算值、門檻監控與通知狀態。指標公式仍在「價差比較 → Formula Lab」建立與修改。</p></div>
-          <button id="goFormulaLab" class="secondary-btn">＋ 建立 / 編輯指標</button>
+          <div><h2>自訂指標 Dashboard</h2><p>集中查看所有自訂公式的即時計算值、門檻監控與通知狀態。建立或修改時，會直接帶你到 Formula Lab 的「另存為我的自訂指標」區。</p></div>
+          <button id="goFormulaLab" class="secondary-btn">＋ 建立 / 編輯自訂指標</button>
         </section>
         <section id="indicatorDashboardSummary" class="spread-kpis"></section>
         <section class="panel">
@@ -24,7 +24,7 @@ if(!index.includes('id="indicatorsView"')){
           <div id="indicatorDashboardGrid" class="indicator-dashboard-grid"></div>
         </section>
         <section class="panel">
-          <div class="formula-lab-head"><div><h3>監控條件 / Alert Rules</h3><p>查看每一個新指標目前的門檻、現值與觸發狀態。</p></div></div>
+          <div class="formula-lab-head"><div><h3>監控條件 / Alert Rules</h3><p>查看每一個自訂指標目前的門檻、現值與觸發狀態。</p></div></div>
           <div id="indicatorDashboardAlerts" class="indicator-dashboard-alerts"></div>
         </section>
       </section>
@@ -32,6 +32,9 @@ if(!index.includes('id="indicatorsView"')){
   const anchor='<section id="connectionsView" class="view">';
   if(index.includes(anchor)) index=index.replace(anchor,view+'\n'+anchor);
   else index=index.replace('</div>\n  </main>',view+'\n    </div>\n  </main>');
+}else{
+  index=index.replace('集中查看所有自設公式的即時計算值、門檻監控與通知狀態。指標公式仍在「價差比較 → Formula Lab」建立與修改。','集中查看所有自訂公式的即時計算值、門檻監控與通知狀態。建立或修改時，會直接帶你到 Formula Lab 的「另存為我的自訂指標」區。');
+  index=index.replace('＋ 建立 / 編輯指標','＋ 建立 / 編輯自訂指標');
 }
 
 if(!app.includes('function renderIndicatorDashboard()')){
@@ -49,8 +52,8 @@ function renderIndicatorDashboard(){
     summary.innerHTML='<div class="kpi"><span>自訂指標</span><b>'+customIndicators.length+'</b><small>已儲存公式</small></div><div class="kpi"><span>監控條件</span><b>'+indicatorAlerts.length+'</b><small>大於 / 小於門檻</small></div><div class="kpi"><span>目前觸發</span><b>'+triggered+'</b><small>條件成立</small></div><div class="kpi"><span>通知權限</span><b>'+(permission==='granted'?'ON':permission==='denied'?'OFF':'—')+'</b><small>'+permission+'</small></div>';
   }
   if(grid){
-    grid.innerHTML=rows.length?rows.map(r=>'<article class="indicator-dash-card '+(r.hits.length?'is-hit':'')+'"><div class="indicator-dash-head"><div><span class="source-note">CUSTOM INDICATOR</span><h3>'+r.ind.name+'</h3></div><span class="quote-status '+(r.hits.length?'live':'neutral')+'">'+(r.hits.length?'觸發 '+r.hits.length:'監控中')+'</span></div><div class="indicator-dash-value">'+(r.value==null?'—':tidy(r.value,8))+'</div><div class="indicator-dash-formula">'+r.ind.formula+'</div><div class="indicator-dash-rules">'+(r.rules.length?r.rules.map(a=>'<span>'+a.op+' '+a.threshold+'</span>').join(''):'<span>尚未設定監控</span>')+'</div><div class="indicator-dash-actions"><button class="secondary-btn" data-dashboard-edit="'+r.ind.id+'">編輯公式</button></div></article>').join(''):'<div class="source-note">尚未建立新指標。請先到價差比較的 Formula Lab 建立公式並命名。</div>';
-    $$('[data-dashboard-edit]').forEach(b=>b.onclick=()=>{const ind=customIndicators.find(x=>x.id===b.dataset.dashboardEdit);if(!ind)return;switchView('spread');if($('#spreadFormula'))$('#spreadFormula').value=ind.formula;if($('#indicatorName'))$('#indicatorName').value=ind.name;calcFormula();setTimeout(()=>$('#spreadFormula')?.scrollIntoView({behavior:'smooth',block:'center'}),80)});
+    grid.innerHTML=rows.length?rows.map(r=>'<article class="indicator-dash-card '+(r.hits.length?'is-hit':'')+'"><div class="indicator-dash-head"><div><span class="source-note">CUSTOM INDICATOR</span><h3>'+r.ind.name+'</h3></div><span class="quote-status '+(r.hits.length?'live':'neutral')+'">'+(r.hits.length?'觸發 '+r.hits.length:'監控中')+'</span></div><div class="indicator-dash-value">'+(r.value==null?'—':tidy(r.value,8))+'</div><div class="indicator-dash-formula">'+r.ind.formula+'</div><div class="indicator-dash-rules">'+(r.rules.length?r.rules.map(a=>'<span>'+a.op+' '+a.threshold+'</span>').join(''):'<span>尚未設定監控</span>')+'</div><div class="indicator-dash-actions"><button class="secondary-btn" data-dashboard-edit="'+r.ind.id+'">編輯公式</button></div></article>').join(''):'<div class="source-note">尚未建立自訂指標。按上方「建立 / 編輯自訂指標」，寫好公式後命名並另存即可。</div>';
+    $$('[data-dashboard-edit]').forEach(b=>b.onclick=()=>{const ind=customIndicators.find(x=>x.id===b.dataset.dashboardEdit);if(!ind)return;switchView('spread');if($('#spreadFormula'))$('#spreadFormula').value=ind.formula;if($('#indicatorName'))$('#indicatorName').value=ind.name;calcFormula();setTimeout(()=>document.querySelector('.indicator-lab')?.scrollIntoView({behavior:'smooth',block:'center'}),120)});
   }
   if(alertsEl){
     alertsEl.innerHTML=indicatorAlerts.length?indicatorAlerts.map(a=>{const ind=customIndicators.find(x=>x.id===a.indicatorId),v=ind?indicatorValue(ind):null,hit=indicatorRuleState(a,v);return '<div class="indicator-alert-item"><div><b>'+(ind?.name||'已刪除指標')+'</b><small>'+a.op+' '+a.threshold+' · 現值 '+(v==null?'—':tidy(v,8))+'</small></div><span class="quote-status '+(hit?'live':'neutral')+'">'+(hit?'條件成立':'監控中')+'</span></div>'}).join(''):'<div class="source-note">尚未建立監控條件。</div>';
@@ -63,7 +66,9 @@ function renderIndicatorDashboard(){
 // Keep dashboard live and wire actions.
 if(!app.includes('renderIndicatorDashboard();evaluateAlerts()')) app=app.replace('renderCustomIndicators();renderIndicatorAlertControls();evaluateAlerts();evaluateIndicatorAlerts()','renderCustomIndicators();renderIndicatorAlertControls();renderIndicatorDashboard();evaluateAlerts();evaluateIndicatorAlerts()');
 app=app.replace("if(name==='connections')renderConnections();window.scrollTo", "if(name==='connections')renderConnections();if(name==='indicators')renderIndicatorDashboard();window.scrollTo");
-if(!app.includes("$('#goFormulaLab').onclick")) app=app.replace("function bindStaticUI(){bindIndicatorUI();", "function bindStaticUI(){bindIndicatorUI();if($('#goFormulaLab'))$('#goFormulaLab').onclick=()=>switchView('spread');if($('#indicatorDashboardNotify'))$('#indicatorDashboardNotify').onclick=async()=>{if(!('Notification'in window))return alert('此瀏覽器不支援通知');const p=await Notification.requestPermission();renderIndicatorDashboard();alert(p==='granted'?'通知已啟用':'通知未啟用')};");
+const goHandler="if($('#goFormulaLab'))$('#goFormulaLab').onclick=()=>{switchView('spread');setTimeout(()=>document.querySelector('.indicator-lab')?.scrollIntoView({behavior:'smooth',block:'center'}),120)};";
+app=app.replace(/if\(\$\('#goFormulaLab'\)\)\$\('#goFormulaLab'\)\.onclick=\(\)=>switchView\('spread'\);?/,goHandler);
+if(!app.includes("$('#goFormulaLab').onclick")) app=app.replace("function bindStaticUI(){bindIndicatorUI();", "function bindStaticUI(){bindIndicatorUI();"+goHandler+"if($('#indicatorDashboardNotify'))$('#indicatorDashboardNotify').onclick=async()=>{if(!('Notification'in window))return alert('此瀏覽器不支援通知');const p=await Notification.requestPermission();renderIndicatorDashboard();alert(p==='granted'?'通知已啟用':'通知未啟用')};");
 
 if(!css.includes('/* indicator-dashboard */')) css+=`
 /* indicator-dashboard */
@@ -72,8 +77,8 @@ if(!css.includes('/* indicator-dashboard */')) css+=`
 @media(max-width:720px){.indicator-dashboard-hero{align-items:flex-start;flex-direction:column}.indicator-dashboard-hero button{width:100%}.indicator-dashboard-grid{grid-template-columns:1fr}}
 `;
 
-index=index.replace(/app\.js\?v=[^\"']+/,'app.js?v=20260916-indicator-dashboard1');
+index=index.replace(/app\.js\?v=[^\"']+/,'app.js?v=20260917-indicator-flow2');
 await fs.writeFile('index.html',index);
 await fs.writeFile('app.js',app);
 await fs.writeFile('styles.css',css);
-console.log('Independent custom indicator dashboard installed.');
+console.log('Independent custom indicator dashboard installed with direct Formula Lab targeting.');
