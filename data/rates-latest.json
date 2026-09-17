@@ -1,12 +1,76 @@
 {
   "meta": {
-    "source": "U.S. Department of the Treasury",
-    "mode": "OFFICIAL DAILY",
+    "source": "Official central banks + U.S. Department of the Treasury",
+    "mode": "OFFICIAL / OFFICIAL DAILY",
     "realtime": false,
     "asOf": "2026-09-16T00:00:00",
-    "generatedAt": "2026-09-16T22:21:37.164Z",
-    "endpoint": "https://home.treasury.gov/resource-center/data-chart-center/interest-rates/pages/xml?data=daily_treasury_yield_curve&field_tdr_date_value=2026"
+    "generatedAt": "2026-09-17T02:20:46.676Z",
+    "treasuryEndpoint": "https://home.treasury.gov/resource-center/data-chart-center/interest-rates/pages/xml?data=daily_treasury_yield_curve&field_tdr_date_value=2026",
+    "note": "Policy rates are refreshed from official central-bank/public pages when parsable; conservative last-known official values are retained if a source page is temporarily unavailable. Fed is shown as the target range; ECB uses the deposit facility; CBC uses the discount rate; PBOC uses 1Y LPR."
   },
+  "policyRates": [
+    {
+      "name": "美國 Fed",
+      "rate": 3.875,
+      "displayRate": "3.75–4.00%",
+      "next": "2026-10-28",
+      "source": "Federal Reserve",
+      "mode": "OFFICIAL",
+      "asOf": "2026-09-16"
+    },
+    {
+      "name": "歐元區 ECB",
+      "rate": 2.5,
+      "displayRate": "2.50%",
+      "next": "2026-10-29",
+      "source": "ECB · Deposit Facility",
+      "mode": "OFFICIAL",
+      "asOf": "2026-09-17"
+    },
+    {
+      "name": "日本 BOJ",
+      "rate": 1,
+      "displayRate": "1.00%",
+      "next": "2026-09-18",
+      "source": "Bank of Japan",
+      "mode": "OFFICIAL"
+    },
+    {
+      "name": "英國 BOE",
+      "rate": 3.75,
+      "displayRate": "3.75%",
+      "next": "2026-09-17",
+      "source": "Bank of England",
+      "mode": "OFFICIAL",
+      "asOf": "2026-09-17"
+    },
+    {
+      "name": "台灣 CBC",
+      "rate": 2,
+      "displayRate": "2.00%",
+      "next": "2026-09-17",
+      "source": "CBC Taiwan · Discount Rate",
+      "mode": "OFFICIAL",
+      "asOf": "2026-09-17"
+    },
+    {
+      "name": "香港 HKMA",
+      "rate": 4,
+      "displayRate": "4.00%",
+      "next": "依 Fed 調整",
+      "source": "HKMA · Base Rate",
+      "mode": "OFFICIAL",
+      "asOf": "2026-08-31"
+    },
+    {
+      "name": "中國 PBOC",
+      "rate": 3,
+      "displayRate": "3.00%",
+      "next": "2026-09-21",
+      "source": "PBOC/NIFC · 1Y LPR",
+      "mode": "OFFICIAL MONTHLY"
+    }
+  ],
   "ust": [
     {
       "tenor": "1M",
