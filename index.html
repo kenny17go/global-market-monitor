@@ -1,4 +1,4 @@
-<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#071422"><title>Global Market Monitor</title><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="v1.4.css"><link rel="stylesheet" href="v1.5.css"><link rel="stylesheet" href="v1.6.css"><link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=20260917b"><link rel="icon" type="image/png" sizes="512x512" href="icon-512.png?v=20260917b"><link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon-v2.png"><link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=20260917b"><link rel="icon" type="image/png" sizes="512x512" href="icon-512.png?v=20260917b"><link rel="manifest" href="manifest.webmanifest?v=20260917b"></head><body>
+<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#071422"><title>Global Market Monitor</title><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="v1.4.css"><link rel="stylesheet" href="v1.5.css"><link rel="stylesheet" href="v1.6.css?v=20260917-tvwidget1"><link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=20260917b"><link rel="icon" type="image/png" sizes="512x512" href="icon-512.png?v=20260917b"><link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon-v2.png"><link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=20260917b"><link rel="icon" type="image/png" sizes="512x512" href="icon-512.png?v=20260917b"><link rel="manifest" href="manifest.webmanifest?v=20260917b"></head><body>
 <div id="screenLock" class="screen-lock" aria-modal="true" role="dialog">
   <div class="screen-lock-card">
     <div class="screen-lock-brand">Global Market Monitor</div>
@@ -86,80 +86,28 @@
             <label>海外交易成本<input id="osCost" type="number" step="any" value="0"></label>
             <label>其他成本/稅/FX<input id="otherCost" type="number" step="any" value="0"></label>
           </div>
-          <div class="cost-actions"><button id="calcCostLab">重新計算</button><span class="source-note">官方規格預設可手動覆寫；FX 換算使用目前 Dashboard 的示範匯率，正式行情接入後會跟隨即時資料。</span></div>
+          <div class="cost-actions"><button id="calcCost">計算換算後價差</button><span class="source-note">成本欄位以各市場報價幣別輸入；若跨幣別比較，請設定 FX。</span></div>
           <div id="costResults" class="cost-results"></div>
         </section>
 
         <section class="formula-lab panel">
-          <div class="formula-lab-head"><div><h3>自訂比較公式 / Formula Lab</h3><p>任意插入商品欄位與運算符號。支援 + − × ÷、括號與 &gt; &lt; &gt;= &lt;= ==。公式只使用你選的原始行情，不預設比較邏輯。</p></div><button id="clearFormula" class="secondary-btn">清除</button></div>
-          <div class="formula-tools">
-            <select id="tokenCategory" aria-label="產品類別"><option value="all">全部產品</option><option value="台灣指數">台灣指數</option><option value="股價指數">股價指數</option><option value="匯率">匯率</option><option value="貴金屬">貴金屬</option><option value="能源">能源</option><option value="結算日NDF">結算日 NDF</option></select>
-            <select id="tokenSelect"><option value="">選擇報價欄位…</option></select><button id="insertToken">插入欄位</button>
-            <button data-op=" + ">＋</button><button data-op=" - ">−</button><button data-op=" * ">×</button><button data-op=" / ">÷</button><button data-op="(">(</button><button data-op=")">)</button>
-            <button data-op=" > ">&gt;</button><button data-op=" < ">&lt;</button><button data-op=" >= ">&gt;=</button><button data-op=" <= ">&lt;=</button>
-          </div>
-          <textarea id="spreadFormula" rows="3" placeholder="例 1：TAIFEX_SPF.BID - CME_MES.ASK
-例 2：(TAIFEX_XJF.LAST - (1 / CME_6J.LAST))
-例 3：(TAIFEX_GDF.LAST / COMEX_MGC.LAST - 1) * 100"></textarea>
-          <div class="formula-action-row"><button id="calcSpreadFormula">計算公式</button><button id="saveSpreadFormula" class="secondary-btn">儲存到監控</button><span id="formulaResult" class="formula-result">等待輸入公式</span></div>
-          <div class="formula-examples"><button data-example="TAIFEX_SPF.BID - CME_MES.ASK">S&P 可成交價差</button><button data-example="TAIFEX_UNF.LAST / CME_MNQ.LAST - 1">Nasdaq 比率</button><button data-example="TAIFEX_XJF.LAST - (1 / CME_6J.LAST)">JPY 倒數換向</button><button data-example="(TAIFEX_GDF.LAST / COMEX_MGC.LAST - 1) * 100">Gold % 差</button><button data-example="TAIFEX_BRF.BID - ICE_BRENT.ASK">Brent Bid/Ask 價差</button></div>
-        
-          <div class="indicator-lab">
-            <div class="indicator-title-row"><div><b>新指標 / Custom Indicator</b><small>先將上方自設公式命名儲存，再設定門檻監控。</small></div></div>
-            <div class="indicator-save-row"><input id="indicatorName" placeholder="指標名稱，例如：台黃近月價差"><button id="saveIndicator">儲存為新指標</button></div>
-            <div id="indicatorList" class="indicator-list"></div>
-            <div class="indicator-alert-builder">
-              <select id="indicatorAlertSelect"><option value="">選擇新指標…</option></select>
-              <select id="indicatorAlertOp"><option value=">">大於 &gt;</option><option value=">=">大於等於 &gt;=</option><option value="<">小於 &lt;</option><option value="<=">小於等於 &lt;=</option></select>
-              <input id="indicatorAlertThreshold" type="number" step="any" placeholder="門檻值">
-              <select id="indicatorAlertCooldown"><option value="0">每次重新穿越門檻通知</option><option value="300">至少間隔 5 分鐘</option><option value="900">至少間隔 15 分鐘</option><option value="3600">至少間隔 1 小時</option></select>
-              <button id="addIndicatorAlert">＋ 建立監控</button><button id="indicatorNotifyBtn" class="secondary-btn">啟用通知</button>
-            </div>
-            <div id="indicatorAlertList" class="indicator-alert-list"></div>
-          </div></section>
+          <div class="formula-lab-head"><div><h3>自設公式 / Formula Lab</h3><p>可直接引用上方商品庫的原始 Bid / Ask / Last，建立任何自訂換算、價差、比率或警示公式。</p></div></div>
+          <div class="formula-tools"><select id="tokenCategory"><option value="all">全部欄位</option><option value="台灣指數">台灣指數</option><option value="股價指數">海外股價指數</option><option value="匯率">匯率</option><option value="貴金屬">貴金屬</option><option value="能源">能源</option><option value="結算日NDF">結算日 NDF</option></select><select id="tokenSelect"></select><button id="insertBid">插入 BID</button><button id="insertAsk">插入 ASK</button><button id="insertLast">插入 LAST</button></div>
+          <textarea id="spreadFormula" rows="3" placeholder="例：TAIFEX_TX.BID - CME_ES.ASK × USD_TWD_SPOT / 100"></textarea>
+          <div class="formula-action-row"><button id="calcFormula">計算公式</button><button id="saveAsIndicator" class="secondary-btn">儲存為新指標</button><div id="formulaResult" class="formula-result">等待輸入公式</div></div>
+          <div class="formula-examples"><button data-formula="TAIFEX_TX.BID-CME_ES.ASK">台指 vs ES 原始價差</button><button data-formula="TAIFEX_UDF.BID-CME_MNQ.ASK">櫃買 vs MNQ 原始價差</button><button data-formula="TAIFEX_GDF.BID-CME_MGC.ASK">黃金原始價差</button><button data-formula="TAIFEX_BRF.BID-ICE_BRENT.ASK">布蘭特原始價差</button></div>
+        </section>
 
-        <div class="spread-grid">
-          <article class="panel"><h3>比較原則 <small>你決定公式，系統不替你限制</small></h3><div class="info-list"><div><b>同月份</b><span>跨市場期貨最好先確認相同或相近到期月。</span></div><div><b>Bid / Ask / Last</b><span>三種欄位都可直接放入公式；找可成交價差時優先使用 Bid/Ask。</span></div><div><b>報價方向</b><span>例如 TAIFEX USD/JPY 與 CME 6J 的報價方向不同，可自行使用 1 / CME_6J。</span></div><div><b>單位與幣別</b><span>新台幣黃金等商品需自行加入 USD/TWD、單位或合約乘數換算。</span></div></div></article>
-          <article class="panel"><h3>目前納入範圍 <small>官方商品清單</small></h3><div class="spread-alert-examples"><span>台灣指數：TX / MTX　｜　股價指數：TJF / UDF / SPF / UNF / SXF / F1F</span><span>外匯：RHF / XEF / XJF / XBF / XAF</span><span>貴金屬：GDF / TGF</span><span>能源：BRF</span><span>RTF（CNT）暫不列入直接海外同標的，避免把 CNT 與 CNH 混為相同市場。</span></div></article>
-        </div>
+        <section class="panel custom-products-wrap"><div class="custom-products-head"><div><h3>自訂商品 / Custom Products</h3><p>新增你自己的市場標的與報價欄位，供 Formula Lab 使用。</p></div><button id="addCustomProduct" class="secondary-btn">＋ 新增商品</button></div><div id="customProductEditor" class="custom-editor hidden"></div><div id="customProductList" class="custom-product-list"></div></section>
+        <section class="panel custom-compare"><div class="custom-products-head"><div><h3>自訂比較 / Custom Compare</h3><p>選兩個商品與欄位快速比較。</p></div></div><div id="customCompareGrid" class="custom-compare-grid"></div><div class="custom-compare-actions"><button id="calcCustomCompare">計算</button></div><div id="customCompareResults" class="custom-compare-results"></div></section>
       </section>
 
+      <section id="indicatorsView" class="view"><section class="panel"><div class="formula-lab-head"><div><h3>自訂指標 / Indicators</h3><p>使用 Formula Lab 儲存的公式建立監控指標。</p></div></div><div id="indicatorDashboardSummary" class="spread-kpis"></div><div id="indicatorDashboardGrid" class="custom-product-list"></div><div id="indicatorDashboardAlerts" class="custom-product-list"></div></section></section>
 
-      
-      <section id="indicatorsView" class="view">
-        <section class="indicator-dashboard-hero panel">
-          <div><h2>自訂指標 Dashboard</h2><p>集中查看所有自訂公式的即時計算值、門檻監控與通知狀態。建立或修改時，會直接帶你到 Formula Lab 的「另存為我的自訂指標」區。</p></div>
-          <button id="goFormulaLab" class="secondary-btn">＋ 建立 / 編輯自訂指標</button>
-        </section>
-        <section id="indicatorDashboardSummary" class="spread-kpis"></section>
-        <section class="panel">
-          <div class="formula-lab-head"><div><h3>我的指標 / My Indicators</h3><p>數值會隨行情更新重新計算；監控條件以重新穿越門檻時觸發。</p></div><button id="indicatorDashboardNotify" class="secondary-btn">啟用通知</button></div>
-          <div id="indicatorDashboardGrid" class="indicator-dashboard-grid"></div>
-        </section>
-        <section class="panel">
-          <div class="formula-lab-head"><div><h3>監控條件 / Alert Rules</h3><p>查看每一個新指標目前的門檻、現值與觸發狀態。</p></div></div>
-          <div id="indicatorDashboardAlerts" class="indicator-dashboard-alerts"></div>
-        </section>
-      </section>
+      <section id="connectionsView" class="view"><section class="connections-hero panel"><div><h2>行情連線 / Connections</h2><p>免費來源與官方延遲資料作為預設；若你有券商或行情權限，可透過私人 Gateway 切換 LIVE。</p></div><div class="connection-mode-box"><label><input id="preferLive" type="checkbox"> 優先使用 LIVE Gateway</label><span id="activeConnectionStatus" class="connection-status">免費延遲 / 官方模式</span></div></section><section class="market-source-grid" id="marketSourceGrid"></section><article class="panel connections-panel"><div class="connections-head"><div><h3>國內券商</h3><p>主要用於 TAIFEX 即時行情。連線需透過使用者自己的本機 Bridge 或私人後端。</p></div></div><div class="broker-grid" id="domesticBrokerGrid"></div></article><article class="panel connections-panel"><div class="connections-head"><div><h3>國外券商 / 行情服務</h3><p>可用於 CME、JPX / OSE、ICE 等海外期貨；實際可用市場取決於帳戶行情訂閱。</p></div></div><div class="broker-grid" id="overseasBrokerGrid"></div></article><article class="panel gateway-panel"><div class="connections-head"><div><h3>連線設定</h3><p>只填 Gateway URL，不在此頁輸入券商密碼或 API Secret。憑證應存放在 Local Bridge / Private Backend。</p></div></div><div class="gateway-form"><label>目前選擇<select id="brokerSelect"></select></label><label>Gateway URL<input id="brokerEndpoint" placeholder="例：http://127.0.0.1:8787/quotes"></label><label>備註<input id="brokerNote" placeholder="例如：家用 Mac mini / Private Worker"></label></div><div class="gateway-actions"><button id="saveBrokerConnection">儲存設定</button><button id="testBrokerConnection" class="secondary-btn">測試連線</button><button id="disconnectBroker" class="secondary-btn">停用 LIVE</button><span id="brokerTestResult" class="source-note">尚未測試</span></div><div class="connection-warning">安全原則：不要把券商密碼、API Secret、憑證檔或 session token 寫入 GitHub、LocalStorage 或前端 JavaScript。網站只保存 Gateway URL、偏好與非敏感備註。</div></article></section>
 
-<section id="connectionsView" class="view">
-        <section class="connections-hero panel">
-          <div><h2>行情連線 / Market Data Connections</h2><p>預設使用免費延遲或官方資料；有券商或行情帳號時，可透過自己的 Local Bridge / Private Gateway 切換至 LIVE。GitHub Pages 不儲存券商帳號、密碼、API Secret 或憑證。</p></div>
-          <div class="connection-mode-box"><label><input id="preferLive" type="checkbox"> 優先使用 LIVE，失敗自動回退 DELAYED</label><span id="activeConnectionStatus" class="connection-status">免費模式</span></div>
-        </section>
-        <section class="market-source-grid" id="marketSourceGrid"></section>
-        <article class="panel connections-panel"><div class="connections-head"><div><h3>國內券商</h3><p>主要用於 TAIFEX 即時行情。連線需透過使用者自己的本機 Bridge 或私人後端。</p></div></div><div class="broker-grid" id="domesticBrokerGrid"></div></article>
-        <article class="panel connections-panel"><div class="connections-head"><div><h3>國外券商 / 行情服務</h3><p>可用於 CME、JPX / OSE、ICE 等海外期貨；實際可用市場取決於帳戶行情訂閱。</p></div></div><div class="broker-grid" id="overseasBrokerGrid"></div></article>
-        <article class="panel gateway-panel">
-          <div class="connections-head"><div><h3>連線設定</h3><p>只填 Gateway URL，不在此頁輸入券商密碼或 API Secret。憑證應存放在 Local Bridge / Private Backend。</p></div></div>
-          <div class="gateway-form"><label>目前選擇<select id="brokerSelect"></select></label><label>Gateway URL<input id="brokerEndpoint" placeholder="例：http://127.0.0.1:8787/quotes"></label><label>備註<input id="brokerNote" placeholder="例如：家用 Mac mini / Private Worker"></label></div>
-          <div class="gateway-actions"><button id="saveBrokerConnection">儲存設定</button><button id="testBrokerConnection" class="secondary-btn">測試連線</button><button id="disconnectBroker" class="secondary-btn">停用 LIVE</button><span id="brokerTestResult" class="source-note">尚未測試</span></div>
-          <div class="connection-warning">安全原則：不要把券商密碼、API Secret、憑證檔或 session token 寫入 GitHub、LocalStorage 或前端 JavaScript。網站只保存 Gateway URL、偏好與非敏感備註。</div>
-        </article>
-      </section>
-
-      <footer class="footer"><span>Global Market Monitor v1.6 · Single app.js?v=20260916-lockdemo1"tag">Provider 可替換</span></span><span>僅供資訊參考，不構成投資建議</span></footer>
+      <footer class="footer"><span>Global Market Monitor v1.6 · TradingView inline chart</span><span>僅供資訊參考，不構成投資建議</span></footer>
     </div>
   </main>
 </div>
-<script src="config.example.js"></script><script src="providers.js?v=20260916-ndf3"></script><script src="app.js?v=20260916-ndf4"></script></body></html>
+<script src="config.example.js?v=20260917-tvwidget1"></script><script src="providers.js?v=20260916-ndf3"></script><script src="app.js?v=20260916-ndf4"></script><script src="tv-spark-widget.js?v=20260917-tvwidget1"></script></body></html>
