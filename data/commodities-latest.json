@@ -3,7 +3,7 @@
     "source": "Stooq + FRED/EIA + Yahoo Finance",
     "mode": "MIXED DELAYED/DAILY",
     "realtime": false,
-    "generatedAt": "2026-09-17T01:22:41.914Z",
+    "generatedAt": "2026-09-17T01:35:07.914Z",
     "note": "Spot/reference quotes remain separate from futures. Commodity overview sparklines use genuine Yahoo 1D / 5m futures chart points when public spot intraday history is unavailable, and the card is relabeled as a futures card to avoid mixing spot price with futures history. No synthetic path is created."
   },
   "commodities": {
@@ -24,11 +24,11 @@
       "future": {
         "label": "COMEX Micro Gold futures",
         "symbol": "MGC=F",
-        "last": 4337.3,
+        "last": 4348.4,
         "previousClose": 4387.5,
-        "change": -50.19999999999982,
-        "pct": -1.14415954415954,
-        "timestamp": "2026-09-17T01:12:27.000Z",
+        "change": -39.100000000000364,
+        "pct": -0.8911680911680995,
+        "timestamp": "2026-09-17T01:24:54.000Z",
         "source": "Yahoo Finance",
         "mode": "DELAYED",
         "series": [
@@ -274,8 +274,10 @@
           4318.2998046875,
           4335.39990234375,
           4341.60009765625,
-          4334.10009765625,
-          4337.2998046875
+          4337,
+          4340.7998046875,
+          4348,
+          4348.39990234375
         ],
         "seriesTimes": [
           "2026-09-16T04:00:00.000Z",
@@ -521,14 +523,16 @@
           "2026-09-17T01:00:00.000Z",
           "2026-09-17T01:05:00.000Z",
           "2026-09-17T01:10:00.000Z",
-          "2026-09-17T01:12:27.000Z"
+          "2026-09-17T01:15:00.000Z",
+          "2026-09-17T01:20:00.000Z",
+          "2026-09-17T01:24:54.000Z"
         ],
         "seriesMeta": {
           "range": "1D",
           "interval": "5m",
           "source": "Yahoo Finance",
           "mode": "DELAYED",
-          "points": 244,
+          "points": 246,
           "instrument": "FUTURES"
         }
       },
@@ -551,11 +555,11 @@
       "future": {
         "label": "COMEX Silver futures",
         "symbol": "SI=F",
-        "last": 64.22,
+        "last": 64.415,
         "previousClose": 64.919,
-        "change": -0.6989999999999981,
-        "pct": -1.0767263821069304,
-        "timestamp": "2026-09-17T01:12:27.000Z",
+        "change": -0.5039999999999907,
+        "pct": -0.7763520695019805,
+        "timestamp": "2026-09-17T01:24:46.000Z",
         "source": "Yahoo Finance",
         "mode": "DELAYED",
         "series": [
@@ -801,8 +805,10 @@
           63.64500045776367,
           64.16000366210938,
           64.25,
-          64.16999816894531,
-          64.22000122070312
+          64.17500305175781,
+          64.31500244140625,
+          64.42500305175781,
+          64.41500091552734
         ],
         "seriesTimes": [
           "2026-09-16T04:00:00.000Z",
@@ -1048,14 +1054,16 @@
           "2026-09-17T01:00:00.000Z",
           "2026-09-17T01:05:00.000Z",
           "2026-09-17T01:10:00.000Z",
-          "2026-09-17T01:12:27.000Z"
+          "2026-09-17T01:15:00.000Z",
+          "2026-09-17T01:20:00.000Z",
+          "2026-09-17T01:24:46.000Z"
         ],
         "seriesMeta": {
           "range": "1D",
           "interval": "5m",
           "source": "Yahoo Finance",
           "mode": "DELAYED",
-          "points": 244,
+          "points": 246,
           "instrument": "FUTURES"
         }
       },
@@ -1078,11 +1086,11 @@
       "future": {
         "label": "NYMEX Micro WTI futures",
         "symbol": "MCL=F",
-        "last": 101.78,
+        "last": 102.1,
         "previousClose": 102.43,
-        "change": -0.6500000000000057,
-        "pct": -0.6345797129747199,
-        "timestamp": "2026-09-17T01:12:25.000Z",
+        "change": -0.3300000000000125,
+        "pct": -0.3221712388948672,
+        "timestamp": "2026-09-17T01:24:53.000Z",
         "source": "Yahoo Finance",
         "mode": "DELAYED",
         "series": [
@@ -1328,8 +1336,10 @@
           101.31999969482422,
           101.4000015258789,
           101.5999984741211,
-          101.9800033569336,
-          101.77999877929688
+          101.93000030517578,
+          102.08999633789062,
+          102.08000183105469,
+          102.0999984741211
         ],
         "seriesTimes": [
           "2026-09-16T04:00:00.000Z",
@@ -1575,14 +1585,16 @@
           "2026-09-17T01:00:00.000Z",
           "2026-09-17T01:05:00.000Z",
           "2026-09-17T01:10:00.000Z",
-          "2026-09-17T01:12:25.000Z"
+          "2026-09-17T01:15:00.000Z",
+          "2026-09-17T01:20:00.000Z",
+          "2026-09-17T01:24:53.000Z"
         ],
         "seriesMeta": {
           "range": "1D",
           "interval": "5m",
           "source": "Yahoo Finance",
           "mode": "DELAYED",
-          "points": 244,
+          "points": 246,
           "instrument": "FUTURES"
         }
       },
@@ -1605,11 +1617,11 @@
       "future": {
         "label": "Brent futures benchmark",
         "symbol": "BZ=F",
-        "last": 105.33,
+        "last": 105.77,
         "previousClose": 105.83,
-        "change": -0.5,
-        "pct": -0.47245582538032693,
-        "timestamp": "2026-09-17T01:11:45.000Z",
+        "change": -0.060000000000002274,
+        "pct": -0.05669469904564139,
+        "timestamp": "2026-09-17T01:24:53.000Z",
         "source": "Yahoo Finance",
         "mode": "DELAYED",
         "series": [
@@ -1841,8 +1853,10 @@
           104.4800033569336,
           104.75,
           105.08000183105469,
-          105.33000183105469,
-          105.33000183105469
+          105.58999633789062,
+          105.66999816894531,
+          105.7300033569336,
+          105.7699966430664
         ],
         "seriesTimes": [
           "2026-09-16T04:00:00.000Z",
@@ -2074,14 +2088,16 @@
           "2026-09-17T01:00:00.000Z",
           "2026-09-17T01:05:00.000Z",
           "2026-09-17T01:10:00.000Z",
-          "2026-09-17T01:11:45.000Z"
+          "2026-09-17T01:15:00.000Z",
+          "2026-09-17T01:20:00.000Z",
+          "2026-09-17T01:24:53.000Z"
         ],
         "seriesMeta": {
           "range": "1D",
           "interval": "5m",
           "source": "Yahoo Finance",
           "mode": "DELAYED",
-          "points": 230,
+          "points": 232,
           "instrument": "FUTURES"
         }
       },
@@ -2104,11 +2120,11 @@
       "future": {
         "label": "COMEX Copper futures",
         "symbol": "HG=F",
-        "last": 6.473,
+        "last": 6.484,
         "previousClose": 6.509,
-        "change": -0.036000000000000476,
-        "pct": -0.5530803502842291,
-        "timestamp": "2026-09-17T01:12:11.000Z",
+        "change": -0.025000000000000355,
+        "pct": -0.3840835765862706,
+        "timestamp": "2026-09-17T01:24:40.000Z",
         "source": "Yahoo Finance",
         "mode": "DELAYED",
         "series": [
@@ -2354,8 +2370,10 @@
           6.453499794006348,
           6.4695000648498535,
           6.471499919891357,
-          6.4720001220703125,
-          6.473499774932861
+          6.473499774932861,
+          6.476500034332275,
+          6.483500003814697,
+          6.483500003814697
         ],
         "seriesTimes": [
           "2026-09-16T04:00:00.000Z",
@@ -2601,14 +2619,16 @@
           "2026-09-17T01:00:00.000Z",
           "2026-09-17T01:05:00.000Z",
           "2026-09-17T01:10:00.000Z",
-          "2026-09-17T01:12:11.000Z"
+          "2026-09-17T01:15:00.000Z",
+          "2026-09-17T01:20:00.000Z",
+          "2026-09-17T01:24:40.000Z"
         ],
         "seriesMeta": {
           "range": "1D",
           "interval": "5m",
           "source": "Yahoo Finance",
           "mode": "DELAYED",
-          "points": 244,
+          "points": 246,
           "instrument": "FUTURES"
         }
       },
@@ -2631,11 +2651,11 @@
       "future": {
         "label": "NYMEX Natural Gas futures",
         "symbol": "NG=F",
-        "last": 2.892,
+        "last": 2.897,
         "previousClose": 2.891,
-        "change": 0.0009999999999998899,
-        "pct": 0.0345901072293286,
-        "timestamp": "2026-09-17T01:12:20.000Z",
+        "change": 0.005999999999999783,
+        "pct": 0.20754064337598696,
+        "timestamp": "2026-09-17T01:24:00.000Z",
         "source": "Yahoo Finance",
         "mode": "DELAYED",
         "series": [
@@ -2880,7 +2900,9 @@
           2.888000011444092,
           2.888000011444092,
           2.8919999599456787,
-          2.8919999599456787
+          2.8929998874664307,
+          2.8970000743865967,
+          2.8970000743865967
         ],
         "seriesTimes": [
           "2026-09-16T04:00:00.000Z",
@@ -3124,14 +3146,16 @@
           "2026-09-17T01:00:00.000Z",
           "2026-09-17T01:05:00.000Z",
           "2026-09-17T01:10:00.000Z",
-          "2026-09-17T01:12:20.000Z"
+          "2026-09-17T01:15:00.000Z",
+          "2026-09-17T01:20:00.000Z",
+          "2026-09-17T01:24:00.000Z"
         ],
         "seriesMeta": {
           "range": "1D",
           "interval": "5m",
           "source": "Yahoo Finance",
           "mode": "DELAYED",
-          "points": 242,
+          "points": 244,
           "instrument": "FUTURES"
         }
       },
