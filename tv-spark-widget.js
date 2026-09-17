@@ -1,10 +1,13 @@
 // TradingView core-index viewer. Keep scope intentionally limited until these three are verified.
 (function(){
+  // Use TradingView-calculated TVC symbols for embedded charts. TradingView documents
+  // TVC:SPX as the freely available counterpart to SP:SPX; TVC also avoids the
+  // exchange/data entitlement dialog seen with SP:/NASDAQ: index feeds in embeds.
   const TV_SYMBOLS={
-    'S&P 500':'SP:SPX',
-    'Nasdaq-100':'NASDAQ:NDX',
-    'SOX':'NASDAQ:SOX',
-    'SOX 費半':'NASDAQ:SOX'
+    'S&P 500':'TVC:SPX',
+    'Nasdaq-100':'TVC:NDX',
+    'SOX':'TVC:SOX',
+    'SOX 費半':'TVC:SOX'
   };
   let activeKey='';
 
@@ -15,7 +18,7 @@
     if(!top)return null;
     el=document.createElement('section');
     el.id='tvSparkViewer';el.className='tv-spark-viewer';el.hidden=true;
-    el.innerHTML='<div class="tv-spark-head"><div><b id="tvSparkTitle">TradingView</b><small>TradingView · Advanced Chart · 指數測試</small></div><button id="tvSparkClose" type="button">✕ 關閉</button></div><div id="tvSparkChart" class="tv-spark-chart"></div>';
+    el.innerHTML='<div class="tv-spark-head"><div><b id="tvSparkTitle">TradingView</b><small>TradingView · Advanced Chart · TVC 指數走勢</small></div><button id="tvSparkClose" type="button">✕ 關閉</button></div><div id="tvSparkChart" class="tv-spark-chart"></div>';
     top.appendChild(el);
     document.getElementById('tvSparkClose').addEventListener('click',closeViewer);
     return el;
@@ -40,8 +43,6 @@
     activeKey=key;clearActive();if(trigger)trigger.classList.add('tv-active');
     document.getElementById('tvSparkTitle').textContent=label+' · '+symbol+' · 走勢圖';
     const chart=document.getElementById('tvSparkChart');chart.replaceChildren();
-    // Each click gets a fresh isolated document. This prevents a previous/default AAPL widget
-    // instance from being reused by TradingView's external embed loader.
     const frame=document.createElement('iframe');
     frame.title=label+' TradingView chart';
     frame.setAttribute('loading','eager');
