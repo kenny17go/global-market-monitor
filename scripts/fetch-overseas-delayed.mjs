@@ -18,7 +18,7 @@ const num=v=>{if(v==null)return null;const n=Number(String(v).replace(/,/g,''));
 const valid=(v,range)=>{const x=num(v);return x!=null&&x>=range[0]&&x<=range[1]?x:null};
 const stripHtml=s=>String(s).replace(/<script[\s\S]*?<\/script>/gi,' ').replace(/<style[\s\S]*?<\/style>/gi,' ').replace(/<[^>]+>/g,' ').replace(/&nbsp;|&#160;/gi,' ').replace(/&amp;/gi,'&').replace(/\s+/g,' ').trim();
 function symbolMonth(symbol){const m=String(symbol).match(/([FGHJKMNQUVXZ])(\d{2})\.[A-Z]+$/i);if(!m)return null;const y=2000+Number(m[2]),mo=MONTH_CODE[m[1].toUpperCase()];return `${y}${String(mo).padStart(2,'0')}`}
-function tvMonth(symbol){const m=String(symbol).match(/([FGHJKMNQUVXZ])(20\d{2})$/i);if(!m)return null;return `${m[2]}${String(MONTH_CODE[m[1].toUpperCase()]).padStart(2,'0')}`}
+function futuresMonth(symbol){const m=String(symbol).match(/([FGHJKMNQUVXZ])(\d{1,2})$/i);if(!m)return null;const yy=Number(m[2]),y=yy<70?2000+yy:1900+yy,mo=MONTH_CODE[m[1].toUpperCase()];return `${y}${String(mo).padStart(2,'0')}`}
 function dateMonth(sec){if(!sec)return null;const d=new Date(Number(sec)*1000);return `${d.getUTCFullYear()}${String(d.getUTCMonth()+1).padStart(2,'0')}`}
 function cookiesFrom(headers){const raw=headers.getSetCookie?.()||[];return raw.map(x=>x.split(';')[0]).filter(Boolean).join('; ')}
 function mergeCookies(a,b){return [...new Set(`${a||''}; ${b||''}`.split(';').map(x=>x.trim()).filter(Boolean))].join('; ')}
@@ -47,10 +47,34 @@ async function yahooApiQuote(symbol,range){
 }
 async function yahooRootProduct(t,source='Yahoo Finance'){let symbols=await yahooChain(t.root);const root=t.root+'=F';if(!symbols.length)symbols=[root];const contracts=[];for(const s of symbols.slice(0,5)){const q=await yahooApiQuote(s,t.range);if(q?.month&&(q.bid!=null||q.ask!=null||q.last!=null))contracts.push(q)}if(!contracts.length&&symbols[0]!==root){const q=await yahooApiQuote(root,t.range);if(q?.month&&(q.bid!=null||q.ask!=null||q.last!=null))contracts.push(q)}contracts.sort((a,b)=>String(a.month).localeCompare(String(b.month)));return {defaultMonth:contracts[0]?.month||null,contracts:contracts.map(c=>({...c,delayMinutes:10})),source,mode:contracts.length?'DELAYED':'UNAVAILABLE',delayMinutes:10}}
 
-// Yahoo range=1d can return only the elapsed portion of today's session (e.g. 8 points
-// shortly after the US open). Fetch several days, then select the latest complete/active
-// exchange-local session. This keeps a true 5-minute intraday sparkline instead of a few
-// snapshots while still preferring today's session once it has enough observations.
+const BARCHART_API_KEY=String(process.env.BARCHART_API_KEY||'').trim();
+function barchartMode(mode){const m=String(mode||'').toUpperCase();return m==='R'?'LIVE':m==='D'?'OFFICIAL DAILY':m==='I'?'DELAYED':'DELAYED'}
+async function barchartRootProduct({root,range,label}){
+  if(!BARCHART_API_KEY)return {defaultMonth:null,contracts:[],source:`Barchart OnDemand · ${label}`,mode:'UNAVAILABLE',reason:'BARCHART_API_KEY not configured'};
+  try{
+    const url=`https://ondemand.websol.barchart.com/getQuote.json?apikey=${encodeURIComponent(BARCHART_API_KEY)}&symbols=${encodeURIComponent(root+'^F')}`;
+    const j=await fetchJson(url),rows=Array.isArray(j?.results)?j.results:[];
+    const contracts=[];
+    for(const q of rows){
+      const month=futuresMonth(q.symbol);if(!month)continue;
+      const bid=valid(q.bid,range),ask=valid(q.ask,range),last=valid(q.lastPrice,range);
+      if(bid==null&&ask==null&&last==null)continue;
+      contracts.push({symbol:q.symbol,month,bid,ask,last,timestamp:q.tradeTimestamp||q.serverTimestamp||null,quoteType:`Barchart OnDemand ${barchartMode(q.mode)}`,quoteMode:barchartMode(q.mode),delayMinutes:null});
+    }
+    contracts.sort((a,b)=>a.month.localeCompare(b.month));
+    const modes=[...new Set(contracts.map(x=>x.quoteMode))];
+    return {defaultMonth:contracts[0]?.month||null,contracts,source:`Barchart OnDemand · ${label}`,mode:modes.length===1?modes[0]:(contracts.length?'MIXED':'UNAVAILABLE'),delayMinutes:null};
+  }catch(e){console.warn('Barchart fallback failed',root,e.message);return {defaultMonth:null,contracts:[],source:`Barchart OnDemand · ${label}`,mode:'UNAVAILABLE',reason:e.message}}
+}
+function mergeProducts(primary,fallback,label){
+  const map=new Map();
+  for(const c of fallback?.contracts||[])map.set(c.month,{...c});
+  for(const c of primary?.contracts||[]){const old=map.get(c.month)||{};map.set(c.month,{...old,...c,bid:c.bid??old.bid??null,ask:c.ask??old.ask??null,last:c.last??old.last??null,timestamp:c.timestamp||old.timestamp||null,quoteType:[c.quoteType,old.quoteType].filter(Boolean).join(' + fallback '),quoteMode:c.quoteMode||old.quoteMode||primary.mode||fallback.mode||null,delayMinutes:c.delayMinutes??old.delayMinutes??primary.delayMinutes??fallback.delayMinutes??null})}
+  const contracts=[...map.values()].filter(c=>c.month&&(c.bid!=null||c.ask!=null||c.last!=null)).sort((a,b)=>a.month.localeCompare(b.month));
+  const usedFallback=(fallback?.contracts||[]).some(f=>{const p=(primary?.contracts||[]).find(x=>x.month===f.month);return !p||p.bid==null&&f.bid!=null||p.ask==null&&f.ask!=null||p.last==null&&f.last!=null});
+  return {defaultMonth:primary?.defaultMonth||fallback?.defaultMonth||contracts[0]?.month||null,contracts,source:usedFallback?`${primary?.source||'Primary'} + ${fallback?.source||'fallback'}`:(primary?.source||fallback?.source||label),mode:primary?.mode!=='UNAVAILABLE'?primary.mode:(fallback?.mode||'UNAVAILABLE'),delayMinutes:primary?.delayMinutes??fallback?.delayMinutes??null};
+}
+
 function localDateKey(sec,timeZone){
   try{return new Intl.DateTimeFormat('en-CA',{timeZone:timeZone||'UTC',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(sec*1000))}catch{return new Date(sec*1000).toISOString().slice(0,10)}
 }
@@ -83,19 +107,7 @@ async function yahooIndexQuote(id,symbol,label,range){
   }
 }
 
-async function tradingViewContracts({id,url,prefix,range}){
-  try{
-    const html=await fetchText(url,{headers:{referer:'https://www.tradingview.com/'}}),plain=stripHtml(html);
-    const rx=new RegExp(`${prefix}[FGHJKMNQUVXZ]20\\d{2}`,'gi');const symbols=[...new Set((html.match(rx)||[]).concat(plain.match(rx)||[]))].slice(0,12);const contracts=[];
-    for(const symbol of symbols){const month=tvMonth(symbol);if(!month)continue;const esc=symbol.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');let last=null;
-      const plainPos=plain.indexOf(symbol);if(plainPos>=0){const chunk=plain.slice(plainPos,plainPos+1200);const m=chunk.match(new RegExp(`${esc}[\\s\\S]{0,500}?20\\d{2}-\\d{2}-\\d{2}\\s+([\\d,]+(?:\\.\\d+)?)`,'i'));if(m)last=valid(m[1],range)}
-      if(last==null){const htmlPos=html.indexOf(symbol);const chunk=htmlPos>=0?html.slice(htmlPos,htmlPos+8000):'';for(const re of [/"close"\s*:\s*(-?[\d.]+)/i,/"lp"\s*:\s*(-?[\d.]+)/i,/"price"\s*:\s*(-?[\d.]+)/i]){const m=chunk.match(re);if(m){last=valid(m[1],range);if(last!=null)break}}}
-      if(last!=null)contracts.push({symbol,month,bid:null,ask:null,last,timestamp:new Date().toISOString(),quoteType:'TradingView delayed page'});
-    }
-    contracts.sort((a,b)=>a.month.localeCompare(b.month));return {defaultMonth:contracts[0]?.month||null,contracts:contracts.map(c=>({...c,delayMinutes:15})),source:'TradingView · OSE delayed fallback',mode:contracts.length?'DELAYED':'UNAVAILABLE',delayMinutes:15};
-  }catch(e){console.warn('TradingView JPX fallback failed',id,e.message);return {defaultMonth:null,contracts:[],source:'TradingView · OSE delayed fallback',mode:'UNAVAILABLE'}}
-}
-async function nikkei225jpMini(){try{const plain=stripHtml(await fetchText('https://nikkei225jp.com/cme/'));const contracts=[];const re=/大証ミニ\s*(\d{2})年(\d{1,2})月限\s*([\d,]+)/g;let m;while((m=re.exec(plain))){const month=`20${m[1]}${String(m[2]).padStart(2,'0')}`,last=valid(m[3],[1000,100000]);if(last!=null)contracts.push({symbol:`OSE Nikkei225 mini ${month}`,month,bid:null,ask:null,last,timestamp:new Date().toISOString(),quoteType:'nikkei225jp public table'})}return {defaultMonth:contracts[0]?.month||null,contracts:contracts.map(c=>({...c,delayMinutes:15})),source:'nikkei225jp.com · OSE public quote fallback',mode:contracts.length?'DELAYED':'UNAVAILABLE',delayMinutes:15}}catch(e){console.warn('nikkei225jp fallback failed',e.message);return {defaultMonth:null,contracts:[],source:'nikkei225jp.com · OSE public quote fallback',mode:'UNAVAILABLE'}}}
+async function nikkei225jpMini(){try{const plain=stripHtml(await fetchText('https://nikkei225jp.com/cme/'));const contracts=[];const re=/大証ミニ\s*(\d{2})年(\d{1,2})月限\s*([\d,]+)/g;let m;while((m=re.exec(plain))){const month=`20${m[1]}${String(m[2]).padStart(2,'0')}`,last=valid(m[3],[1000,100000]);if(last!=null)contracts.push({symbol:`OSE Nikkei225 mini ${month}`,month,bid:null,ask:null,last,timestamp:new Date().toISOString(),quoteType:'nikkei225jp public table',quoteMode:'DELAYED',delayMinutes:15})}return {defaultMonth:contracts[0]?.month||null,contracts,source:'nikkei225jp.com · OSE public quote fallback',mode:contracts.length?'DELAYED':'UNAVAILABLE',delayMinutes:15}}catch(e){console.warn('nikkei225jp fallback failed',e.message);return {defaultMonth:null,contracts:[],source:'nikkei225jp.com · OSE public quote fallback',mode:'UNAVAILABLE'}}}
 
 const INDEX_TARGETS=[
   {id:'SPX',symbol:'^GSPC',label:'S&P 500',range:[100,20000]},
@@ -107,9 +119,20 @@ const INDEX_TARGETS=[
 ];
 const indices={};for(const x of INDEX_TARGETS)indices[x.id]=await yahooIndexQuote(x.id,x.symbol,x.label,x.range);
 const products={};for(const t of ROOTS)products[t.id]=await yahooRootProduct(t);
-products.JPX_MINI_TOPIX=await tradingViewContracts({id:'JPX_MINI_TOPIX',url:'https://tw.tradingview.com/symbols/OSE-TOPIXM1!/contracts/',prefix:'TOPIXM',range:[100,10000]});
-products.JPX_NIKKEI225_MINI=await tradingViewContracts({id:'JPX_NIKKEI225_MINI',url:'https://tw.tradingview.com/symbols/OSE-NK225M1!/contracts/',prefix:'NK225M',range:[1000,100000]});
-if(!products.JPX_NIKKEI225_MINI.contracts.length)products.JPX_NIKKEI225_MINI=await nikkei225jpMini();
-products.ICE_BRENT_MINI=await yahooRootProduct({id:'ICE_BRENT_MINI',root:'BZ',exchange:'Brent reference',range:[10,300]},'Yahoo Finance · Brent delayed benchmark');
-const out={meta:{source:'Yahoo Finance + JPX delayed fallbacks',mode:'DELAYED',realtime:false,generatedAt:new Date().toISOString(),note:'Yahoo cash indices and futures are public delayed/web data, not a licensed realtime feed. Intraday index sparklines fetch 5d of 5-minute bars and select the latest sufficiently populated session; early-session cards temporarily show the last completed session instead of a misleading handful of points. JPX/OSE fallbacks expose delayed last prices/contract months only and do not synthesize Bid/Ask. LIVE broker connectors can override delayed data.'},indices,products};
+
+const [bcNikkei,bcTopix,bcMgc,bcBrent]=await Promise.all([
+  barchartRootProduct({root:'NP',range:[1000,100000],label:'JPX Nikkei 225 mini'}),
+  barchartRootProduct({root:'TS',range:[100,10000],label:'JPX mini-TOPIX'}),
+  barchartRootProduct({root:'MGC',range:[100,20000],label:'COMEX Micro Gold'}),
+  barchartRootProduct({root:'CB',range:[10,300],label:'ICE Brent'})
+]);
+
+products.JPX_NIKKEI225_MINI=mergeProducts(bcNikkei,await nikkei225jpMini(),'JPX Nikkei 225 mini');
+products.JPX_MINI_TOPIX=bcTopix;
+products.COMEX_MGC=mergeProducts(products.COMEX_MGC,bcMgc,'COMEX Micro Gold');
+products.COMEX_MGC_TWD=mergeProducts(products.COMEX_MGC_TWD,bcMgc,'COMEX Micro Gold');
+const yahooBrent=await yahooRootProduct({id:'ICE_BRENT_MINI',root:'BZ',exchange:'Brent reference',range:[10,300]},'Yahoo Finance · Brent delayed benchmark');
+products.ICE_BRENT_MINI=mergeProducts(yahooBrent,bcBrent,'ICE Brent');
+
+const out={meta:{source:BARCHART_API_KEY?'Yahoo Finance + Barchart OnDemand + public fallbacks':'Yahoo Finance + public fallbacks (Barchart key not configured)',mode:'MIXED',realtime:false,generatedAt:new Date().toISOString(),note:'TradingView is no longer used as a JPX/OSE quote source. Yahoo remains the first public source for CME/COMEX and Brent benchmark data. When BARCHART_API_KEY is configured, Barchart OnDemand supplements missing contract Bid/Ask/Last for JPX Nikkei 225 mini, mini-TOPIX, COMEX Micro Gold and ICE Brent. Barchart mode/timestamps are preserved; missing Bid/Ask are never synthesized. Without a Barchart key, Nikkei 225 mini can fall back to a public delayed Last quote and mini-TOPIX remains unavailable rather than fabricated.'},indices,products};
 await fs.mkdir('data',{recursive:true});await fs.writeFile('data/overseas-delayed.json',JSON.stringify(out,null,2)+'\n');console.log('Wrote data/overseas-delayed.json');for(const [id,p] of Object.entries(products))console.log(id,p.defaultMonth,p.contracts?.length||0,p.contracts?.[0]?.bid,p.contracts?.[0]?.ask,p.contracts?.[0]?.last,p.source,p.contracts?.[0]?.quoteType||'');
