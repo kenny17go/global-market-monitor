@@ -1,1 +1,0 @@
-Current PWA icon assets: market-icon-180.png, market-icon-192.png, market-icon-512.png.
