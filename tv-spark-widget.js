@@ -26,13 +26,15 @@
     const key=label+'|'+symbol,el=viewer();if(!el)return;
     if(activeKey===key&&!el.hidden){closeViewer();return}
     activeKey=key;clearActive();if(trigger)trigger.classList.add('tv-active');
-    document.getElementById('tvSparkTitle').textContent=label+' · 走勢圖';
+    document.getElementById('tvSparkTitle').textContent=label+' · '+symbol+' · 走勢圖';
     const chart=document.getElementById('tvSparkChart');chart.replaceChildren();
     const container=document.createElement('div');container.className='tradingview-widget-container';container.style.cssText='height:100%;width:100%';
     const widget=document.createElement('div');widget.className='tradingview-widget-container__widget';widget.style.cssText='height:100%;width:100%';container.appendChild(widget);
     const script=document.createElement('script');script.type='text/javascript';script.src='https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js';script.async=true;
-    script.text=JSON.stringify({autosize:true,symbol,interval:'D',timezone:'Asia/Taipei',theme:'dark',backgroundColor:'rgba(7,20,34,1)',style:'1',locale:'zh_TW',hide_side_toolbar:true,allow_symbol_change:false,save_image:false,calendar:false,support_host:'https://www.tradingview.com'});
-    chart.appendChild(container);container.appendChild(script);el.hidden=false;setTimeout(()=>el.scrollIntoView({behavior:'smooth',block:'nearest'}),80);
+    // TradingView's embed loader reads the JSON from the script element's inline HTML.
+    // Using innerHTML here is intentional; script.text caused the loader to fall back to its default AAPL chart on some browsers.
+    script.innerHTML=JSON.stringify({autosize:true,symbol:symbol,interval:'D',timezone:'Asia/Taipei',theme:'dark',backgroundColor:'rgba(7,20,34,1)',style:'1',locale:'zh_TW',hide_side_toolbar:true,allow_symbol_change:false,save_image:false,calendar:false,support_host:'https://www.tradingview.com'});
+    container.appendChild(script);chart.appendChild(container);el.hidden=false;setTimeout(()=>el.scrollIntoView({behavior:'smooth',block:'nearest'}),80);
   }
   function arm(el,label){if(!el||!TV_SYMBOLS[label])return;el.classList.add('tv-spark-trigger');el.setAttribute('role','button');el.setAttribute('tabindex','0');el.setAttribute('title','點擊展開 '+label+' TradingView 走勢圖');el.setAttribute('aria-label','展開 '+label+' TradingView 走勢圖');if(el.dataset.tvWidgetBound==='1')return;el.dataset.tvWidgetBound='1';el.addEventListener('click',ev=>{ev.preventDefault();ev.stopPropagation();openViewer(label,el)});el.addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();openViewer(label,el)}})}
   function bindTop(){document.querySelectorAll('#topCards .card').forEach(card=>{const label=(card.querySelector('.label')?.textContent||'').trim();arm(card.querySelector('.spark'),label)})}
