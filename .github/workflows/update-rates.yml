@@ -9,7 +9,7 @@ on:
       - 'scripts/patch-ust-yield-panel.mjs'
       - '.github/workflows/update-rates.yml'
   schedule:
-    - cron: '15 22 * * 1-5'
+    - cron: '17 * * * 1-5'
 
 permissions:
   contents: write
@@ -26,7 +26,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Fetch official US Treasury yield curve
+      - name: Fetch official policy rates and US Treasury yield curve
         run: node scripts/fetch-overview-rates.mjs
       - name: Install overview rates bridge
         run: node scripts/patch-overview-rates.mjs
@@ -39,9 +39,11 @@ jobs:
           node --check scripts/patch-ust-yield-panel.mjs
           node --check providers.js
           node --check app.js
-          node -e "const d=JSON.parse(require('fs').readFileSync('data/rates-latest.json','utf8')); const need=['1M','3M','6M','1Y','2Y','5Y','10Y','30Y']; const ok=need.filter(t=>d.ust?.find(x=>x.tenor===t&&x.yield!=null)); if(ok.length<8) process.exit(1); console.log('UST tenors:',ok.length,'asOf:',d.meta?.asOf);"
+          node -e "const d=JSON.parse(require('fs').readFileSync('data/rates-latest.json','utf8')); const need=['1M','3M','6M','1Y','2Y','5Y','10Y','30Y']; const ok=need.filter(t=>d.ust?.find(x=>x.tenor===t&&x.yield!=null)); const pr=d.policyRates||[]; if(ok.length<8||pr.length<7||pr.filter(x=>x.displayRate&&x.displayRate!=='—').length<6) process.exit(1); console.log('UST tenors:',ok.length,'policy rates:',pr.length,'asOf:',d.meta?.asOf);"
+          grep -q "ratesData.policyRates" providers.js
           grep -q "mergeOverviewRates(base,ratesData)" providers.js
           grep -q "rates-latest.json" providers.js
+          grep -q "x.displayRate" app.js
           grep -q "ustYieldValues" index.html
           grep -q "ustSpread102" index.html
           grep -q "ustYieldTenors" app.js
@@ -56,5 +58,6 @@ jobs:
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "feat: refresh UST curve with axes and tenor table"
+          git commit -m "data: refresh official policy rates and UST curve"
+          git pull --rebase origin main
           git push
