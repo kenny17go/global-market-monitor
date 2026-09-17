@@ -1,0 +1,73 @@
+name: Patch critical quote gaps
+
+on:
+  push:
+    paths:
+      - '.github/workflows/patch-critical-quote-gaps.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Patch critical quote handling
+        run: |
+          node <<'NODE'
+          const fs=require('fs');
+
+          let app=fs.readFileSync('app.js','utf8');
+          app=app.replace(
+            "const cls = v => Number(v) >= 0 ? 'pos' : 'neg';\nconst n = (v, d=0) => Number.isFinite(Number(v)) ? Number(v) : d;\nconst tidy = (v, max=6, min=0) => {\n  const x=Number(v); if(!Number.isFinite(x)) return '—';",
+            "const isQuoteNumber = v => v !== null && v !== undefined && v !== '' && typeof v !== 'boolean' && Number.isFinite(Number(v));\nconst cls = v => !isQuoteNumber(v) ? '' : Number(v) >= 0 ? 'pos' : 'neg';\nconst n = (v, d=0) => isQuoteNumber(v) ? Number(v) : d;\nconst tidy = (v, max=6, min=0) => {\n  if(!isQuoteNumber(v)) return '—';\n  const x=Number(v);"
+          );
+          app=app.replace(
+            "const fmt=(v,d=2)=>Number(v).toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d});\nconst fxPoint2=v=>{const x=Number(v);return Number.isFinite(x)?x.toFixed(2):'—'};",
+            "const fmt=(v,d=2)=>isQuoteNumber(v)?Number(v).toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d}):'—';\nconst fxPoint2=v=>isQuoteNumber(v)?Number(v).toFixed(2):'—';"
+          );
+          app=app.replace(
+            "function costFieldValue(q,field,month){const key=String(field).toLowerCase();if(month&&Array.isArray(q?.contracts)){const c=q.contracts.find(x=>x.month===month);if(c&&c[key]!=null)return Number(c[key])}return Number(q?.[key]??0)}\nfunction normalizedPrice(row,side,p){if(row.compare==='inverse'&&side==='os')return p?1/p:0;return p}",
+            "function costFieldValue(q,field,month){const key=String(field).toLowerCase();if(month&&Array.isArray(q?.contracts)){const c=q.contracts.find(x=>x.month===month);if(c&&isQuoteNumber(c[key]))return Number(c[key])}return isQuoteNumber(q?.[key])?Number(q[key]):null}\nfunction normalizedPrice(row,side,p){if(!isQuoteNumber(p))return null;if(row.compare==='inverse'&&side==='os')return Number(p)!==0?1/Number(p):null;return Number(p)}"
+          );
+          const needle="const twCmp=normalizedPrice(row,'tw',twP)*twU,osCmp=normalizedPrice(row,'os',osP)*osU,rawSpread=";
+          if(app.includes(needle)) app=app.replace(needle,"if(!isQuoteNumber(twP)||!isQuoteNumber(osP)){const miss=[];if(!isQuoteNumber(twP))miss.push(row.tw.code+' '+twField);if(!isQuoteNumber(osP))miss.push(row.os.code+' '+osField);$('#costResults').innerHTML=`<div class=\"cost-warning\">⚠ 缺少 ${miss.join(' / ')} 報價。系統不以 0.00 代替缺值，也不計算假價差；請等待下一次報價更新，或改用已有的 Last / LIVE Gateway。</div>`;return}const twCmp=normalizedPrice(row,'tw',twP)*twU,osCmp=normalizedPrice(row,'os',osP)*osU,rawSpread=");
+          fs.writeFileSync('app.js',app);
+
+          let ov=fs.readFileSync('scripts/fetch-overseas-delayed.mjs','utf8');
+          ov=ov.replace("return {defaultMonth:contracts[0]?.month||null,contracts,source,mode:contracts.length?'DELAYED':'UNAVAILABLE'}","return {defaultMonth:contracts[0]?.month||null,contracts:contracts.map(c=>({...c,delayMinutes:10})),source,mode:contracts.length?'DELAYED':'UNAVAILABLE',delayMinutes:10}");
+          ov=ov.replace("return {defaultMonth:contracts[0]?.month||null,contracts,source:'TradingView · OSE delayed fallback',mode:contracts.length?'DELAYED':'UNAVAILABLE'}","return {defaultMonth:contracts[0]?.month||null,contracts:contracts.map(c=>({...c,delayMinutes:15})),source:'TradingView · OSE delayed fallback',mode:contracts.length?'DELAYED':'UNAVAILABLE',delayMinutes:15}");
+          ov=ov.replace("return {defaultMonth:contracts[0]?.month||null,contracts,source:'nikkei225jp.com · OSE public quote fallback',mode:contracts.length?'DELAYED':'UNAVAILABLE'}","return {defaultMonth:contracts[0]?.month||null,contracts:contracts.map(c=>({...c,delayMinutes:15})),source:'nikkei225jp.com · OSE public quote fallback',mode:contracts.length?'DELAYED':'UNAVAILABLE',delayMinutes:15}");
+          fs.writeFileSync('scripts/fetch-overseas-delayed.mjs',ov);
+
+          let idx=fs.readFileSync('index.html','utf8');
+          idx=idx.replace(/app\.js\?v=[^\"']+/,'app.js?v=20260917-criticalquotes1');
+          idx=idx.replace(/tv-spark-widget\.js\?v=[^\"']+/,'tv-spark-widget.js?v=20260917-criticalquotes1');
+          idx=idx.replace('Global Market Monitor v1.6 · TradingView inline chart','Global Market Monitor v1.6 · Spread & Quote Quality');
+          fs.writeFileSync('index.html',idx);
+          NODE
+      - name: Verify critical guards
+        run: |
+          grep -q "const isQuoteNumber" app.js
+          grep -q "系統不以 0.00 代替缺值" app.js
+          grep -q "delayMinutes:15" scripts/fetch-overseas-delayed.mjs
+          node --check app.js
+          node --check scripts/fetch-overseas-delayed.mjs
+      - name: Commit patch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app.js index.html scripts/fetch-overseas-delayed.mjs
+          if git diff --cached --quiet; then
+            echo "No changes needed"
+          else
+            git commit -m "fix: protect critical Gold Brent CME JPX quote gaps"
+            git push
+          fi
