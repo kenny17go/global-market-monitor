@@ -56,32 +56,26 @@ function localDateKey(sec,timeZone){
 }
 async function yahooIndexQuote(id,symbol,label,range){
   try{
-    const j=await fetchJson(`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=5m&range=5d&includePrePost=false`);
+    const j=await fetchJson(`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=5m&range=1d`);
     const r=j?.chart?.result?.[0],m=r?.meta;
     const last=valid(m?.regularMarketPrice,range),prev=valid(m?.chartPreviousClose??m?.previousClose,range);
     if(last==null)throw new Error('missing market price');
     const change=prev!=null?last-prev:null,pct=prev?change/prev*100:null;
     const ts=Array.isArray(r?.timestamp)?r.timestamp:[];
     const close=Array.isArray(r?.indicators?.quote?.[0]?.close)?r.indicators.quote[0].close:[];
-    const tz=m?.exchangeTimezoneName||'UTC',byDay=new Map();
+    const points=[];
     for(let i=0;i<Math.min(ts.length,close.length);i++){
-      const t=Number(ts[i]),v=valid(close[i],range);if(!Number.isFinite(t)||v==null)continue;
-      const key=localDateKey(t,tz);if(!byDay.has(key))byDay.set(key,[]);byDay.get(key).push({t,v});
+      const t=Number(ts[i]),v=valid(close[i],range);
+      if(!Number.isFinite(t)||v==null)continue;
+      points.push({t,v});
     }
-    const days=[...byDay.entries()].sort((a,b)=>a[0].localeCompare(b[0]));
-    if(!days.length)throw new Error('missing intraday series');
-    const latest=days.at(-1),previous=days.length>1?days.at(-2):null;
-    // If today's session has fewer than 24 five-minute bars, show the latest completed
-    // session rather than a misleading 6-8 point smooth line. Once >=24 bars exist,
-    // switch to today's active session and keep growing toward the full day.
-    const chosen=(latest[1].length>=24||!previous)?latest:previous;
-    const points=chosen[1];
     return {
       id,symbol,label,last,previousClose:prev,change,pct,
       timestamp:m?.regularMarketTime?new Date(m.regularMarketTime*1000).toISOString():new Date().toISOString(),
       source:'Yahoo Finance',mode:'DELAYED',
-      series:points.map(x=>x.v),seriesTimes:points.map(x=>new Date(x.t*1000).toISOString()),
-      seriesMeta:{range:'1D',interval:'5m',session:chosen[0]===latest[0]?'ACTIVE_SESSION':'LAST_COMPLETE_SESSION',sessionDate:chosen[0],source:'Yahoo Finance',mode:'DELAYED',timezone:tz,points:points.length}
+      series:points.map(x=>x.v),
+      seriesTimes:points.map(x=>new Date(x.t*1000).toISOString()),
+      seriesMeta:{range:'1D',interval:'5m',session:'LATEST_SESSION',source:'Yahoo Finance',mode:'DELAYED',timezone:m?.exchangeTimezoneName||null,points:points.length}
     };
   }catch(e){
     console.warn('Yahoo index failed',id,symbol,e.message);
