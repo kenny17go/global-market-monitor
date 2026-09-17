@@ -1,97 +1,48 @@
 // TradingView click-chart integration intentionally disabled.
 // Global Market Monitor is a spread-comparison tool: quote freshness, source quality,
 // contract matching and bid/ask accuracy take priority over historical charting.
-// TradingView may still be used by backend/research workflows as a reference/check source,
-// but this frontend file must not add click handlers, chart widgets or navigation.
 (function(){
   function cleanup(){
     const viewer=document.getElementById('tvSparkViewer');
     if(viewer)viewer.remove();
     document.querySelectorAll('.tv-active,.tv-spark-trigger').forEach(el=>{
       el.classList.remove('tv-active','tv-spark-trigger');
-      el.removeAttribute('role');
-      el.removeAttribute('tabindex');
-      el.removeAttribute('title');
-      delete el.dataset.tvWidgetBound;
+      el.removeAttribute('role');el.removeAttribute('tabindex');el.removeAttribute('title');delete el.dataset.tvWidgetBound;
     });
   }
-
   const esc=s=>String(s??'—').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const finite=v=>v!==null&&v!==undefined&&v!==''&&Number.isFinite(Number(v));
+  const px=(v,d=6)=>finite(v)?Number(v).toLocaleString('en-US',{maximumFractionDigits:d}):'—';
   const modeClass=m=>/LIVE/i.test(m||'')?'live':/DELAY|DAILY|EOD/i.test(m||'')?'neutral':'neutral';
-  function selectedContract(q,selectId){
-    const month=document.getElementById(selectId)?.value;
-    if(month&&Array.isArray(q?.contracts))return q.contracts.find(c=>c.month===month)||null;
-    return null;
-  }
+  function selectedContract(q,selectId){const month=document.getElementById(selectId)?.value;if(month&&Array.isArray(q?.contracts))return q.contracts.find(c=>c.month===month)||null;return null}
   function verifiedDelay(q,m){
-    const mode=String(m?.mode||'');
-    if(/LIVE/i.test(mode))return 'LIVE';
-    if(/DAILY|EOD|OFFICIAL/i.test(mode))return 'OFFICIAL DAILY / EOD';
-    if(!/DELAY/i.test(mode))return mode||'UNKNOWN';
+    const mode=String(m?.mode||'');if(/LIVE/i.test(mode))return 'LIVE';if(/DAILY|EOD|OFFICIAL/i.test(mode))return 'OFFICIAL DAILY / EOD';if(!/DELAY/i.test(mode))return mode||'UNKNOWN';
     const market=`${q?.exchange||''} ${q?.id||''} ${q?.code||''} ${m?.source||''}`.toUpperCase();
-    // Exchange-published public quote policies: CME Group futures >=10m; JPX/OSE futures >=15m.
-    if(/CME|CBOT|COMEX|NYMEX/.test(market))return 'DELAYED ≥10m';
-    if(/JPX|OSE|OSAKA/.test(market))return 'DELAYED ≥15m';
-    // ICE/Yahoo and other fallbacks remain DELAYED unless an exact venue delay is verified.
-    return 'DELAYED';
+    if(/CME|CBOT|COMEX|NYMEX/.test(market))return 'DELAYED ≥10m';if(/JPX|OSE|OSAKA/.test(market))return 'DELAYED ≥15m';return 'DELAYED';
   }
   function legMeta(q,selectId){
-    const c=selectedContract(q,selectId);
-    const meta={
-      source:q?.source||'—',
-      mode:q?.quoteMode||'UNKNOWN',
-      timestamp:c?.timestamp||c?.date||q?.quoteTimestamp||q?.quoteDate||null,
-      month:c?.month||document.getElementById(selectId)?.value||q?.expiry||'—'
-    };
-    meta.displayMode=verifiedDelay(q,meta);
-    return meta;
+    const c=selectedContract(q,selectId);const meta={source:q?.source||'—',mode:q?.quoteMode||'UNKNOWN',timestamp:c?.timestamp||c?.date||q?.quoteTimestamp||q?.quoteDate||null,month:c?.month||document.getElementById(selectId)?.value||q?.expiry||'—',bid:c?.bid??q?.bid??null,ask:c?.ask??q?.ask??null,last:c?.last??q?.last??null};meta.displayMode=verifiedDelay(q,meta);return meta;
   }
-  function parsedTs(v){
-    if(!v)return null;
-    if(/^\d{4}-\d{2}-\d{2}$/.test(String(v)))return null;
-    const t=Date.parse(v);return Number.isFinite(t)?t:null;
+  function parsedTs(v){if(!v||/^\d{4}-\d{2}-\d{2}$/.test(String(v)))return null;const t=Date.parse(v);return Number.isFinite(t)?t:null}
+  function fmtTime(v){if(!v)return '無時間戳';if(/^\d{4}-\d{2}-\d{2}$/.test(String(v)))return String(v)+' 日資料';const t=Date.parse(v);if(!Number.isFinite(t))return String(v);return new Date(t).toLocaleString('zh-TW',{hour12:false,month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit'})}
+  function syncState(a,b){const ma=String(a.mode||''),mb=String(b.mode||'');if(/DAILY|EOD|OFFICIAL/i.test(ma)||/DAILY|EOD|OFFICIAL/i.test(mb))return {level:'warn',text:'⚠ 含官方日資料 / EOD，不能視為同時報價'};const ta=parsedTs(a.timestamp),tb=parsedTs(b.timestamp);if(!ta||!tb)return {level:'warn',text:'⚠ 缺少可比較的即時時間戳'};const mins=Math.abs(ta-tb)/60000;if(mins<=2)return {level:'ok',text:`✓ 報價時間接近 · 相差 ${mins.toFixed(1)} 分鐘`};if(mins<=10)return {level:'caution',text:`△ 報價時間差 ${mins.toFixed(1)} 分鐘 · 計算時請留意`};return {level:'warn',text:`⚠ 報價不同步 · 相差 ${mins.toFixed(1)} 分鐘`}}
+  function executableState(row,a,b){
+    const dir=document.getElementById('costDirection')?.value||'sellTw';
+    let twField,osField,twValue,osValue;
+    if(dir==='sellTw'){twField='Bid';osField='Ask';twValue=a.bid;osValue=b.ask}else{twField='Ask';osField='Bid';twValue=a.ask;osValue=b.bid}
+    const complete=finite(twValue)&&finite(osValue);
+    if(complete)return {level:'ok',title:'✓ 可交易 Bid/Ask',text:`${row.tw.code} ${twField} ${px(twValue)} ↔ ${row.os.code} ${osField} ${px(osValue)}`,twField,osField,twValue,osValue,fallback:false};
+    const twFallback=finite(twValue)?twValue:a.last,osFallback=finite(osValue)?osValue:b.last;
+    const usable=finite(twFallback)&&finite(osFallback);
+    return {level:usable?'caution':'warn',title:usable?'△ Bid/Ask 不完整 · 退回 Last 參考':'⚠ 缺少可比較報價',text:usable?`${row.tw.code} ${finite(twValue)?twField:'Last'} ${px(twFallback)} ↔ ${row.os.code} ${finite(osValue)?osField:'Last'} ${px(osFallback)}`:'目前無法形成雙邊可比較價格',twField:finite(twValue)?twField:'Last',osField:finite(osValue)?osField:'Last',twValue:twFallback,osValue:osFallback,fallback:true};
   }
-  function fmtTime(v){
-    if(!v)return '無時間戳';
-    if(/^\d{4}-\d{2}-\d{2}$/.test(String(v)))return String(v)+' 日資料';
-    const t=Date.parse(v);if(!Number.isFinite(t))return String(v);
-    return new Date(t).toLocaleString('zh-TW',{hour12:false,month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit'});
-  }
-  function syncState(a,b){
-    const ma=String(a.mode||''),mb=String(b.mode||'');
-    if(/DAILY|EOD|OFFICIAL/i.test(ma)||/DAILY|EOD|OFFICIAL/i.test(mb))return {level:'warn',text:'⚠ 含官方日資料 / EOD，不能視為同時報價'};
-    const ta=parsedTs(a.timestamp),tb=parsedTs(b.timestamp);
-    if(!ta||!tb)return {level:'warn',text:'⚠ 缺少可比較的即時時間戳'};
-    const mins=Math.abs(ta-tb)/60000;
-    if(mins<=2)return {level:'ok',text:`✓ 報價時間接近 · 相差 ${mins.toFixed(1)} 分鐘`};
-    if(mins<=10)return {level:'caution',text:`△ 報價時間差 ${mins.toFixed(1)} 分鐘 · 計算時請留意`};
-    return {level:'warn',text:`⚠ 報價不同步 · 相差 ${mins.toFixed(1)} 分鐘`};
-  }
-  function ensureStyle(){
-    if(document.getElementById('quoteQualityStyle'))return;
-    const s=document.createElement('style');s.id='quoteQualityStyle';s.textContent=`
-      .quote-quality-box{margin:14px 0;padding:12px;border:1px solid rgba(148,163,184,.22);border-radius:12px;background:rgba(8,20,34,.55)}
-      .quote-quality-head{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:10px}.quote-quality-head b{font-size:14px}.quote-sync{font-size:12px;font-weight:700}.quote-sync.ok{color:#5ee6a8}.quote-sync.caution{color:#f6c85f}.quote-sync.warn{color:#ff8b8b}
-      .quote-quality-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.quote-leg{padding:10px;border-radius:10px;background:rgba(255,255,255,.035)}.quote-leg strong{display:block;font-size:13px;margin-bottom:5px}.quote-leg small{display:block;line-height:1.55;color:#9fb0c3}.quote-leg .quote-status{display:inline-block;margin-left:6px}
-      .quote-delay-note{margin-top:8px;font-size:11px;line-height:1.5;color:#8293a8}
-      @media(max-width:720px){.quote-quality-grid{grid-template-columns:1fr}.quote-quality-head{align-items:flex-start;flex-direction:column}}
-    `;document.head.appendChild(s);
-  }
+  function ensureStyle(){if(document.getElementById('quoteQualityStyle'))return;const s=document.createElement('style');s.id='quoteQualityStyle';s.textContent=`.quote-quality-box{margin:14px 0;padding:12px;border:1px solid rgba(148,163,184,.22);border-radius:12px;background:rgba(8,20,34,.55)}.quote-quality-head{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:10px}.quote-quality-head b{font-size:14px}.quote-sync,.exec-title{font-size:12px;font-weight:700}.quote-sync.ok,.exec-title.ok{color:#5ee6a8}.quote-sync.caution,.exec-title.caution{color:#f6c85f}.quote-sync.warn,.exec-title.warn{color:#ff8b8b}.quote-quality-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.quote-leg{padding:10px;border-radius:10px;background:rgba(255,255,255,.035)}.quote-leg strong{display:block;font-size:13px;margin-bottom:5px}.quote-leg small{display:block;line-height:1.55;color:#9fb0c3}.quote-leg .quote-status{display:inline-block;margin-left:6px}.exec-box{margin-top:10px;padding:10px;border-radius:10px;background:rgba(255,255,255,.035)}.exec-box small{display:block;color:#9fb0c3;margin-top:4px}.quote-delay-note{margin-top:8px;font-size:11px;line-height:1.5;color:#8293a8}@media(max-width:720px){.quote-quality-grid{grid-template-columns:1fr}.quote-quality-head{align-items:flex-start;flex-direction:column}}`;document.head.appendChild(s)}
   function renderQuality(){
-    const results=document.getElementById('costResults');
-    if(!results||typeof selectedCostRow!=='function')return;
-    let row;try{row=selectedCostRow()}catch(e){return}if(!row?.tw||!row?.os)return;
-    ensureStyle();
-    let box=document.getElementById('quoteQualityBox');
-    if(!box){box=document.createElement('div');box.id='quoteQualityBox';box.className='quote-quality-box';results.parentNode.insertBefore(box,results)}
-    const a=legMeta(row.tw,'twExpiry'),b=legMeta(row.os,'osExpiry'),sync=syncState(a,b);
-    const card=(title,q,m)=>`<div class="quote-leg"><strong>${esc(title)} ${esc(q.code)} · ${esc(m.month)} <span class="quote-status ${modeClass(m.mode)}">${esc(m.displayMode)}</span></strong><small>來源：${esc(m.source)}</small><small>報價時間：${esc(fmtTime(m.timestamp))}</small></div>`;
-    box.innerHTML=`<div class="quote-quality-head"><b>報價品質 / Quote Quality</b><span class="quote-sync ${sync.level}">${esc(sync.text)}</span></div><div class="quote-quality-grid">${card(row.tw.exchange||'TAIFEX',row.tw,a)}${card(row.os.exchange||'海外',row.os,b)}</div><div class="quote-delay-note">延遲標示採交易所公開規則：CME Group 公開期貨行情至少延遲 10 分鐘；JPX/OSE 公開期貨行情至少延遲 15 分鐘。其他來源若無可驗證的固定延遲，只標示 DELAYED，不自行推定分鐘數。</div>`;
+    const results=document.getElementById('costResults');if(!results||typeof selectedCostRow!=='function')return;let row;try{row=selectedCostRow()}catch(e){return}if(!row?.tw||!row?.os)return;ensureStyle();let box=document.getElementById('quoteQualityBox');if(!box){box=document.createElement('div');box.id='quoteQualityBox';box.className='quote-quality-box';results.parentNode.insertBefore(box,results)}
+    const a=legMeta(row.tw,'twExpiry'),b=legMeta(row.os,'osExpiry'),sync=syncState(a,b),ex=executableState(row,a,b);
+    const card=(title,q,m)=>`<div class="quote-leg"><strong>${esc(title)} ${esc(q.code)} · ${esc(m.month)} <span class="quote-status ${modeClass(m.mode)}">${esc(m.displayMode)}</span></strong><small>Bid ${px(m.bid)} · Ask ${px(m.ask)} · Last ${px(m.last)}</small><small>來源：${esc(m.source)}</small><small>報價時間：${esc(fmtTime(m.timestamp))}</small></div>`;
+    box.innerHTML=`<div class="quote-quality-head"><b>報價品質 / Quote Quality</b><span class="quote-sync ${sync.level}">${esc(sync.text)}</span></div><div class="quote-quality-grid">${card(row.tw.exchange||'TAIFEX',row.tw,a)}${card(row.os.exchange||'海外',row.os,b)}</div><div class="exec-box"><div class="exec-title ${ex.level}">${esc(ex.title)}</div><small>${esc(ex.text)}</small><small>${ex.fallback?'此數值含 Last fallback，只適合參考，不視為可立即成交價差。':'依目前方向使用賣出腿 Bid、買進腿 Ask，較接近實際可成交價格。'}</small></div><div class="quote-delay-note">延遲標示採交易所公開規則：CME Group 公開期貨行情至少延遲 10 分鐘；JPX/OSE 公開期貨行情至少延遲 15 分鐘。其他來源若無可驗證的固定延遲，只標示 DELAYED。</div>`;
   }
-  function bindQuality(){
-    cleanup();renderQuality();
-    ['costProduct','twExpiry','osExpiry','twPriceField','osPriceField','costDirection'].forEach(id=>document.getElementById(id)?.addEventListener('change',()=>setTimeout(renderQuality,0)));
-    setInterval(renderQuality,3000);
-  }
+  function bindQuality(){cleanup();renderQuality();['costProduct','twExpiry','osExpiry','twPriceField','osPriceField','costDirection'].forEach(id=>document.getElementById(id)?.addEventListener('change',()=>setTimeout(renderQuality,0)));setInterval(renderQuality,3000)}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bindQuality,{once:true});else bindQuality();
 })();
