@@ -1,10 +1,10 @@
 // TradingView core-index viewer. Scope intentionally limited to S&P 500, Nasdaq-100 and SOX.
 (function(){
-  // S&P 500 and Nasdaq-100 use the exact FRED symbols from TradingView's official
-  // Indices Overview / Symbol Overview widget demo. SOX stays on TradingView's TVC feed.
+  // Use TradingView's TVC index feeds for a market-price chart instead of the broader
+  // FRED economic-series view. Keep the compact Symbol Overview viewer.
   const TV_SYMBOLS={
-    'S&P 500':'FRED:SP500',
-    'Nasdaq-100':'FRED:NDQ100',
+    'S&P 500':'TVC:SPX',
+    'Nasdaq-100':'TVC:NDX',
     'SOX':'TVC:SOX',
     'SOX 費半':'TVC:SOX'
   };
