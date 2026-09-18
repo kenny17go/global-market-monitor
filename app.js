@@ -513,10 +513,10 @@ async function importCixBackup(file){
 }
 function moveFormulaToMyIndex(){
   const formula=$('#spreadFormula')?.value.trim();if(!formula)return alert('請先輸入公式');
-  const r=evalMarketFormula(formula);if(!r.ok)return alert('公式無法解析：'+r.error);
+  // 「加入我的指數」只負責保存公式定義；即使目前某個行情欄位尚未載入，也允許加入。
   switchView('customindex');document.querySelector('.cix-builder')?.classList.remove('is-collapsed');clearCixForm();
   if($('#cixFormula'))$('#cixFormula').value=formula;
-  if($('#cixPreview'))$('#cixPreview').textContent='已從 Formula Lab 帶入公式';
+  if($('#cixPreview'))$('#cixPreview').textContent='已從 Formula Lab 帶入公式；儲存後會依可用行情計算';
   setTimeout(()=>$('#cixName')?.focus(),80);
 }
 function cixModeLabel(v){return ({raw:'RAW',percent:'%',base100:'BASE 100',base1000:'BASE 1,000'})[v]||v}
