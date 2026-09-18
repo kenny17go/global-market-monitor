@@ -493,9 +493,13 @@ function jpyValuationInfo(x){
   const iceBid=ja>0?1/ja:null,iceAsk=jb>0?1/jb:null;
   const premium=tb>0&&iceAsk?100*(tb/iceAsk-1):null;
   const discount=ta>0&&iceBid?100*(iceBid/ta-1):null;
-  const signal=premium!=null&&premium>=0.3?'高估':discount!=null&&discount>=0.3?'低估':premium!=null&&discount!=null?'正常':'資料不足';
-  const sigClass=signal==='高估'?'neg':signal==='低估'?'pos':'';
-  return `<div class="cix-hedge"><b>同到期日估值 · ${m.month}</b><span>TAIFEX XJF Bid / Ask：${tb>0?tidy(tb,4):'—'} / ${ta>0?tidy(ta,4):'—'}</span><span>CME 6J Bid / Ask：${jb>0?tidy(jb,7):'—'} / ${ja>0?tidy(ja,7):'—'}</span><span>CME 換算 USD/JPY Bid / Ask：${iceBid?tidy(iceBid,4):'—'} / ${iceAsk?tidy(iceAsk,4):'—'}</span><span>高估幅度：${premium!=null?tidy(premium,3)+'%':'—'}｜低估幅度：${discount!=null?tidy(discount,3)+'%':'—'}</span><strong class="${sigClass}">訊號：${signal}</strong><small>門檻 ±0.30%；缺少 Bid/Ask 或共同到期月份時不產生交易訊號。</small></div>`;
+  const times=[m.tw?.quoteTimestamp,m.os?.quoteTimestamp].filter(Boolean).map(t=>new Date(t).getTime()).filter(Number.isFinite);
+  const now=Date.now(),ages=times.map(t=>(now-t)/60000),maxAge=ages.length?Math.max(...ages):null,skew=times.length===2?Math.abs(times[0]-times[1])/60000:null;
+  const fresh=times.length===2&&maxAge<=Number(x.freshness||20)&&skew<=Number(x.skew||15);
+  const rawSignal=premium!=null&&premium>=0.3?'高估':discount!=null&&discount>=0.3?'低估':premium!=null&&discount!=null?'正常':'資料不足';
+  const signal=rawSignal!=='資料不足'&&!fresh?'STALE · 不提醒':rawSignal;
+  const sigClass=rawSignal==='高估'?'neg':rawSignal==='低估'?'pos':'';
+  return `<div class="cix-hedge"><b>同到期日估值 · ${m.month}</b><span>TAIFEX XJF Bid / Ask：${tb>0?tidy(tb,4):'—'} / ${ta>0?tidy(ta,4):'—'}</span><span>CME 6J Bid / Ask：${jb>0?tidy(jb,7):'—'} / ${ja>0?tidy(ja,7):'—'}</span><span>CME 換算 USD/JPY Bid / Ask：${iceBid?tidy(iceBid,4):'—'} / ${iceAsk?tidy(iceAsk,4):'—'}</span><span>高估幅度：${premium!=null?tidy(premium,3)+'%':'—'}｜低估幅度：${discount!=null?tidy(discount,3)+'%':'—'}</span><span>資料品質：${fresh?'PASS':'STALE'}｜最舊報價 ${maxAge!=null?tidy(maxAge,1)+'m':'—'}｜時間差 ${skew!=null?tidy(skew,1)+'m':'—'}</span><strong class="${sigClass}">訊號：${signal}</strong><small>門檻 ±0.30%；Fresh ≤ ${x.freshness||20}m、時間差 ≤ ${x.skew||15}m 才允許提醒。缺少 Bid/Ask 或共同月份時不產生交易訊號。</small></div>`;
 }
 function jpyHedgeInfo(x){
   if(!['JPYTW01','JPYTW02'].includes(x?.symbol))return '';
