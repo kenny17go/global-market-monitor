@@ -190,26 +190,6 @@ function renderYield(){
 }
 function catalogRows(){return DATA?.crossMarketCatalog||[]}
 
-const SCREEN_LOCK_PASS='GMM2026';
-function initScreenLock(){
-  const lock=document.getElementById('screenLock');
-  if(!lock)return;
-  const input=document.getElementById('screenLockPassword');
-  const btn=document.getElementById('screenLockSubmit');
-  const err=document.getElementById('screenLockError');
-  const unlocked=sessionStorage.getItem('gmmScreenUnlocked')==='1';
-  document.body.classList.toggle('screen-locked',!unlocked);
-  lock.classList.toggle('is-unlocked',unlocked);
-  if(unlocked)return;
-  setTimeout(()=>input?.focus(),120);
-  const submit=()=>{
-    if(input?.value===SCREEN_LOCK_PASS){sessionStorage.setItem('gmmScreenUnlocked','1');document.body.classList.remove('screen-locked');lock.classList.add('is-unlocked');if(err)err.textContent='';}
-    else{if(err)err.textContent='密碼錯誤，請再試一次';if(input){input.value='';input.focus();}}
-  };
-  if(btn)btn.onclick=submit;
-  if(input)input.addEventListener('keydown',e=>{if(e.key==='Enter')submit()});
-}
-
 function quoteDecimals(code){return DISPLAY_DECIMALS[code]??2}
 function qfmt(v,code){return tidy(v,quoteDecimals(code),quoteDecimals(code))}
 const SETTLEMENT_NDF_FORMULA_TOKENS={TGF_NEAR_NDF:null,TGF_NEXT_NDF:null,BRF_NEAR_NDF:null,BRF_NEXT_NDF:null};
@@ -625,7 +605,7 @@ function bindCixUI(){
 }
 
 function switchView(name){$$('.view').forEach(v=>v.classList.toggle('active',v.id===name+'View'));$$('[data-view]').forEach(x=>x.classList.toggle('active',x.dataset.view===name));if(name==='connections')renderConnections();if(name==='indicators')renderIndicatorDashboard();window.scrollTo({top:0,behavior:'smooth'})}
-function bindStaticUI(){bindIndicatorUI();bindCixUI();if($('#saveAsIndicator'))$('#saveAsIndicator').onclick=moveFormulaToMyIndex;if($('#goFormulaLab'))$('#goFormulaLab').onclick=()=>{switchView('spread');setTimeout(()=>document.querySelector('.indicator-lab')?.scrollIntoView({behavior:'smooth',block:'center'}),120)};if($('#indicatorDashboardNotify'))$('#indicatorDashboardNotify').onclick=async()=>{if(!('Notification'in window))return alert('此瀏覽器不支援通知');const p=await Notification.requestPermission();renderIndicatorDashboard();alert(p==='granted'?'通知已啟用':'通知未啟用')};$$('[data-view]').forEach(x=>x.onclick=()=>switchView(x.dataset.view));bindConnectionsUI();if($('#customizeTop'))$('#customizeTop').onclick=()=>$('#topPicker').classList.toggle('hidden');if($('#catalogFilter'))$('#catalogFilter').onchange=renderCatalog;if($('#tokenCategory'))$('#tokenCategory').onchange=renderTokenOptions;const insertQuoteField=field=>{const sel=$('#tokenSelect'),ta=$('#spreadFormula');if(!sel||!ta)return;let t=sel.value;if(!t)return alert('請先選擇商品');t=t.replace(/\.(BID|ASK|LAST)$/i,'')+'.'+field;ta.value+=(ta.value&&!ta.value.endsWith(' ')?' ':'')+t;ta.focus()};
+function bindStaticUI(){bindCixUI();if($('#saveAsIndicator'))$('#saveAsIndicator').onclick=moveFormulaToMyIndex;if($('#goFormulaLab'))$('#goFormulaLab').onclick=()=>{switchView('spread');setTimeout(()=>document.querySelector('.indicator-lab')?.scrollIntoView({behavior:'smooth',block:'center'}),120)};if($('#indicatorDashboardNotify'))$('#indicatorDashboardNotify').onclick=async()=>{if(!('Notification'in window))return alert('此瀏覽器不支援通知');const p=await Notification.requestPermission();renderIndicatorDashboard();alert(p==='granted'?'通知已啟用':'通知未啟用')};$$('[data-view]').forEach(x=>x.onclick=()=>switchView(x.dataset.view));bindConnectionsUI();if($('#customizeTop'))$('#customizeTop').onclick=()=>$('#topPicker').classList.toggle('hidden');if($('#catalogFilter'))$('#catalogFilter').onchange=renderCatalog;if($('#tokenCategory'))$('#tokenCategory').onchange=renderTokenOptions;const insertQuoteField=field=>{const sel=$('#tokenSelect'),ta=$('#spreadFormula');if(!sel||!ta)return;let t=sel.value;if(!t)return alert('請先選擇商品');t=t.replace(/\.(BID|ASK|LAST)$/i,'')+'.'+field;ta.value+=(ta.value&&!ta.value.endsWith(' ')?' ':'')+t;ta.focus()};
 if($('#insertBid'))$('#insertBid').onclick=()=>insertQuoteField('BID');
 if($('#insertAsk'))$('#insertAsk').onclick=()=>insertQuoteField('ASK');
 if($('#insertLast'))$('#insertLast').onclick=()=>insertQuoteField('LAST');
