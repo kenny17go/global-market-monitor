@@ -720,7 +720,7 @@ function saveCustomIndexV1(){
 }
 function syncCixWatchMode(){
   const alertMode=$('#cixWatchMode')?.value==='alert';
-  $('.cix-alert-only').forEach(el=>el.classList.toggle('is-hidden',!alertMode));
+  document.querySelectorAll('.cix-alert-only').forEach(el=>el.classList.toggle('is-hidden',!alertMode));
   const note=$('#cixWatchNote');
   if(note)note.textContent=alertMode?'Alert 模式：設定上／下門檻後，條件成立時才提醒。':'Watch Only：只持續監看，不觸發門檻提醒。';
 }
