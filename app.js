@@ -725,7 +725,7 @@ function bindCixUI(){
   if($('#cixInsertBid'))$('#cixInsertBid').onclick=()=>insertCixQuoteField('BID');
   if($('#cixInsertAsk'))$('#cixInsertAsk').onclick=()=>insertCixQuoteField('ASK');
   if($('#cixInsertLast'))$('#cixInsertLast').onclick=()=>insertCixQuoteField('LAST');
-  $('[data-cix-op]').forEach(b=>b.onclick=()=>{const ta=$('#cixFormula');if(!ta)return;ta.value+=b.dataset.cixOp;ta.focus();updateCixFormulaPreview()});
+  document.querySelectorAll('[data-cix-op]').forEach(b=>b.onclick=()=>{const ta=$('#cixFormula');if(!ta)return;ta.value+=b.dataset.cixOp;ta.focus();updateCixFormulaPreview()});
   if($('#exportCix'))$('#exportCix').onclick=exportCixBackup;
   if($('#importCix'))$('#importCix').onclick=()=>$('#cixImportFile')?.click();
   if($('#cixImportFile'))$('#cixImportFile').onchange=async e=>{const f=e.target.files?.[0];if(f)await importCixBackup(f);e.target.value=''};
