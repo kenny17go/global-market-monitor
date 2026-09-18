@@ -88,3 +88,10 @@
   .cix-card-actions{display:grid;grid-template-columns:1fr 1fr}
   .cix-card-actions button{min-height:40px}
 }
+
+/* v1.7.4 — Custom Index pin & manual order */
+.cix-card-actions .cix-pin.is-pinned{border-color:#5e91b5;color:#9edcff;background:#0b2c43}
+@media(max-width:720px){
+  .cix-card-actions{grid-template-columns:1.5fr .55fr .55fr 1fr 1fr}
+  .cix-card-actions button{padding:7px 5px;font-size:12px}
+}
