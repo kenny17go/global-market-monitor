@@ -17,3 +17,40 @@
 .cix-hedge{display:grid;gap:3px;margin-top:9px;padding:9px;border:1px solid #234b68;border-radius:7px;background:#061522;font-size:11px;color:#b9d0df}.cix-hedge b{color:#e6f3fb}.cix-hedge strong{color:#78cfff}.cix-hedge small{color:var(--muted);margin-top:2px}
 
 .cix-history{display:grid;gap:3px;margin-top:8px;padding:8px 9px;border-top:1px solid #234b68;font-size:11px;color:#b9d0df}.cix-history b{color:#e6f3fb}.cix-history strong{color:#78cfff}
+
+
+/* v1.7.1 — Custom Index mobile workflow */
+.cix-step{margin-top:12px;padding:14px;border:1px solid #234b68;border-radius:10px;background:#071827}
+.cix-step:first-of-type{margin-top:6px}
+.cix-step-title{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.cix-step-title>span{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:#0d6ea8;border:1px solid #38a6df;color:#fff;font-weight:800;font-size:13px;flex:0 0 28px}
+.cix-step-title>div{display:grid;gap:2px}
+.cix-step-title b{font-size:15px;color:#e8f4fb}
+.cix-step-title small,.cix-advanced-label{font-size:11px;color:var(--muted)}
+.cix-advanced-label{margin:12px 0 7px;padding-top:10px;border-top:1px solid #173d59}
+.cix-template-tools{display:grid;grid-template-columns:1.15fr 1.6fr .8fr 1.6fr .8fr auto;gap:7px}
+.cix-template-tools select,.cix-template-tools button{min-width:0}
+.cix-formula-tools{margin-top:0}
+.cix-step .cix-preview{margin-top:12px}
+.cix-builder.is-collapsed .cix-step{display:none}
+
+@media(max-width:720px){
+  .cix-builder{padding:0 8px 12px}
+  .cix-builder-head{position:sticky;top:58px;z-index:5;background:#081827;padding:10px 2px;border-bottom:1px solid #173d59}
+  .cix-step{padding:12px 10px;margin-top:10px}
+  .cix-step-title{margin-bottom:10px}
+  .cix-template-tools{grid-template-columns:1fr 1fr}
+  .cix-template-tools #cixTemplate,.cix-template-tools #applyCixTemplate{grid-column:1/-1}
+  .cix-template-tools #cixLegA,.cix-template-tools #cixLegB{grid-column:1/-1}
+  .cix-template-tools button{min-height:42px}
+  .cix-formula-tools{display:flex;flex-wrap:wrap;gap:7px}
+  .cix-formula-tools #cixTokenCategory,.cix-formula-tools #cixTokenSelect{flex:1 1 100%}
+  .cix-formula-tools button{flex:1 1 calc(33.333% - 7px);min-height:42px}
+  .cix-formula-tools [data-cix-op]{flex:0 0 52px}
+  #cixFormula{min-height:108px;font-size:14px;line-height:1.45}
+  .cix-monitor-grid{grid-template-columns:1fr}
+  .cix-preview b{font-size:16px;line-height:1.35;overflow-wrap:anywhere}
+  .cix-preview strong{font-size:15px}
+  .cix-actions{position:sticky;bottom:8px;z-index:6;padding:8px;background:rgba(7,24,39,.94);border:1px solid #234b68;border-radius:10px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+  .cix-actions #saveCustomIndex{min-height:48px;font-size:16px}
+}
