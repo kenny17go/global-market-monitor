@@ -119,7 +119,7 @@
         
           <div class="indicator-lab">
             <div class="indicator-title-row"><div><b>新指標 / Custom Indicator</b><small>先將上方自設公式命名儲存，再設定門檻監控。</small></div></div>
-            <div class="indicator-save-row"><input id="indicatorName" placeholder="指標名稱，例如：台黃近月價差"><button id="saveIndicator">儲存為新指標</button></div>
+            <div class="indicator-save-row"><input id="indicatorName" placeholder="指標名稱，例如：台黃近月價差"><button id="saveIndicator">儲存為新指標</button><button id="exportIndicators" class="secondary-btn">備份指標</button><button id="importIndicators" class="secondary-btn">還原備份</button><input id="indicatorImportFile" type="file" accept="application/json,.json" hidden></div>
             <div id="indicatorList" class="indicator-list"></div>
             <div class="indicator-alert-builder">
               <select id="indicatorAlertSelect"><option value="">選擇新指標…</option></select>
