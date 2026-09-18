@@ -486,12 +486,15 @@ function jpyHedgeInfo(x){
   const xjfUsd=xjfLots*20000;
   const cmeUsd=usdJpy>0?12500000/usdJpy:null;
   const mismatch=cmeUsd?Math.abs(xjfUsd-cmeUsd)/cmeUsd*100:null;
+  const xjfNotionalJpy=usdJpy>0?xjfUsd*usdJpy:null;
+  const cmeNotionalJpy=12500000*cmeLots;
+  const mismatchJpy=xjfNotionalJpy!=null?xjfNotionalJpy-cmeNotionalJpy:null;
   const xjfMarginJpy=xjfLots*102000;
   const cmeMarginUsd=3800;
   const usdtwd=Number(DATA?.twd?.spotBid||0);
   const xjfMarginUsd=usdJpy>0?xjfMarginJpy/usdJpy:null;
   const totalTwd=usdtwd>0&&xjfMarginUsd!=null?(xjfMarginUsd+cmeMarginUsd)*usdtwd:null;
-  return `<div class="cix-hedge"><b>合約配對</b><span>建議整數比例 <strong>${xjfLots} XJF : ${cmeLots} 6J</strong></span><span>理論 XJF/6J：${theoretical?tidy(theoretical,3):'—'}｜名目誤差：${mismatch!=null?tidy(mismatch,2)+'%':'—'}</span><span>XJF 原始保證金：JPY ${xjfMarginJpy.toLocaleString()}｜6J margin estimate：USD ${cmeMarginUsd.toLocaleString()}</span><span>合計保證金換算：${totalTwd!=null?'約 TWD '+Math.round(totalTwd).toLocaleString():'—'}</span><small>比例依 USD/JPY 動態估算；6J USD 3,800 為目前系統 margin estimate，非即時清算保證金。</small></div>`;
+  return `<div class="cix-hedge"><b>合約配對</b><span>建議整數比例 <strong>${xjfLots} XJF : ${cmeLots} 6J</strong></span><span>理論 XJF/6J：${theoretical?tidy(theoretical,3):'—'}</span><span>名目本金配對誤差：<strong>${mismatchJpy!=null?(mismatchJpy>=0?'+':'')+Math.round(mismatchJpy).toLocaleString()+' JPY':'—'}</strong>｜${mismatch!=null?tidy(mismatch,2)+'%':'—'}</span><span>XJF 原始保證金：JPY ${xjfMarginJpy.toLocaleString()}｜6J margin estimate：USD ${cmeMarginUsd.toLocaleString()}</span><span>合計保證金換算：${totalTwd!=null?'約 TWD '+Math.round(totalTwd).toLocaleString():'—'}</span><small>比例依 USD/JPY 動態估算；6J USD 3,800 為目前系統 margin estimate，非即時清算保證金。</small></div>`;
 }
 function renderCixLibrary(){
   const box=$('#cixLibrary'),sum=$('#cixSummary');if(!box)return;
