@@ -628,20 +628,17 @@ function cixMatchedContractsForRow(row){
 function cixCrossMarketInfo(x){
   if(['JPYTW01','JPYTW02'].includes(x?.symbol))return '';
   const row=cixCrossMarketPair(x);if(!row)return '';
-  const m=cixMatchedContractsForRow(row),tw=row.tw||{},os=row.os||{};
-  const mult=v=>v!=null&&v!==''?Number(v):null;
-  const twMult=mult(tw.multiplier??tw.contractMultiplier),osMult=mult(os.multiplier??os.contractMultiplier);
-  const twTick=mult(tw.tick??tw.tickSize),osTick=mult(os.tick??os.tickSize);
-  const months=m.matches.length?m.matches.map(q=>q.month).join(' / '):'—';
-  const expiryStatus=m.matches.length?'MATCHED':'EXPIRY MISMATCH';
-  let ratio='—',mismatch='—';
-  const twLast=Number(tw.last),osLast=Number(os.last);
-  if(twMult>0&&osMult>0&&twLast>0&&osLast>0){
-    const twNotional=twLast*twMult,osNotional=osLast*osMult;
-    const raw=osNotional/twNotional,twLots=Math.max(1,Math.round(raw)),err=Math.abs(twLots*twNotional-osNotional)/osNotional*100;
-    ratio=twLots+' '+tw.code+' : 1 '+os.code;mismatch=tidy(err,2)+'%';
-  }
-  return `<div class="cix-hedge"><b>跨市場期貨辨識 · ${row.name}</b><span>市場：${tw.exchange||'台期所'} ${tw.code} ↔ ${os.exchange||'海外'} ${os.code}</span><span>共同到期月份：<strong>${months}</strong>｜狀態 ${expiryStatus}</span><span>合約乘數：${tw.code} ${twMult!=null?twMult:'—'}｜${os.code} ${osMult!=null?osMult:'—'}</span><span>最小跳動：${tw.code} ${twTick!=null?twTick:'—'}｜${os.code} ${osTick!=null?osTick:'—'}</span><span>名目配對參考：<strong>${ratio}</strong>｜未換匯誤差 ${mismatch}</span><small>自動辨識僅在公式同時包含商品庫中同一標的的台灣與海外代碼時顯示。跨幣別、反向報價或單位不同時，口數比例需再套用 FX／單位換算，不把未換算結果當成正式避險比例。</small></div>`;
+  const m=cixMatchedContractsForRow(row),tw=row.tw||{},os=row.os||{},ts=specFor(tw.id),ospec=specFor(os.id);
+  const twMult=Number(ts?.multiplier),osMult=Number(ospec?.multiplier),twTick=Number(ts?.tick),osTick=Number(ospec?.tick);
+  const twFx=fxToTwd(ts?.currency),osFx=fxToTwd(ospec?.currency);
+  const twPoint=twMult*twFx,osPoint=osMult*osFx;
+  const hedge=twPoint>0&&osPoint>0?osPoint/twPoint:null,twLots=hedge?Math.max(1,Math.round(hedge)):null;
+  const mismatch=twLots&&twPoint>0&&osPoint>0?Math.abs(twLots*twPoint-osPoint)/osPoint*100:null;
+  const tm=marginFor(tw.id),om=marginFor(os.id),tmTwd=tm?.initial==null?null:Number(tm.initial)*fxToTwd(tm.currency),omTwd=om?.initial==null?null:Number(om.initial)*fxToTwd(om.currency);
+  const knownMargin=(tmTwd||0)+(omTwd||0);
+  const months=m.matches.length?m.matches.map(q=>q.month).join(' / '):'—',expiryStatus=m.matches.length?'MATCHED':'EXPIRY MISMATCH';
+  const conversionOk=Number.isFinite(twFx)&&twFx>0&&Number.isFinite(osFx)&&osFx>0;
+  return `<div class="cix-hedge"><b>跨市場合約與成本資訊 · ${row.name}</b><span>市場：${tw.exchange||'台期所'} ${tw.code} ↔ ${os.exchange||'海外'} ${os.code}</span><span>共同到期月份：<strong>${months}</strong>｜狀態 ${expiryStatus}</span><span>合約乘數：${tw.code} ${Number.isFinite(twMult)?twMult:'—'} ${ts?.currency||''}｜${os.code} ${Number.isFinite(osMult)?osMult:'—'} ${ospec?.currency||''}</span><span>Tick：${tw.code} ${Number.isFinite(twTick)?twTick:'—'}｜${os.code} ${Number.isFinite(osTick)?osTick:'—'}</span><span>FX → TWD：${ts?.currency||'—'} ${Number.isFinite(twFx)?tidy(twFx,6):'—'}｜${ospec?.currency||'—'} ${Number.isFinite(osFx)?tidy(osFx,6):'—'}</span><span>每點價值（TWD）：${tw.code} ${Number.isFinite(twPoint)?tidy(twPoint,2):'—'}｜${os.code} ${Number.isFinite(osPoint)?tidy(osPoint,2):'—'}</span><span>換匯後口數參考：<strong>${conversionOk&&twLots?twLots+' '+tw.code+' : 1 '+os.code:'—'}</strong>｜每點價值配對誤差 ${mismatch!=null?tidy(mismatch,2)+'%':'—'}</span><span>原始保證金：${tw.code} ${tm?.initial==null?'動態':tidy(tm.initial,2)+' '+tm.currency}｜${os.code} ${om?.initial==null?'動態':tidy(om.initial,2)+' '+om.currency}</span><span>已知保證金換算：<strong>${knownMargin>0?tidy(knownMargin,0)+' TWD':'—'}</strong>${tm?.initial==null||om?.initial==null?'｜不含動態保證金腿':''}</span><small>合約乘數、Tick、FX 與保證金沿用「合約規格、換算與成本試算」資料。口數為每點價值中性化參考；若商品另有重量、反向報價或特殊單位換算，仍以 Formula／Cost Lab 的完整換算為準，不等同套利獲利或正式下單建議。</small></div>`;
 }
 function cixGeneralInfo(x){
   if(['JPYTW01','JPYTW02'].includes(x?.symbol))return '';
