@@ -456,6 +456,17 @@ function render(){if(!DATA)return;renderUsdtwdFx();renderConnectionSources();ren
 const CIX_KEY='gmmCustomIndexLibraryV1';
 let customIndexLibrary=(()=>{try{return JSON.parse(localStorage.getItem(CIX_KEY)||'[]')}catch{return []}})();
 let editingCixId=null;
+
+const JPY_CIX_PRESETS=[
+  {id:'cix_jpytw01',name:'台日圓期貨相對估值－近月',symbol:'JPYTW01',description:'TAIFEX XJF 與 ICE KSN 同到期日近月比較；ICE KSN 為 USD/JPY 的反向報價（USD per JPY），倒數時 Bid/Ask 互換。',formula:'100 * (TAIFEX_XJF_NEAR.BID * ICE_KSN_NEAR.BID - 1)',mode:'percent',version:'1.0',watchMode:'alert',upper:0.3,lower:null,interval:15,freshness:20,skew:15,methodology:{expiryMatch:'same-expiry-only',premiumFormula:'100 * (TAIFEX_XJF_NEAR.BID * ICE_KSN_NEAR.BID - 1)',discountFormula:'100 * (1 / (ICE_KSN_NEAR.ASK * TAIFEX_XJF_NEAR.ASK) - 1)',premiumTrigger:'>= 0.30%',discountTrigger:'>= 0.30%',iceSymbol:'KSN',status:'WAITING_ICE_KSN_SOURCE'},createdAt:'2026-09-18T00:00:00.000Z',updatedAt:'2026-09-18T00:00:00.000Z'},
+  {id:'cix_jpytw02',name:'台日圓期貨相對估值－次月',symbol:'JPYTW02',description:'TAIFEX XJF 與 ICE KSN 同到期日次月比較；若到期日不一致則不計算、不提醒。',formula:'100 * (TAIFEX_XJF_NEXT.BID * ICE_KSN_NEXT.BID - 1)',mode:'percent',version:'1.0',watchMode:'alert',upper:0.3,lower:null,interval:15,freshness:20,skew:15,methodology:{expiryMatch:'same-expiry-only',premiumFormula:'100 * (TAIFEX_XJF_NEXT.BID * ICE_KSN_NEXT.BID - 1)',discountFormula:'100 * (1 / (ICE_KSN_NEXT.ASK * TAIFEX_XJF_NEXT.ASK) - 1)',premiumTrigger:'>= 0.30%',discountTrigger:'>= 0.30%',iceSymbol:'KSN',status:'WAITING_ICE_KSN_SOURCE'},createdAt:'2026-09-18T00:00:00.000Z',updatedAt:'2026-09-18T00:00:00.000Z'}
+];
+function ensureJpyCixPresets(){
+  let changed=false;
+  for(const p of JPY_CIX_PRESETS){if(!customIndexLibrary.some(x=>x.symbol===p.symbol)){customIndexLibrary.push(JSON.parse(JSON.stringify(p)));changed=true}}
+  if(changed)saveCixLibrary();
+}
+
 function saveCixLibrary(){localStorage.setItem(CIX_KEY,JSON.stringify(customIndexLibrary))}
 function cixModeLabel(v){return ({raw:'RAW',percent:'%',base100:'BASE 100',base1000:'BASE 1,000'})[v]||v}
 function clearCixForm(){
@@ -490,7 +501,7 @@ function saveCustomIndexV1(){
   saveCixLibrary();clearCixForm();renderCixLibrary();document.querySelector('.cix-builder')?.classList.add('is-collapsed');
 }
 function bindCixUI(){
-  if(!$('#customindexView'))return;renderCixLibrary();
+  if(!$('#customindexView'))return;ensureJpyCixPresets();renderCixLibrary();
   if($('#newCustomIndex'))$('#newCustomIndex').onclick=()=>{document.querySelector('.cix-builder')?.classList.remove('is-collapsed');clearCixForm()};
   if($('#cancelCustomIndex'))$('#cancelCustomIndex').onclick=()=>document.querySelector('.cix-builder')?.classList.toggle('is-collapsed');
   if($('#clearCustomIndex'))$('#clearCustomIndex').onclick=clearCixForm;if($('#saveCustomIndex'))$('#saveCustomIndex').onclick=saveCustomIndexV1;
