@@ -15,3 +15,5 @@
 @media(max-width:600px){.cix-hero{flex-direction:column}.cix-form-grid,.cix-monitor-grid{grid-template-columns:1fr}.cix-wide{grid-column:auto}.cix-actions{flex-direction:column}.cix-primary{min-height:42px}}
 
 .cix-hedge{display:grid;gap:3px;margin-top:9px;padding:9px;border:1px solid #234b68;border-radius:7px;background:#061522;font-size:11px;color:#b9d0df}.cix-hedge b{color:#e6f3fb}.cix-hedge strong{color:#78cfff}.cix-hedge small{color:var(--muted);margin-top:2px}
+
+.cix-history{display:grid;gap:3px;margin-top:8px;padding:8px 9px;border-top:1px solid #234b68;font-size:11px;color:#b9d0df}.cix-history b{color:#e6f3fb}.cix-history strong{color:#78cfff}
