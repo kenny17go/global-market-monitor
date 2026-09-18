@@ -704,7 +704,19 @@ function saveCustomIndexV1(){
   const old=customIndexLibrary.find(x=>x.id===editingCixId);
   const obj={id:editingCixId||('cix_'+Date.now()),name,symbol,description:$('#cixDescription')?.value.trim()||'',formula,mode:$('#cixMode')?.value||'raw',version:old?.version||'1.0',watchMode:$('#cixWatchMode')?.value||'watch',upper:$('#cixUpper')?.value===''?null:Number($('#cixUpper').value),lower:$('#cixLower')?.value===''?null:Number($('#cixLower').value),interval:Number($('#cixInterval')?.value||15),freshness:Number($('#cixFreshness')?.value||20),skew:Number($('#cixSkew')?.value||15),createdAt:old?.createdAt||new Date().toISOString(),updatedAt:new Date().toISOString()};
   if(editingCixId)customIndexLibrary=customIndexLibrary.map(x=>x.id===editingCixId?obj:x);else customIndexLibrary.unshift(obj);
-  saveCixLibrary();clearCixForm();renderCixLibrary();document.querySelector('.cix-builder')?.classList.add('is-collapsed');
+  try{
+    saveCixLibrary();
+    const saved=customIndexLibrary.find(x=>x.id===obj.id);
+    if(!saved)throw new Error('儲存後找不到指數');
+    renderCixLibrary();
+    alert('已儲存：'+saved.symbol+'｜'+saved.name);
+    clearCixForm();
+    document.querySelector('.cix-builder')?.classList.add('is-collapsed');
+    setTimeout(()=>document.querySelector('#cixLibrary')?.scrollIntoView({behavior:'smooth',block:'start'}),80);
+  }catch(err){
+    console.error('Save custom index failed',err);
+    alert('儲存失敗：'+(err?.message||'未知錯誤'));
+  }
 }
 function bindCixUI(){
   if(!$('#customindexView'))return;ensureJpyCixPresets();renderCixLibrary();renderCixTokenOptions();renderCixTemplateOptions();
