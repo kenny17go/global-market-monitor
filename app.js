@@ -499,6 +499,25 @@ function moveFormulaToMyIndex(){
   if($('#cixPreview'))$('#cixPreview').textContent='已從 Formula Lab 帶入公式；儲存後會依可用行情計算';
   setTimeout(()=>$('#cixName')?.focus(),80);
 }
+function renderCixTemplateOptions(){
+  const opts='<option value="">選擇商品…</option>'+builtinProducts().map(p=>`<option value="${p.id}">${p.name}｜${p.exchange} ${p.code}</option>`).join('');
+  ['#cixLegA','#cixLegB'].forEach((s,idx)=>{const el=$(s);if(!el)return;const old=el.value;el.innerHTML=opts;if([...el.options].some(o=>o.value===old))el.value=old;else if(idx===1&&el.options.length>2)el.selectedIndex=2});
+}
+function applyCixTemplate(){
+  const type=$('#cixTemplate')?.value||'manual',a=$('#cixLegA')?.value,b=$('#cixLegB')?.value,af=$('#cixLegAField')?.value||'BID',bf=$('#cixLegBField')?.value||'ASK',ta=$('#cixFormula');
+  if(!ta)return;if(type==='manual')return ta.focus();if(!a||!b)return alert('請先選擇 A 與 B 商品');
+  const A=a+'.'+af,B=b+'.'+bf;
+  if(type==='spread')ta.value=`${A} - ${B}`;
+  else if(type==='ratio')ta.value=`${A} / ${B}`;
+  else if(type==='pct')ta.value=`(${A} / ${B} - 1) * 100`;
+  else if(type==='cost'){
+    const ap=getAnyProduct(a),bp=getAnyProduct(b);
+    if(!ap||!bp)return alert('找不到合約規格');
+    const am=Number(ap.multiplier||1),au=Number(ap.unitFactor||1),afx=Number(ap.fx||1),bm=Number(bp.multiplier||1),bu=Number(bp.unitFactor||1),bfx=Number(bp.fx||1),cost=Number(ap.cost||0)+Number(bp.cost||0);
+    ta.value=`(${A} * ${am} * ${au} * ${afx}) - (${B} * ${bm} * ${bu} * ${bfx}) - ${cost}`;
+  }
+  updateCixFormulaPreview();ta.focus();
+}
 function renderCixTokenOptions(){
   const s=$('#cixTokenSelect');if(!s)return;
   const filter=$('#cixTokenCategory')?.value||'all',cur=s.value,groups={};
@@ -676,7 +695,8 @@ function saveCustomIndexV1(){
   saveCixLibrary();clearCixForm();renderCixLibrary();document.querySelector('.cix-builder')?.classList.add('is-collapsed');
 }
 function bindCixUI(){
-  if(!$('#customindexView'))return;ensureJpyCixPresets();renderCixLibrary();renderCixTokenOptions();
+  if(!$('#customindexView'))return;ensureJpyCixPresets();renderCixLibrary();renderCixTokenOptions();renderCixTemplateOptions();
+  if($('#applyCixTemplate'))$('#applyCixTemplate').onclick=applyCixTemplate;
   if($('#cixTokenCategory'))$('#cixTokenCategory').onchange=renderCixTokenOptions;
   if($('#cixInsertBid'))$('#cixInsertBid').onclick=()=>insertCixQuoteField('BID');
   if($('#cixInsertAsk'))$('#cixInsertAsk').onclick=()=>insertCixQuoteField('ASK');
