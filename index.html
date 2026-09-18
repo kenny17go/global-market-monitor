@@ -58,8 +58,9 @@
             <label>Methodology Version<input id="cixVersion" value="1.0" readonly></label>
             <label class="cix-wide">說明<input id="cixDescription" placeholder="這個指數想觀察什麼？"></label>
           </div>
-          <div class="cix-subhead"><div><b>Formula</b><small>可使用既有 Formula Lab 的市場代碼；V1 儲存公式與方法設定。</small></div></div>
-          <textarea id="cixFormula" rows="3" placeholder="例：100 * TAIFEX_GDF.LAST / (COMEX_MGC.LAST * USD_TWD_SPOT)"></textarea>
+          <div class="cix-subhead"><div><b>Formula</b><small>不用記市場代碼；選擇商品後直接插入 BID / ASK / LAST，再使用標準運算符號組合公式。</small></div></div>
+          <div class="formula-tools cix-formula-tools"><select id="cixTokenCategory"><option value="all">全部欄位</option><option value="台灣指數">台灣指數</option><option value="股價指數">海外股價指數</option><option value="匯率">匯率</option><option value="貴金屬">貴金屬</option><option value="能源">能源</option><option value="結算日NDF">結算日 NDF</option></select><select id="cixTokenSelect"></select><button id="cixInsertBid">插入 BID</button><button id="cixInsertAsk">插入 ASK</button><button id="cixInsertLast">插入 LAST</button><button data-cix-op=" + ">＋</button><button data-cix-op=" - ">−</button><button data-cix-op=" * ">＊</button><button data-cix-op=" / ">／</button><button data-cix-op=" ( ">(</button><button data-cix-op=" ) ">)</button></div>
+          <textarea id="cixFormula" rows="3" placeholder="例：TAIFEX_GDF.BID - CME_MGC.ASK"></textarea>
           <div class="cix-form-grid cix-monitor-grid">
             <label>監控模式<select id="cixWatchMode"><option value="watch">Watch Only</option><option value="alert">Alert</option></select></label>
             <label>上方門檻 ≥<input id="cixUpper" type="number" step="any" placeholder="例如 101"></label>
@@ -68,7 +69,7 @@
             <label>最大資料年齡<select id="cixFreshness"><option value="10">10 分鐘</option><option value="20" selected>20 分鐘</option><option value="30">30 分鐘</option><option value="60">60 分鐘</option></select></label>
             <label>成分最大時間差<select id="cixSkew"><option value="5">5 分鐘</option><option value="15" selected>15 分鐘</option><option value="30">30 分鐘</option></select></label>
           </div>
-          <div class="cix-preview"><span>公式預覽</span><b id="cixPreview">等待輸入公式</b><small id="cixPreviewNote">儲存後會成為可重複引用的自訂 Symbol。</small></div>
+          <div class="cix-preview"><span>公式預覽</span><b id="cixPreview">等待輸入公式</b><strong id="cixLiveValue">目前值 —</strong><small id="cixPreviewNote">選擇商品與 BID / ASK / LAST 後可立即試算；儲存後會成為可重複引用的自訂 Symbol。</small></div>
           <div class="cix-actions"><button id="saveCustomIndex" class="cix-primary">儲存自訂指數</button><button id="clearCustomIndex" class="secondary-btn">清除</button></div>
         </section>
         <section class="panel"><div class="cix-library-head"><div><h3>Custom Index Library</h3><p>每個指數保留公式、Base/顯示方式、Methodology Version 與監控條件。</p></div></div><div id="cixLibrary" class="cix-library"></div></section>
