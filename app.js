@@ -686,8 +686,20 @@ function editCix(id){
 }
 function deleteCix(id){customIndexLibrary=customIndexLibrary.filter(x=>x.id!==id);saveCixLibrary();renderCixLibrary()}
 function saveCustomIndexV1(){
-  const name=$('#cixName')?.value.trim(),symbol=$('#cixSymbol')?.value.trim().toUpperCase().replace(/[^A-Z0-9_]/g,''),formula=$('#cixFormula')?.value.trim();
-  if(!name||!symbol||!formula)return alert('請填寫指數名稱、Symbol 與 Formula');
+  const formula=$('#cixFormula')?.value.trim();
+  if(!formula)return alert('請先建立 Formula');
+  let name=$('#cixName')?.value.trim(),symbol=$('#cixSymbol')?.value.trim().toUpperCase().replace(/[^A-Z0-9_]/g,'');
+  const legA=$('#cixLegA')?.value||'',legB=$('#cixLegB')?.value||'';
+  if(!name){
+    const ap=getAnyProduct(legA),bp=getAnyProduct(legB);
+    name=ap&&bp?`${ap.name} vs ${bp.name}`:'自訂指數';
+    if($('#cixName'))$('#cixName').value=name;
+  }
+  if(!symbol){
+    const used=new Set(customIndexLibrary.map(x=>x.symbol));let n=1;
+    do{symbol='CIX'+String(n++).padStart(3,'0')}while(used.has(symbol));
+    if($('#cixSymbol'))$('#cixSymbol').value=symbol;
+  }
   if(customIndexLibrary.some(x=>x.symbol===symbol&&x.id!==editingCixId))return alert('Symbol 已存在，請使用另一個代碼');
   const old=customIndexLibrary.find(x=>x.id===editingCixId);
   const obj={id:editingCixId||('cix_'+Date.now()),name,symbol,description:$('#cixDescription')?.value.trim()||'',formula,mode:$('#cixMode')?.value||'raw',version:old?.version||'1.0',watchMode:$('#cixWatchMode')?.value||'watch',upper:$('#cixUpper')?.value===''?null:Number($('#cixUpper').value),lower:$('#cixLower')?.value===''?null:Number($('#cixLower').value),interval:Number($('#cixInterval')?.value||15),freshness:Number($('#cixFreshness')?.value||20),skew:Number($('#cixSkew')?.value||15),createdAt:old?.createdAt||new Date().toISOString(),updatedAt:new Date().toISOString()};
