@@ -45,7 +45,16 @@ async function yahooApiQuote(symbol,range){
   try{const j=await fetchJson(`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1m&range=1d`);const m=j?.chart?.result?.[0]?.meta;if(m)return {symbol,month:symbolMonth(symbol)||dateMonth(m.expireDate),bid:null,ask:null,last:valid(m.regularMarketPrice,range),timestamp:m.regularMarketTime?new Date(m.regularMarketTime*1000).toISOString():null,quoteType:'Yahoo chart fallback'}}catch(e){console.warn('Yahoo chart API failed',symbol,e.message)}
   return null;
 }
-async function yahooRootProduct(t,source='Yahoo Finance'){let symbols=await yahooChain(t.root);const root=t.root+'=F';if(!symbols.length)symbols=[root];const contracts=[];for(const s of symbols.slice(0,5)){const q=await yahooApiQuote(s,t.range);if(q?.month&&(q.bid!=null||q.ask!=null||q.last!=null))contracts.push(q)}if(!contracts.length&&symbols[0]!==root){const q=await yahooApiQuote(root,t.range);if(q?.month&&(q.bid!=null||q.ask!=null||q.last!=null))contracts.push(q)}contracts.sort((a,b)=>String(a.month).localeCompare(String(b.month)));return {defaultMonth:contracts[0]?.month||null,contracts:contracts.map(c=>({...c,delayMinutes:10})),source,mode:contracts.length?'DELAYED':'UNAVAILABLE',delayMinutes:10}}
+function quarterlyYahooSymbols(root,count=6){
+  const codes={3:'H',6:'M',9:'U',12:'Z'},now=new Date(),out=[];
+  let y=now.getUTCFullYear(),m=now.getUTCMonth()+1;
+  for(let k=0;out.length<count&&k<30;k++){
+    const yy=y+Math.floor((m-1+k)/12),mm=((m-1+k)%12)+1,code=codes[mm];
+    if(code)out.push(`${root}${code}${String(yy).slice(-2)}.CME`);
+  }
+  return out;
+}
+async function yahooRootProduct(t,source='Yahoo Finance'){let symbols=await yahooChain(t.root);const root=t.root+'=F';if(t.root==='6J')symbols=[...new Set([...symbols,...quarterlyYahooSymbols('6J',8)])];if(!symbols.length)symbols=[root];const contracts=[];for(const s of symbols.slice(0,5)){const q=await yahooApiQuote(s,t.range);if(q?.month&&(q.bid!=null||q.ask!=null||q.last!=null))contracts.push(q)}if(!contracts.length&&symbols[0]!==root){const q=await yahooApiQuote(root,t.range);if(q?.month&&(q.bid!=null||q.ask!=null||q.last!=null))contracts.push(q)}contracts.sort((a,b)=>String(a.month).localeCompare(String(b.month)));return {defaultMonth:contracts[0]?.month||null,contracts:contracts.map(c=>({...c,delayMinutes:10})),source,mode:contracts.length?'DELAYED':'UNAVAILABLE',delayMinutes:10}}
 
 const BARCHART_API_KEY=String(process.env.BARCHART_API_KEY||'').trim();
 function barchartMode(mode){const m=String(mode||'').toUpperCase();return m==='R'?'LIVE':m==='D'?'OFFICIAL DAILY':m==='I'?'DELAYED':'DELAYED'}
