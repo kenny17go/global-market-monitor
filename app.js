@@ -499,6 +499,38 @@ function moveFormulaToMyIndex(){
   if($('#cixPreview'))$('#cixPreview').textContent='已從 Formula Lab 帶入公式；儲存後會依可用行情計算';
   setTimeout(()=>$('#cixName')?.focus(),80);
 }
+function renderCixTokenOptions(){
+  const s=$('#cixTokenSelect');if(!s)return;
+  const filter=$('#cixTokenCategory')?.value||'all',cur=s.value,groups={};
+  const add=(g,label,id)=>{groups[g]??=[];groups[g].push({label,id})};
+  catalogRows().forEach(x=>{
+    const addTw=()=>add(x.category,`${x.name}｜${x.tw.exchange} ${x.tw.code}`,x.tw.id);
+    const addOs=()=>add(x.category,`${x.name}｜${x.os.exchange} ${x.os.code}`,x.os.id);
+    if(filter==='all'){addTw();addOs();return}
+    if(filter==='台灣指數'&&x.category==='股價指數'){addTw();return}
+    if(filter==='股價指數'&&x.category==='股價指數'){addOs();return}
+    if(filter==='匯率'&&x.category==='外匯'){addTw();addOs();return}
+    if(filter===x.category){addTw();addOs()}
+  });
+  let html='<option value="">選擇商品／代碼…</option>';
+  html+=Object.entries(groups).map(([g,arr])=>`<optgroup label="${g}">${arr.map(q=>`<option value="${q.id}">${q.label}</option>`).join('')}</optgroup>`).join('');
+  if(filter==='all'||filter==='結算日NDF')html+='<optgroup label="結算日 NDF"><option value="TGF_NEAR_NDF">TGF 近月 NDF Mid</option><option value="TGF_NEXT_NDF">TGF 次月 NDF Mid</option><option value="BRF_NEAR_NDF">BRF 近月 NDF Mid</option><option value="BRF_NEXT_NDF">BRF 次月 NDF Mid</option></optgroup>';
+  if(filter==='all'||filter==='匯率')html+='<optgroup label="匯率"><option value="USD_TWD_SPOT">USD/TWD Spot</option></optgroup>';
+  s.innerHTML=html;if([...s.options].some(o=>o.value===cur))s.value=cur;
+}
+function updateCixFormulaPreview(){
+  const f=$('#cixFormula')?.value.trim()||'',p=$('#cixPreview'),v=$('#cixLiveValue');
+  if(p)p.textContent=f||'等待輸入公式';
+  if(!v)return;if(!f){v.textContent='目前值 —';return}
+  const r=evalMarketFormula(f);
+  v.textContent=r.ok&&r.type==='number'&&Number.isFinite(Number(r.value))?'目前值 '+tidy(r.value,8):'目前值 — · '+(r.error||'等待可用行情');
+}
+function insertCixQuoteField(field){
+  const sel=$('#cixTokenSelect'),ta=$('#cixFormula');if(!sel||!ta)return;
+  const base=sel.value;if(!base)return alert('請先選擇商品／代碼');
+  const token=/_(NDF)$|USD_TWD_SPOT/.test(base)?base:base+'.'+field;
+  ta.value+=(ta.value&&!ta.value.endsWith(' ')?' ':'')+token;ta.focus();updateCixFormulaPreview();
+}
 function cixModeLabel(v){return ({raw:'RAW',percent:'%',base100:'BASE 100',base1000:'BASE 1,000'})[v]||v}
 function clearCixForm(){
   editingCixId=null;
@@ -594,14 +626,19 @@ function saveCustomIndexV1(){
   saveCixLibrary();clearCixForm();renderCixLibrary();document.querySelector('.cix-builder')?.classList.add('is-collapsed');
 }
 function bindCixUI(){
-  if(!$('#customindexView'))return;ensureJpyCixPresets();renderCixLibrary();
+  if(!$('#customindexView'))return;ensureJpyCixPresets();renderCixLibrary();renderCixTokenOptions();
+  if($('#cixTokenCategory'))$('#cixTokenCategory').onchange=renderCixTokenOptions;
+  if($('#cixInsertBid'))$('#cixInsertBid').onclick=()=>insertCixQuoteField('BID');
+  if($('#cixInsertAsk'))$('#cixInsertAsk').onclick=()=>insertCixQuoteField('ASK');
+  if($('#cixInsertLast'))$('#cixInsertLast').onclick=()=>insertCixQuoteField('LAST');
+  $('[data-cix-op]').forEach(b=>b.onclick=()=>{const ta=$('#cixFormula');if(!ta)return;ta.value+=b.dataset.cixOp;ta.focus();updateCixFormulaPreview()});
   if($('#exportCix'))$('#exportCix').onclick=exportCixBackup;
   if($('#importCix'))$('#importCix').onclick=()=>$('#cixImportFile')?.click();
   if($('#cixImportFile'))$('#cixImportFile').onchange=async e=>{const f=e.target.files?.[0];if(f)await importCixBackup(f);e.target.value=''};
   if($('#newCustomIndex'))$('#newCustomIndex').onclick=()=>{document.querySelector('.cix-builder')?.classList.remove('is-collapsed');clearCixForm()};
   if($('#cancelCustomIndex'))$('#cancelCustomIndex').onclick=()=>document.querySelector('.cix-builder')?.classList.toggle('is-collapsed');
   if($('#clearCustomIndex'))$('#clearCustomIndex').onclick=clearCixForm;if($('#saveCustomIndex'))$('#saveCustomIndex').onclick=saveCustomIndexV1;
-  if($('#cixFormula'))$('#cixFormula').oninput=e=>{if($('#cixPreview'))$('#cixPreview').textContent=e.target.value.trim()||'等待輸入公式'};
+  if($('#cixFormula'))$('#cixFormula').oninput=updateCixFormulaPreview;
 }
 
 function switchView(name){$$('.view').forEach(v=>v.classList.toggle('active',v.id===name+'View'));$$('[data-view]').forEach(x=>x.classList.toggle('active',x.dataset.view===name));if(name==='connections')renderConnections();if(name==='indicators')renderIndicatorDashboard();window.scrollTo({top:0,behavior:'smooth'})}
