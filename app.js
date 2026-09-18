@@ -491,6 +491,22 @@ function jpyMatchedContracts(x){
   if(!month)return {status:'EXPIRY MISMATCH',month:null,tw:tw[idx]||null,os:os[idx]||null};
   return {status:'MATCHED',month,tw:tw.find(q=>q.month===month),os:os.find(q=>q.month===month)};
 }
+const CIX_SIGNAL_KEY='gmmCixSignalHistoryV1';
+function cixSignalHistory(){try{return JSON.parse(localStorage.getItem(CIX_SIGNAL_KEY)||'[]')}catch{return []}}
+function saveCixSignalHistory(v){localStorage.setItem(CIX_SIGNAL_KEY,JSON.stringify(v.slice(0,100)))}
+function recordJpySignal(x,m,signal,premium,discount,fresh){
+  if(!fresh||!['高估','低估'].includes(signal)||x.watchMode!=='alert')return;
+  const key=[x.symbol,m.month,signal].join('|'),now=Date.now(),hist=cixSignalHistory(),last=hist.find(v=>v.key===key);
+  const cooldown=Number(x.interval||15)*60000;if(last&&now-new Date(last.at).getTime()<cooldown)return;
+  const row={key,symbol:x.symbol,name:x.name,month:m.month,signal,premium,discount,at:new Date(now).toISOString()};
+  saveCixSignalHistory([row,...hist]);
+  if('Notification'in window&&Notification.permission==='granted')new Notification(`${x.symbol} ${signal}`,{body:`${m.month}｜高估 ${premium!=null?tidy(premium,3)+'%':'—'}｜低估 ${discount!=null?tidy(discount,3)+'%':'—'}`});
+}
+function jpySignalHistoryHtml(x){
+  if(!['JPYTW01','JPYTW02'].includes(x?.symbol))return '';
+  const rows=cixSignalHistory().filter(v=>v.symbol===x.symbol).slice(0,5);
+  return rows.length?`<div class="cix-history"><b>最近訊號</b>${rows.map(v=>`<span>${new Date(v.at).toLocaleString('zh-TW',{hour12:false})} · ${v.month} · <strong>${v.signal}</strong> · ${v.signal==='高估'?tidy(v.premium,3):tidy(v.discount,3)}%</span>`).join('')}</div>`:'';
+}
 function jpyValuationInfo(x){
   const m=jpyMatchedContracts(x);if(!m)return '';
   if(m.status!=='MATCHED')return '<div class="cix-hedge"><b>估值狀態</b><strong>EXPIRY MISMATCH</strong><small>目前找不到 XJF 與 CME 6J 的第 '+(x.symbol==='JPYTW02'?'二':'一')+'個共同到期月份，因此不計算、不觸發提醒。</small></div>';
@@ -503,6 +519,7 @@ function jpyValuationInfo(x){
   const fresh=times.length===2&&maxAge<=Number(x.freshness||20)&&skew<=Number(x.skew||15);
   const rawSignal=premium!=null&&premium>=0.3?'高估':discount!=null&&discount>=0.3?'低估':premium!=null&&discount!=null?'正常':'資料不足';
   const signal=rawSignal!=='資料不足'&&!fresh?'STALE · 不提醒':rawSignal;
+  if(fresh)recordJpySignal(x,m,rawSignal,premium,discount,fresh);
   const sigClass=rawSignal==='高估'?'neg':rawSignal==='低估'?'pos':'';
   return `<div class="cix-hedge"><b>同到期日估值 · ${m.month}</b><span>TAIFEX XJF Bid / Ask：${tb>0?tidy(tb,4):'—'} / ${ta>0?tidy(ta,4):'—'}</span><span>CME 6J Bid / Ask：${jb>0?tidy(jb,7):'—'} / ${ja>0?tidy(ja,7):'—'}</span><span>CME 換算 USD/JPY Bid / Ask：${iceBid?tidy(iceBid,4):'—'} / ${iceAsk?tidy(iceAsk,4):'—'}</span><span>高估幅度：${premium!=null?tidy(premium,3)+'%':'—'}｜低估幅度：${discount!=null?tidy(discount,3)+'%':'—'}</span><span>資料品質：${fresh?'PASS':'STALE'}｜最舊報價 ${maxAge!=null?tidy(maxAge,1)+'m':'—'}｜時間差 ${skew!=null?tidy(skew,1)+'m':'—'}</span><strong class="${sigClass}">訊號：${signal}</strong><small>門檻 ±0.30%；Fresh ≤ ${x.freshness||20}m、時間差 ≤ ${x.skew||15}m 才允許提醒。缺少 Bid/Ask 或共同月份時不產生交易訊號。</small></div>`;
 }
@@ -531,7 +548,7 @@ function renderCixLibrary(){
   const alertCount=customIndexLibrary.filter(x=>x.watchMode==='alert').length;
   if(sum)sum.innerHTML=`<div class="spread-kpi"><span>自訂指數</span><b>${customIndexLibrary.length}</b><small>Custom Indices</small></div><div class="spread-kpi"><span>監控中</span><b>${alertCount}</b><small>Alert Mode</small></div><div class="spread-kpi"><span>方法版本</span><b>${customIndexLibrary.reduce((a,x)=>a+(x.version?1:0),0)}</b><small>Methodologies</small></div>`;
   if(!customIndexLibrary.length){box.innerHTML='<div class="cix-empty">尚未建立自訂指數。按「＋ 建立自訂指數」開始。</div>';return}
-  box.innerHTML=customIndexLibrary.map(x=>`<div class="cix-card"><div class="cix-card-title"><span class="cix-symbol">${x.symbol}</span><b>${x.name}</b><small>${x.description||'—'}</small></div><div><div class="cix-card-formula">${x.formula}</div>${jpyValuationInfo(x)}${jpyHedgeInfo(x)}<div class="cix-card-meta"><span class="cix-pill">${cixModeLabel(x.mode)}</span><span class="cix-pill">Methodology v${x.version}</span><span class="cix-pill">${x.watchMode==='alert'?'ALERT':'WATCH ONLY'}</span><span class="cix-pill">${x.interval}m</span><span class="cix-pill">Fresh ≤ ${x.freshness}m</span></div></div><div class="cix-card-actions"><button data-cix-edit="${x.id}">編輯</button><button class="danger" data-cix-delete="${x.id}">刪除</button></div></div>`).join('');
+  box.innerHTML=customIndexLibrary.map(x=>`<div class="cix-card"><div class="cix-card-title"><span class="cix-symbol">${x.symbol}</span><b>${x.name}</b><small>${x.description||'—'}</small></div><div><div class="cix-card-formula">${x.formula}</div>${jpyValuationInfo(x)}${jpyHedgeInfo(x)}${jpySignalHistoryHtml(x)}<div class="cix-card-meta"><span class="cix-pill">${cixModeLabel(x.mode)}</span><span class="cix-pill">Methodology v${x.version}</span><span class="cix-pill">${x.watchMode==='alert'?'ALERT':'WATCH ONLY'}</span><span class="cix-pill">${x.interval}m</span><span class="cix-pill">Fresh ≤ ${x.freshness}m</span></div></div><div class="cix-card-actions"><button data-cix-edit="${x.id}">編輯</button><button class="danger" data-cix-delete="${x.id}">刪除</button></div></div>`).join('');
   $('[data-cix-edit]').forEach(b=>b.onclick=()=>editCix(b.dataset.cixEdit));$('[data-cix-delete]').forEach(b=>b.onclick=()=>deleteCix(b.dataset.cixDelete));
 }
 function editCix(id){
