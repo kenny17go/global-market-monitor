@@ -190,6 +190,27 @@ function renderYield(){
 }
 function catalogRows(){return DATA?.crossMarketCatalog||[]}
 
+
+const SCREEN_LOCK_PASS='GMM2026';
+function initScreenLock(){
+  const lock=document.getElementById('screenLock');
+  if(!lock)return;
+  const input=document.getElementById('screenLockPassword');
+  const btn=document.getElementById('screenLockSubmit');
+  const err=document.getElementById('screenLockError');
+  const unlocked=sessionStorage.getItem('gmmScreenUnlocked')==='1';
+  document.body.classList.toggle('screen-locked',!unlocked);
+  lock.classList.toggle('is-unlocked',unlocked);
+  if(unlocked)return;
+  setTimeout(()=>input?.focus(),120);
+  const submit=()=>{
+    if(input?.value===SCREEN_LOCK_PASS){sessionStorage.setItem('gmmScreenUnlocked','1');document.body.classList.remove('screen-locked');lock.classList.add('is-unlocked');if(err)err.textContent='';}
+    else{if(err)err.textContent='密碼錯誤，請再試一次';if(input){input.value='';input.focus();}}
+  };
+  if(btn)btn.onclick=submit;
+  if(input)input.addEventListener('keydown',e=>{if(e.key==='Enter')submit()});
+}
+
 function quoteDecimals(code){return DISPLAY_DECIMALS[code]??2}
 function qfmt(v,code){return tidy(v,quoteDecimals(code),quoteDecimals(code))}
 const SETTLEMENT_NDF_FORMULA_TOKENS={TGF_NEAR_NDF:null,TGF_NEXT_NDF:null,BRF_NEAR_NDF:null,BRF_NEXT_NDF:null};
@@ -441,7 +462,7 @@ async function getTaifexSettlementData(){if(!TAIFEX_SETTLEMENT_DATA_PROMISE)TAIF
 function daysBetween(a,b){return Math.max(0,Math.ceil((b-a)/86400000))}
 async function renderTaifexSettlementNdf(){const body=$('#settlementNdfBody'),src=$('#settlementNdfSource');if(!body)return;const tx=await getTaifexSettlementData(),fx=DATA?.usdtwdFx,off=fx?.offshore;if(!tx?.products||!off){body.innerHTML='<tr><td colspan="9">資料載入中或來源暫時不可用</td></tr>';return}const base=fx?.meta?.generatedAt?new Date(fx.meta.generatedAt):new Date(),today=new Date(Date.UTC(base.getUTCFullYear(),base.getUTCMonth(),base.getUTCDate()));const rows=[];for(const [code,name,fn] of [['TGF','台幣黃金',tgfSettlement],['BRF','布蘭特原油',brfSettlement]]){const months=[...new Set((tx.products?.[code]?.contracts||[]).map(x=>String(x.month||'')).filter(x=>/^\d{6}$/.test(x)))].sort().slice(0,2);months.forEach((month,i)=>{const settle=fn(month),days=daysBetween(today,settle),q=ndfInterp(off,days,fx.spot);rows.push({code,name,label:i===0?'近月':'次月',month,settle,days,q})})}SETTLEMENT_NDF_FORMULA_TOKENS.TGF_NEAR_NDF=rows.find(r=>r.code==='TGF'&&r.label==='近月')?.q?.mid??null;SETTLEMENT_NDF_FORMULA_TOKENS.TGF_NEXT_NDF=rows.find(r=>r.code==='TGF'&&r.label==='次月')?.q?.mid??null;SETTLEMENT_NDF_FORMULA_TOKENS.BRF_NEAR_NDF=rows.find(r=>r.code==='BRF'&&r.label==='近月')?.q?.mid??null;SETTLEMENT_NDF_FORMULA_TOKENS.BRF_NEXT_NDF=rows.find(r=>r.code==='BRF'&&r.label==='次月')?.q?.mid??null;const f=v=>v==null?'—':Number(v).toFixed(4);body.innerHTML=rows.map(r=>'<tr><td><b>'+r.name+'</b><small>'+r.code+'</small></td><td>'+r.label+'</td><td>'+r.month+'</td><td>'+sDate(r.settle)+'</td><td>'+r.days+'</td><td>'+f(r.q?.bid)+'</td><td>'+f(r.q?.ask)+'</td><td><b>'+f(r.q?.mid)+'</b></td><td>'+f(r.q?.swapMid)+'</td></tr>').join('')||'<tr><td colspan="9">找不到有效合約</td></tr>';renderCustomIndicators();renderIndicatorAlertControls();evaluateIndicatorAlerts();if(src)src.textContent='NDF '+(off?.source||'—')+' · '+(off?.mode||'—')+' · 自動換月'}
 
-function renderUsdtwdFx(){setTimeout(()=>renderTaifexSettlementNdf().catch(e=>{console.error('TAIFEX settlement NDF render failed',e);const s=document.getElementById('settlementNdfSource'),b=document.getElementById('settlementNdfBody');if(s)s.textContent='NDF 載入失敗';if(b)b.innerHTML='<tr><td colspan="9">NDF 計算錯誤：'+String(e?.message||e)+'</td></tr>'}),0);setTimeout(()=>renderTaifexSettlementNdf().catch(e=>{console.error('TAIFEX settlement NDF render failed',e);const s=document.getElementById('settlementNdfSource'),b=document.getElementById('settlementNdfBody');if(s)s.textContent='NDF 載入失敗';if(b)b.innerHTML='<tr><td colspan="9">NDF 計算錯誤：'+String(e?.message||e)+'</td></tr>'}),0);setTimeout(()=>renderTaifexSettlementNdf().catch(e=>{console.error('TAIFEX settlement NDF render failed',e);const s=document.getElementById('settlementNdfSource'),b=document.getElementById('settlementNdfBody');if(s)s.textContent='NDF 載入失敗';if(b)b.innerHTML='<tr><td colspan="9">NDF 計算錯誤：'+String(e?.message||e)+'</td></tr>'}),0);
+function renderUsdtwdFx(){setTimeout(()=>renderTaifexSettlementNdf().catch(e=>{console.error('TAIFEX settlement NDF render failed',e);const s=document.getElementById('settlementNdfSource'),b=document.getElementById('settlementNdfBody');if(s)s.textContent='NDF 載入失敗';if(b)b.innerHTML='<tr><td colspan="9">NDF 計算錯誤：'+String(e?.message||e)+'</td></tr>'}),0);setTimeout(()=>renderTaifexSettlementNdf().catch(e=>{console.error('TAIFEX settlement NDF render failed',e);const s=document.getElementById('settlementNdfSource'),b=document.getElementById('settlementNdfBody');if(s)s.textContent='NDF 載入失敗';if(b)b.innerHTML='<tr><td colspan="9">NDF 計算錯誤：'+String(e?.message||e)+'</td></tr>'}),0);setTimeout(()=>renderTaifexSettlementNdf().catch(e=>{console.error('TAIFEX settlement NDF render failed',e);const s=document.getElementById('settlementNdfSource'),b=document.getElementById('settlementNdfBody');if(s)s.textContent='NDF 載入失敗';if(b)b.innerHTML='<tr><td colspan="9">NDF 計算錯誤：'+String(e?.message||e)+'</td></tr>'}),0);setTimeout(()=>renderTaifexSettlementNdf().catch(e=>{console.error('TAIFEX settlement NDF render failed',e);const s=document.getElementById('settlementNdfSource'),b=document.getElementById('settlementNdfBody');if(s)s.textContent='NDF 載入失敗';if(b)b.innerHTML='<tr><td colspan="9">NDF 計算錯誤：'+String(e?.message||e)+'</td></tr>'}),0);
   const p=DATA?.usdtwdFx;if(!$('#usdtwdCurveBody'))return;
   const spot=p?.spot||{},tenors=['1W','1M','3M','6M','1Y'];
   const f=v=>v==null?'—':tidy(v,4);
@@ -712,7 +733,7 @@ function bindCixUI(){
 }
 
 function switchView(name){$$('.view').forEach(v=>v.classList.toggle('active',v.id===name+'View'));$$('[data-view]').forEach(x=>x.classList.toggle('active',x.dataset.view===name));if(name==='connections')renderConnections();if(name==='indicators')renderIndicatorDashboard();window.scrollTo({top:0,behavior:'smooth'})}
-function bindStaticUI(){bindCixUI();if($('#saveAsIndicator'))$('#saveAsIndicator').onclick=moveFormulaToMyIndex;if($('#goFormulaLab'))$('#goFormulaLab').onclick=()=>{switchView('spread');setTimeout(()=>document.querySelector('.indicator-lab')?.scrollIntoView({behavior:'smooth',block:'center'}),120)};if($('#indicatorDashboardNotify'))$('#indicatorDashboardNotify').onclick=async()=>{if(!('Notification'in window))return alert('此瀏覽器不支援通知');const p=await Notification.requestPermission();renderIndicatorDashboard();alert(p==='granted'?'通知已啟用':'通知未啟用')};$$('[data-view]').forEach(x=>x.onclick=()=>switchView(x.dataset.view));bindConnectionsUI();if($('#customizeTop'))$('#customizeTop').onclick=()=>$('#topPicker').classList.toggle('hidden');if($('#catalogFilter'))$('#catalogFilter').onchange=renderCatalog;if($('#tokenCategory'))$('#tokenCategory').onchange=renderTokenOptions;const insertQuoteField=field=>{const sel=$('#tokenSelect'),ta=$('#spreadFormula');if(!sel||!ta)return;let t=sel.value;if(!t)return alert('請先選擇商品');t=t.replace(/\.(BID|ASK|LAST)$/i,'')+'.'+field;ta.value+=(ta.value&&!ta.value.endsWith(' ')?' ':'')+t;ta.focus()};
+function bindStaticUI(){bindIndicatorUI();bindCixUI();if($('#saveAsIndicator'))$('#saveAsIndicator').onclick=moveFormulaToMyIndex;if($('#goFormulaLab'))$('#goFormulaLab').onclick=()=>{switchView('spread');setTimeout(()=>document.querySelector('.indicator-lab')?.scrollIntoView({behavior:'smooth',block:'center'}),120)};if($('#indicatorDashboardNotify'))$('#indicatorDashboardNotify').onclick=async()=>{if(!('Notification'in window))return alert('此瀏覽器不支援通知');const p=await Notification.requestPermission();renderIndicatorDashboard();alert(p==='granted'?'通知已啟用':'通知未啟用')};$$('[data-view]').forEach(x=>x.onclick=()=>switchView(x.dataset.view));bindConnectionsUI();if($('#customizeTop'))$('#customizeTop').onclick=()=>$('#topPicker').classList.toggle('hidden');if($('#catalogFilter'))$('#catalogFilter').onchange=renderCatalog;if($('#tokenCategory'))$('#tokenCategory').onchange=renderTokenOptions;const insertQuoteField=field=>{const sel=$('#tokenSelect'),ta=$('#spreadFormula');if(!sel||!ta)return;let t=sel.value;if(!t)return alert('請先選擇商品');t=t.replace(/\.(BID|ASK|LAST)$/i,'')+'.'+field;ta.value+=(ta.value&&!ta.value.endsWith(' ')?' ':'')+t;ta.focus()};
 if($('#insertBid'))$('#insertBid').onclick=()=>insertQuoteField('BID');
 if($('#insertAsk'))$('#insertAsk').onclick=()=>insertQuoteField('ASK');
 if($('#insertLast'))$('#insertLast').onclick=()=>insertQuoteField('LAST');
