@@ -463,7 +463,12 @@ const JPY_CIX_PRESETS=[
 ];
 function ensureJpyCixPresets(){
   let changed=false;
-  for(const p of JPY_CIX_PRESETS){if(!customIndexLibrary.some(x=>x.symbol===p.symbol)){customIndexLibrary.push(JSON.parse(JSON.stringify(p)));changed=true}}
+  for(const p of JPY_CIX_PRESETS){
+    const i=customIndexLibrary.findIndex(x=>x.symbol===p.symbol);
+    if(i<0){customIndexLibrary.push(JSON.parse(JSON.stringify(p)));changed=true;continue}
+    const old=customIndexLibrary[i],legacy=old?.methodology?.cmeSymbol!=='6J'||/ICE|KSN/i.test(JSON.stringify(old));
+    if(legacy){customIndexLibrary[i]={...JSON.parse(JSON.stringify(p)),createdAt:old.createdAt||p.createdAt,updatedAt:new Date().toISOString()};changed=true}
+  }
   if(changed)saveCixLibrary();
 }
 
