@@ -555,7 +555,7 @@ function clearCixForm(){
   editingCixId=null;
   const vals={cixName:'',cixSymbol:'',cixDescription:'',cixFormula:'',cixUpper:'',cixLower:''};
   Object.entries(vals).forEach(([id,v])=>{const e=document.getElementById(id);if(e)e.value=v});
-  if($('#cixMode'))$('#cixMode').value='raw';if($('#cixVersion'))$('#cixVersion').value='1.0';if($('#cixWatchMode'))$('#cixWatchMode').value='watch';if($('#cixInterval'))$('#cixInterval').value='15';if($('#cixFreshness'))$('#cixFreshness').value='20';if($('#cixSkew'))$('#cixSkew').value='15';
+  if($('#cixMode'))$('#cixMode').value='raw';if($('#cixVersion'))$('#cixVersion').value='1.0';if($('#cixWatchMode'))$('#cixWatchMode').value='watch';syncCixWatchMode();if($('#cixInterval'))$('#cixInterval').value='15';if($('#cixFreshness'))$('#cixFreshness').value='20';if($('#cixSkew'))$('#cixSkew').value='15';
   if($('#cixPreview'))$('#cixPreview').textContent='等待輸入公式';
 }
 function jpyMatchedContracts(x){
@@ -682,7 +682,7 @@ function editCix(id){
   const x=customIndexLibrary.find(v=>v.id===id);if(!x)return;editingCixId=id;
   const map={cixName:x.name,cixSymbol:x.symbol,cixDescription:x.description,cixFormula:x.formula,cixMode:x.mode,cixVersion:x.version,cixWatchMode:x.watchMode,cixUpper:x.upper??'',cixLower:x.lower??'',cixInterval:String(x.interval),cixFreshness:String(x.freshness),cixSkew:String(x.skew)};
   Object.entries(map).forEach(([id,v])=>{const e=document.getElementById(id);if(e)e.value=v});
-  document.querySelector('.cix-builder')?.classList.remove('is-collapsed');if($('#cixPreview'))$('#cixPreview').textContent=x.formula?'已載入公式 · 儲存修改將保留 Methodology 設定':'等待輸入公式';window.scrollTo({top:0,behavior:'smooth'});
+  document.querySelector('.cix-builder')?.classList.remove('is-collapsed');syncCixWatchMode();if($('#cixPreview'))$('#cixPreview').textContent=x.formula?'已載入公式 · 儲存修改將保留 Methodology 設定':'等待輸入公式';window.scrollTo({top:0,behavior:'smooth'});
 }
 function deleteCix(id){customIndexLibrary=customIndexLibrary.filter(x=>x.id!==id);saveCixLibrary();renderCixLibrary()}
 function saveCustomIndexV1(){
@@ -718,6 +718,12 @@ function saveCustomIndexV1(){
     alert('儲存失敗：'+(err?.message||'未知錯誤'));
   }
 }
+function syncCixWatchMode(){
+  const alertMode=$('#cixWatchMode')?.value==='alert';
+  $('.cix-alert-only').forEach(el=>el.classList.toggle('is-hidden',!alertMode));
+  const note=$('#cixWatchNote');
+  if(note)note.textContent=alertMode?'Alert 模式：設定上／下門檻後，條件成立時才提醒。':'Watch Only：只持續監看，不觸發門檻提醒。';
+}
 function bindCixUI(){
   if(!$('#customindexView'))return;ensureJpyCixPresets();renderCixLibrary();renderCixTokenOptions();renderCixTemplateOptions();
   if($('#applyCixTemplate'))$('#applyCixTemplate').onclick=applyCixTemplate;
@@ -732,7 +738,7 @@ function bindCixUI(){
   if($('#newCustomIndex'))$('#newCustomIndex').onclick=()=>{document.querySelector('.cix-builder')?.classList.remove('is-collapsed');clearCixForm()};
   if($('#cancelCustomIndex'))$('#cancelCustomIndex').onclick=()=>document.querySelector('.cix-builder')?.classList.toggle('is-collapsed');
   if($('#clearCustomIndex'))$('#clearCustomIndex').onclick=clearCixForm;if($('#saveCustomIndex'))$('#saveCustomIndex').onclick=saveCustomIndexV1;
-  if($('#cixFormula'))$('#cixFormula').oninput=updateCixFormulaPreview;
+  if($('#cixFormula'))$('#cixFormula').oninput=updateCixFormulaPreview;if($('#cixWatchMode'))$('#cixWatchMode').onchange=syncCixWatchMode;syncCixWatchMode();
 }
 
 function switchView(name){$$('.view').forEach(v=>v.classList.toggle('active',v.id===name+'View'));$$('[data-view]').forEach(x=>x.classList.toggle('active',x.dataset.view===name));if(name==='connections')renderConnections();if(name==='indicators')renderIndicatorDashboard();window.scrollTo({top:0,behavior:'smooth'})}
