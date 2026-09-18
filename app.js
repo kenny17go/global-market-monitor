@@ -670,13 +670,28 @@ function cixGeneralInfo(x){
   const rows=details.map(d=>`<span><strong>${d.token}</strong> · ${d.label}｜${d.field||'MID'} ${d.value!=null?tidy(d.value,8):'—'}｜Bid ${d.bid!=null?tidy(d.bid,8):'—'} / Ask ${d.ask!=null?tidy(d.ask,8):'—'}${d.time?'｜'+new Date(d.time).toLocaleString('zh-TW',{hour12:false}):''}</span>`).join('');
   return `<div class="cix-hedge"><b>即時指數資訊</b><strong>目前值：${value!=null?tidy(value,8):'—'}</strong>${rows||'<span>尚無可辨識的行情成分。</span>'}<span>資料品質：<strong>${fresh?'PASS':'STALE'}</strong>｜最舊報價 ${maxAge!=null?tidy(maxAge,1)+'m':'—'}｜成分時間差 ${times.length>1?tidy(skew,1)+'m':'—'}</span><span>監控狀態：<strong>${signal}</strong>${x.upper!=null?'｜上限 '+x.upper:''}${x.lower!=null?'｜下限 '+x.lower:''}</span></div>`;
 }
+function cixCardSnapshot(x){
+  const r=evalMarketFormula(x.formula),value=r.ok&&r.type==='number'&&Number.isFinite(Number(r.value))?tidy(Number(r.value),8):'—';
+  const details=cixFormulaTokens(x.formula).map(cixTokenDetail).filter(Boolean),times=details.map(d=>d.time).filter(Boolean).map(t=>new Date(t).getTime()).filter(Number.isFinite);
+  const ages=times.map(t=>(Date.now()-t)/60000),maxAge=ages.length?Math.max(...ages):null,skew=times.length>1?(Math.max(...times)-Math.min(...times))/60000:0;
+  const fresh=details.length>0&&times.length===details.length&&maxAge<=Number(x.freshness||20)&&skew<=Number(x.skew||15);
+  let signal=x.watchMode==='alert'?'ALERT':'WATCH';
+  if(x.watchMode==='alert'&&r.ok&&r.type==='number'){const v=Number(r.value);if(x.upper!=null&&v>=Number(x.upper))signal='≥ 上限';else if(x.lower!=null&&v<=Number(x.lower))signal='≤ 下限';else signal='門檻內'}
+  return {value,fresh,signal};
+}
 function renderCixLibrary(){
   const box=$('#cixLibrary'),sum=$('#cixSummary');if(!box)return;
   const alertCount=customIndexLibrary.filter(x=>x.watchMode==='alert').length;
   if(sum)sum.innerHTML=`<div class="spread-kpi"><span>自訂指數</span><b>${customIndexLibrary.length}</b><small>Custom Indices</small></div><div class="spread-kpi"><span>監控中</span><b>${alertCount}</b><small>Alert Mode</small></div><div class="spread-kpi"><span>方法版本</span><b>${customIndexLibrary.reduce((a,x)=>a+(x.version?1:0),0)}</b><small>Methodologies</small></div>`;
   if(!customIndexLibrary.length){box.innerHTML='<div class="cix-empty">尚未建立自訂指數。按「＋ 建立自訂指數」開始。</div>';return}
-  box.innerHTML=customIndexLibrary.map(x=>`<div class="cix-card"><div class="cix-card-title"><span class="cix-symbol">${x.symbol}</span><b>${x.name}</b><small>${x.description||'—'}</small></div><div><div class="cix-card-formula">${x.formula}</div>${jpyValuationInfo(x)}${jpyHedgeInfo(x)}${jpySignalHistoryHtml(x)}${cixGeneralInfo(x)}${cixCrossMarketInfo(x)}<div class="cix-card-meta"><span class="cix-pill">${cixModeLabel(x.mode)}</span><span class="cix-pill">Methodology v${x.version}</span><span class="cix-pill">${x.watchMode==='alert'?'ALERT':'WATCH ONLY'}</span><span class="cix-pill">${x.interval}m</span><span class="cix-pill">Fresh ≤ ${x.freshness}m</span></div></div><div class="cix-card-actions"><button data-cix-edit="${x.id}">編輯</button><button class="danger" data-cix-delete="${x.id}">刪除</button></div></div>`).join('');
-  $$('[data-cix-edit]').forEach(b=>b.onclick=()=>editCix(b.dataset.cixEdit));$$('[data-cix-delete]').forEach(b=>b.onclick=()=>deleteCix(b.dataset.cixDelete));
+  box.innerHTML=customIndexLibrary.map(x=>{const snap=cixCardSnapshot(x);return `<article class="cix-card">
+    <div class="cix-card-head"><div class="cix-card-title"><span class="cix-symbol">${x.symbol}</span><b>${x.name}</b><small>${x.description||'—'}</small></div><div class="cix-card-value"><small>目前值</small><strong>${snap.value}</strong></div></div>
+    <div class="cix-card-status"><span class="cix-status ${snap.fresh?'is-pass':'is-stale'}">${snap.fresh?'PASS':'STALE'}</span><span class="cix-status">${snap.signal}</span><span class="cix-pill">${cixModeLabel(x.mode)}</span><span class="cix-pill">${x.interval}m</span></div>
+    <div class="cix-card-formula"><small>Formula</small><code>${x.formula}</code></div>
+    <details class="cix-card-details"><summary>查看成分行情與進階資訊</summary><div class="cix-card-detail-body">${jpyValuationInfo(x)}${jpyHedgeInfo(x)}${jpySignalHistoryHtml(x)}${cixGeneralInfo(x)}${cixCrossMarketInfo(x)}<div class="cix-card-meta"><span class="cix-pill">Methodology v${x.version}</span><span class="cix-pill">${x.watchMode==='alert'?'ALERT':'WATCH ONLY'}</span><span class="cix-pill">Fresh ≤ ${x.freshness}m</span></div></div></details>
+    <div class="cix-card-actions"><button data-cix-edit="${x.id}">編輯</button><button class="danger" data-cix-delete="${x.id}">刪除</button></div>
+  </article>`}).join('');
+  document.querySelectorAll('[data-cix-edit]').forEach(b=>b.onclick=()=>editCix(b.dataset.cixEdit));document.querySelectorAll('[data-cix-delete]').forEach(b=>b.onclick=()=>deleteCix(b.dataset.cixDelete));
 }
 function editCix(id){
   const x=customIndexLibrary.find(v=>v.id===id);if(!x)return;editingCixId=id;
