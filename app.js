@@ -691,12 +691,25 @@ function cixCardSnapshot(x){
   if(x.watchMode==='alert'&&r.ok&&r.type==='number'){const v=Number(r.value);if(x.upper!=null&&v>=Number(x.upper))signal='≥ 上限';else if(x.lower!=null&&v<=Number(x.lower))signal='≤ 下限';else signal='門檻內'}
   return {value,fresh,signal};
 }
+function filteredCixLibrary(){
+  const q=($('#cixSearch')?.value||'').trim().toLowerCase(),filter=$('#cixFilter')?.value||'all';
+  return orderedCixLibrary().filter(x=>{
+    const snap=cixCardSnapshot(x),hay=[x.name,x.symbol,x.description,x.formula].join(' ').toLowerCase();
+    if(q&&!hay.includes(q))return false;
+    if(filter==='pinned'&&!x.pinned)return false;
+    if(filter==='alert'&&x.watchMode!=='alert')return false;
+    if(filter==='watch'&&x.watchMode==='alert')return false;
+    if(filter==='pass'&&!snap.fresh)return false;
+    if(filter==='stale'&&snap.fresh)return false;
+    return true;
+  });
+}
 function renderCixLibrary(){
   const box=$('#cixLibrary'),sum=$('#cixSummary');if(!box)return;
   const alertCount=customIndexLibrary.filter(x=>x.watchMode==='alert').length;
   if(sum)sum.innerHTML=`<div class="spread-kpi"><span>自訂指數</span><b>${customIndexLibrary.length}</b><small>Custom Indices</small></div><div class="spread-kpi"><span>監控中</span><b>${alertCount}</b><small>Alert Mode</small></div><div class="spread-kpi"><span>方法版本</span><b>${customIndexLibrary.reduce((a,x)=>a+(x.version?1:0),0)}</b><small>Methodologies</small></div>`;
   if(!customIndexLibrary.length){box.innerHTML='<div class="cix-empty">尚未建立自訂指數。按「＋ 建立自訂指數」開始。</div>';return}
-  box.innerHTML=orderedCixLibrary().map(x=>{const snap=cixCardSnapshot(x);return `<article class="cix-card">
+  const visible=filteredCixLibrary();if(!visible.length){box.innerHTML='<div class="cix-empty">目前沒有符合搜尋／篩選條件的指數。</div>';return}box.innerHTML=visible.map(x=>{const snap=cixCardSnapshot(x);return `<article class="cix-card">
     <div class="cix-card-head"><div class="cix-card-title"><span class="cix-symbol">${x.symbol}</span><b>${x.name}</b><small>${x.description||'—'}</small></div><div class="cix-card-value"><small>目前值</small><strong>${snap.value}</strong></div></div>
     <div class="cix-card-status"><span class="cix-status ${snap.fresh?'is-pass':'is-stale'}">${snap.fresh?'PASS':'STALE'}</span><span class="cix-status">${snap.signal}</span><span class="cix-pill">${cixModeLabel(x.mode)}</span><span class="cix-pill">${x.interval}m</span></div>
     <div class="cix-card-formula"><small>Formula</small><code>${x.formula}</code></div>
@@ -753,6 +766,7 @@ function syncCixWatchMode(){
 }
 function bindCixUI(){
   if(!$('#customindexView'))return;ensureJpyCixPresets();renderCixLibrary();renderCixTokenOptions();renderCixTemplateOptions();
+  if($('#cixSearch'))$('#cixSearch').oninput=renderCixLibrary;if($('#cixFilter'))$('#cixFilter').onchange=renderCixLibrary;
   if($('#applyCixTemplate'))$('#applyCixTemplate').onclick=applyCixTemplate;
   if($('#cixTokenCategory'))$('#cixTokenCategory').onchange=renderCixTokenOptions;
   if($('#cixInsertBid'))$('#cixInsertBid').onclick=()=>insertCixQuoteField('BID');
