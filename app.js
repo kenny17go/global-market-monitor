@@ -476,12 +476,29 @@ function clearCixForm(){
   if($('#cixMode'))$('#cixMode').value='raw';if($('#cixVersion'))$('#cixVersion').value='1.0';if($('#cixWatchMode'))$('#cixWatchMode').value='watch';if($('#cixInterval'))$('#cixInterval').value='15';if($('#cixFreshness'))$('#cixFreshness').value='20';if($('#cixSkew'))$('#cixSkew').value='15';
   if($('#cixPreview'))$('#cixPreview').textContent='等待輸入公式';
 }
+function jpyHedgeInfo(x){
+  if(!['JPYTW01','JPYTW02'].includes(x?.symbol))return '';
+  const fxRow=(DATA?.fx||[]).find(q=>q.pair==='USD/JPY');
+  const usdJpy=Number(fxRow?.bid||fxRow?.ask||0);
+  const theoretical=usdJpy>0?625/usdJpy:null;
+  const xjfLots=theoretical?Math.max(1,Math.round(theoretical)):4;
+  const cmeLots=1;
+  const xjfUsd=xjfLots*20000;
+  const cmeUsd=usdJpy>0?12500000/usdJpy:null;
+  const mismatch=cmeUsd?Math.abs(xjfUsd-cmeUsd)/cmeUsd*100:null;
+  const xjfMarginJpy=xjfLots*102000;
+  const cmeMarginUsd=3800;
+  const usdtwd=Number(DATA?.twd?.spotBid||0);
+  const xjfMarginUsd=usdJpy>0?xjfMarginJpy/usdJpy:null;
+  const totalTwd=usdtwd>0&&xjfMarginUsd!=null?(xjfMarginUsd+cmeMarginUsd)*usdtwd:null;
+  return `<div class="cix-hedge"><b>合約配對</b><span>建議整數比例 <strong>${xjfLots} XJF : ${cmeLots} 6J</strong></span><span>理論 XJF/6J：${theoretical?tidy(theoretical,3):'—'}｜名目誤差：${mismatch!=null?tidy(mismatch,2)+'%':'—'}</span><span>XJF 原始保證金：JPY ${xjfMarginJpy.toLocaleString()}｜6J margin estimate：USD ${cmeMarginUsd.toLocaleString()}</span><span>合計保證金換算：${totalTwd!=null?'約 TWD '+Math.round(totalTwd).toLocaleString():'—'}</span><small>比例依 USD/JPY 動態估算；6J USD 3,800 為目前系統 margin estimate，非即時清算保證金。</small></div>`;
+}
 function renderCixLibrary(){
   const box=$('#cixLibrary'),sum=$('#cixSummary');if(!box)return;
   const alertCount=customIndexLibrary.filter(x=>x.watchMode==='alert').length;
   if(sum)sum.innerHTML=`<div class="spread-kpi"><span>自訂指數</span><b>${customIndexLibrary.length}</b><small>Custom Indices</small></div><div class="spread-kpi"><span>監控中</span><b>${alertCount}</b><small>Alert Mode</small></div><div class="spread-kpi"><span>方法版本</span><b>${customIndexLibrary.reduce((a,x)=>a+(x.version?1:0),0)}</b><small>Methodologies</small></div>`;
   if(!customIndexLibrary.length){box.innerHTML='<div class="cix-empty">尚未建立自訂指數。按「＋ 建立自訂指數」開始。</div>';return}
-  box.innerHTML=customIndexLibrary.map(x=>`<div class="cix-card"><div class="cix-card-title"><span class="cix-symbol">${x.symbol}</span><b>${x.name}</b><small>${x.description||'—'}</small></div><div><div class="cix-card-formula">${x.formula}</div><div class="cix-card-meta"><span class="cix-pill">${cixModeLabel(x.mode)}</span><span class="cix-pill">Methodology v${x.version}</span><span class="cix-pill">${x.watchMode==='alert'?'ALERT':'WATCH ONLY'}</span><span class="cix-pill">${x.interval}m</span><span class="cix-pill">Fresh ≤ ${x.freshness}m</span></div></div><div class="cix-card-actions"><button data-cix-edit="${x.id}">編輯</button><button class="danger" data-cix-delete="${x.id}">刪除</button></div></div>`).join('');
+  box.innerHTML=customIndexLibrary.map(x=>`<div class="cix-card"><div class="cix-card-title"><span class="cix-symbol">${x.symbol}</span><b>${x.name}</b><small>${x.description||'—'}</small></div><div><div class="cix-card-formula">${x.formula}</div>${jpyHedgeInfo(x)}<div class="cix-card-meta"><span class="cix-pill">${cixModeLabel(x.mode)}</span><span class="cix-pill">Methodology v${x.version}</span><span class="cix-pill">${x.watchMode==='alert'?'ALERT':'WATCH ONLY'}</span><span class="cix-pill">${x.interval}m</span><span class="cix-pill">Fresh ≤ ${x.freshness}m</span></div></div><div class="cix-card-actions"><button data-cix-edit="${x.id}">編輯</button><button class="danger" data-cix-delete="${x.id}">刪除</button></div></div>`).join('');
   $('[data-cix-edit]').forEach(b=>b.onclick=()=>editCix(b.dataset.cixEdit));$('[data-cix-delete]').forEach(b=>b.onclick=()=>deleteCix(b.dataset.cixDelete));
 }
 function editCix(id){
