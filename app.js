@@ -256,6 +256,24 @@ function indicatorValue(ind){
 }
 function saveIndicators(){localStorage.setItem(INDICATOR_KEY,JSON.stringify(customIndicators))}
 function saveIndicatorAlerts(){localStorage.setItem(INDICATOR_ALERT_KEY,JSON.stringify(indicatorAlerts))}
+function exportIndicatorBackup(){
+  const payload={version:1,exportedAt:new Date().toISOString(),indicators:customIndicators,alerts:indicatorAlerts};
+  const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob),link=document.createElement('a');
+  link.href=url;link.download='global-market-monitor-indicators-'+new Date().toISOString().slice(0,10)+'.json';
+  document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+async function importIndicatorBackup(file){
+  try{
+    const raw=JSON.parse(await file.text()),inds=Array.isArray(raw)?raw:raw?.indicators,alerts=Array.isArray(raw?.alerts)?raw.alerts:[];
+    if(!Array.isArray(inds))throw new Error('備份格式不正確');
+    const clean=inds.filter(x=>x&&typeof x.name==='string'&&typeof x.formula==='string').map((x,n)=>({id:String(x.id||('IND_IMPORT_'+Date.now().toString(36)+'_'+n)),name:x.name,formula:x.formula,createdAt:x.createdAt||new Date().toISOString(),updatedAt:x.updatedAt}));
+    if(!clean.length)throw new Error('備份中沒有可還原的指標');
+    customIndicators=clean;indicatorAlerts=alerts.filter(x=>x&&clean.some(i=>i.id===x.indicatorId));
+    saveIndicators();saveIndicatorAlerts();renderCustomIndicators();renderIndicatorAlertControls();renderIndicatorDashboard();
+    alert('已還原 '+clean.length+' 個自訂指標');
+  }catch(err){alert('還原失敗：'+(err?.message||err))}
+}
 function renderCustomIndicators(){
   const el=$('#indicatorList');if(!el)return;
   el.innerHTML=customIndicators.length?customIndicators.map(ind=>{const v=indicatorValue(ind);return '<div class="indicator-card"><div><b>'+ind.name+'</b><small>'+ind.formula+'</small></div><div class="indicator-card-value">'+(v==null?'—':tidy(v,8))+'</div><button class="secondary-btn" data-load-indicator="'+ind.id+'">載入</button><button class="secondary-btn" data-del-indicator="'+ind.id+'">刪除</button></div>'}).join(''):'<div class="source-note">尚未建立新指標。先在上方完成公式，再命名儲存。</div>';
@@ -274,6 +292,9 @@ function evaluateIndicatorAlerts(){
   if(changed)saveIndicatorAlerts();
 }
 function bindIndicatorUI(){
+  if($('#exportIndicators'))$('#exportIndicators').onclick=exportIndicatorBackup;
+  if($('#importIndicators'))$('#importIndicators').onclick=()=>$('#indicatorImportFile')?.click();
+  if($('#indicatorImportFile'))$('#indicatorImportFile').onchange=async e=>{const f=e.target.files?.[0];if(f)await importIndicatorBackup(f);e.target.value=''};
   if($('#saveIndicator'))$('#saveIndicator').onclick=()=>{const name=$('#indicatorName')?.value.trim(),formula=$('#spreadFormula')?.value.trim();if(!name)return alert('請先輸入新指標名稱');if(!formula)return alert('請先建立自設公式');const r=evalMarketFormula(formula);if(!r.ok||r.type!=='number'||!Number.isFinite(Number(r.value)))return alert('目前公式無法產生可用數值：'+(r.error||'請檢查公式'));const old=customIndicators.find(x=>x.name===name);if(old){old.formula=formula;old.updatedAt=new Date().toISOString()}else customIndicators.push({id:'IND_'+Date.now().toString(36),name,formula,createdAt:new Date().toISOString()});saveIndicators();renderCustomIndicators();renderIndicatorAlertControls()};
   if($('#addIndicatorAlert'))$('#addIndicatorAlert').onclick=()=>{const indicatorId=$('#indicatorAlertSelect')?.value,op=$('#indicatorAlertOp')?.value,threshold=Number($('#indicatorAlertThreshold')?.value),cooldown=Number($('#indicatorAlertCooldown')?.value||0);if(!indicatorId)return alert('請先選擇新指標');if(!Number.isFinite(threshold))return alert('請輸入有效門檻值');indicatorAlerts.push({id:'AL_'+Date.now().toString(36),indicatorId,op,threshold,cooldown,active:false,lastHit:0});saveIndicatorAlerts();renderIndicatorAlertControls();evaluateIndicatorAlerts()};
   if($('#indicatorNotifyBtn'))$('#indicatorNotifyBtn').onclick=async()=>{if(!('Notification'in window))return alert('此瀏覽器不支援通知');const p=await Notification.requestPermission();alert(p==='granted'?'通知已啟用':'通知未啟用')};
