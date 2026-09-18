@@ -54,3 +54,6 @@
   .cix-actions{position:sticky;bottom:8px;z-index:6;padding:8px;background:rgba(7,24,39,.94);border:1px solid #234b68;border-radius:10px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
   .cix-actions #saveCustomIndex{min-height:48px;font-size:16px}
 }
+/* v1.7.2 — simplify monitor setup */
+.cix-alert-only.is-hidden{display:none!important}
+.cix-watch-note{display:block;margin-top:9px;color:var(--muted);font-size:11px;line-height:1.45}
