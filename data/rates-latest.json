@@ -4,7 +4,7 @@
     "mode": "OFFICIAL / OFFICIAL DAILY",
     "realtime": false,
     "asOf": "2026-09-17T00:00:00",
-    "generatedAt": "2026-09-18T04:45:47.220Z",
+    "generatedAt": "2026-09-18T09:44:10.128Z",
     "treasuryEndpoint": "https://home.treasury.gov/resource-center/data-chart-center/interest-rates/pages/xml?data=daily_treasury_yield_curve&field_tdr_date_value=2026",
     "note": "Policy rates are refreshed from official central-bank/public pages when parsable; conservative last-known official values are retained if a source page is temporarily unavailable. Fed is shown as the target range; ECB uses the deposit facility; CBC uses the discount rate; PBOC uses 1Y LPR."
   },
