@@ -601,12 +601,37 @@ function jpyHedgeInfo(x){
   const totalTwd=usdtwd>0&&xjfMarginUsd!=null?(xjfMarginUsd+cmeMarginUsd)*usdtwd:null;
   return `<div class="cix-hedge"><b>合約配對</b><span>建議整數比例 <strong>${xjfLots} XJF : ${cmeLots} 6J</strong></span><span>理論 XJF/6J：${theoretical?tidy(theoretical,3):'—'}</span><span>名目本金配對誤差：<strong>${mismatchJpy!=null?(mismatchJpy>=0?'+':'')+Math.round(mismatchJpy).toLocaleString()+' JPY':'—'}</strong>｜${mismatch!=null?tidy(mismatch,2)+'%':'—'}</span><span>XJF 原始保證金：JPY ${xjfMarginJpy.toLocaleString()}｜6J margin estimate：USD ${cmeMarginUsd.toLocaleString()}</span><span>合計保證金換算：${totalTwd!=null?'約 TWD '+Math.round(totalTwd).toLocaleString():'—'}</span><small>比例依 USD/JPY 動態估算；6J USD 3,800 為目前系統 margin estimate，非即時清算保證金。</small></div>`;
 }
+function cixFormulaTokens(formula){
+  return [...new Set(String(formula||'').match(/[A-Z][A-Z0-9_]*(?:\.(?:BID|ASK|LAST))?/g)||[])].filter(t=>!/^BASE\d*$/.test(t));
+}
+function cixTokenDetail(token){
+  if(token==='USD_TWD_SPOT'){
+    const bid=Number(DATA?.twd?.spotBid),ask=Number(DATA?.twd?.spotAsk),last=Number(DATA?.twd?.spot||DATA?.twd?.spotMid);
+    return {token,label:'USD/TWD Spot',value:Number.isFinite(last)?last:(Number.isFinite(bid)&&Number.isFinite(ask)?(bid+ask)/2:null),bid,ask,time:DATA?.twd?.quoteTimestamp||DATA?.generatedAt};
+  }
+  const m=token.match(/^([A-Z][A-Z0-9_]*)(?:\.(BID|ASK|LAST))?$/);if(!m)return null;
+  const [,id,field='LAST']=m,row=catalogRows().flatMap(x=>[{side:x.tw,label:`${x.name}｜${x.tw.exchange} ${x.tw.code}`},{side:x.os,label:`${x.name}｜${x.os.exchange} ${x.os.code}`}]).find(x=>x.side?.id===id);
+  if(!row)return null;
+  const side=row.side,bid=Number(side.bid),ask=Number(side.ask),last=Number(side.last),value=field==='BID'?bid:field==='ASK'?ask:last;
+  return {token,label:row.label,field,value:Number.isFinite(value)?value:null,bid:Number.isFinite(bid)?bid:null,ask:Number.isFinite(ask)?ask:null,last:Number.isFinite(last)?last:null,time:side.quoteTimestamp||side.timestamp||side.updatedAt};
+}
+function cixGeneralInfo(x){
+  if(['JPYTW01','JPYTW02'].includes(x?.symbol))return '';
+  const r=evalMarketFormula(x.formula),details=cixFormulaTokens(x.formula).map(cixTokenDetail).filter(Boolean);
+  const times=details.map(d=>d.time).filter(Boolean).map(t=>new Date(t).getTime()).filter(Number.isFinite),now=Date.now();
+  const ages=times.map(t=>(now-t)/60000),maxAge=ages.length?Math.max(...ages):null,skew=times.length>1?(Math.max(...times)-Math.min(...times))/60000:0;
+  const fresh=details.length>0&&times.length===details.length&&maxAge<=Number(x.freshness||20)&&skew<=Number(x.skew||15);
+  const value=r.ok&&r.type==='number'&&Number.isFinite(Number(r.value))?Number(r.value):null;
+  let signal='WATCH ONLY';if(x.watchMode==='alert'&&value!=null){if(x.upper!=null&&value>=Number(x.upper))signal='≥ 上方門檻';else if(x.lower!=null&&value<=Number(x.lower))signal='≤ 下方門檻';else signal='門檻內'}
+  const rows=details.map(d=>`<span><strong>${d.token}</strong> · ${d.label}｜${d.field||'MID'} ${d.value!=null?tidy(d.value,8):'—'}｜Bid ${d.bid!=null?tidy(d.bid,8):'—'} / Ask ${d.ask!=null?tidy(d.ask,8):'—'}${d.time?'｜'+new Date(d.time).toLocaleString('zh-TW',{hour12:false}):''}</span>`).join('');
+  return `<div class="cix-hedge"><b>即時指數資訊</b><strong>目前值：${value!=null?tidy(value,8):'—'}</strong>${rows||'<span>尚無可辨識的行情成分。</span>'}<span>資料品質：<strong>${fresh?'PASS':'STALE'}</strong>｜最舊報價 ${maxAge!=null?tidy(maxAge,1)+'m':'—'}｜成分時間差 ${times.length>1?tidy(skew,1)+'m':'—'}</span><span>監控狀態：<strong>${signal}</strong>${x.upper!=null?'｜上限 '+x.upper:''}${x.lower!=null?'｜下限 '+x.lower:''}</span></div>`;
+}
 function renderCixLibrary(){
   const box=$('#cixLibrary'),sum=$('#cixSummary');if(!box)return;
   const alertCount=customIndexLibrary.filter(x=>x.watchMode==='alert').length;
   if(sum)sum.innerHTML=`<div class="spread-kpi"><span>自訂指數</span><b>${customIndexLibrary.length}</b><small>Custom Indices</small></div><div class="spread-kpi"><span>監控中</span><b>${alertCount}</b><small>Alert Mode</small></div><div class="spread-kpi"><span>方法版本</span><b>${customIndexLibrary.reduce((a,x)=>a+(x.version?1:0),0)}</b><small>Methodologies</small></div>`;
   if(!customIndexLibrary.length){box.innerHTML='<div class="cix-empty">尚未建立自訂指數。按「＋ 建立自訂指數」開始。</div>';return}
-  box.innerHTML=customIndexLibrary.map(x=>`<div class="cix-card"><div class="cix-card-title"><span class="cix-symbol">${x.symbol}</span><b>${x.name}</b><small>${x.description||'—'}</small></div><div><div class="cix-card-formula">${x.formula}</div>${jpyValuationInfo(x)}${jpyHedgeInfo(x)}${jpySignalHistoryHtml(x)}<div class="cix-card-meta"><span class="cix-pill">${cixModeLabel(x.mode)}</span><span class="cix-pill">Methodology v${x.version}</span><span class="cix-pill">${x.watchMode==='alert'?'ALERT':'WATCH ONLY'}</span><span class="cix-pill">${x.interval}m</span><span class="cix-pill">Fresh ≤ ${x.freshness}m</span></div></div><div class="cix-card-actions"><button data-cix-edit="${x.id}">編輯</button><button class="danger" data-cix-delete="${x.id}">刪除</button></div></div>`).join('');
+  box.innerHTML=customIndexLibrary.map(x=>`<div class="cix-card"><div class="cix-card-title"><span class="cix-symbol">${x.symbol}</span><b>${x.name}</b><small>${x.description||'—'}</small></div><div><div class="cix-card-formula">${x.formula}</div>${jpyValuationInfo(x)}${jpyHedgeInfo(x)}${jpySignalHistoryHtml(x)}${cixGeneralInfo(x)}<div class="cix-card-meta"><span class="cix-pill">${cixModeLabel(x.mode)}</span><span class="cix-pill">Methodology v${x.version}</span><span class="cix-pill">${x.watchMode==='alert'?'ALERT':'WATCH ONLY'}</span><span class="cix-pill">${x.interval}m</span><span class="cix-pill">Fresh ≤ ${x.freshness}m</span></div></div><div class="cix-card-actions"><button data-cix-edit="${x.id}">編輯</button><button class="danger" data-cix-delete="${x.id}">刪除</button></div></div>`).join('');
   $$('[data-cix-edit]').forEach(b=>b.onclick=()=>editCix(b.dataset.cixEdit));$$('[data-cix-delete]').forEach(b=>b.onclick=()=>deleteCix(b.dataset.cixDelete));
 }
 function editCix(id){
