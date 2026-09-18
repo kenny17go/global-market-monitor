@@ -615,6 +615,34 @@ function cixTokenDetail(token){
   const side=row.side,bid=Number(side.bid),ask=Number(side.ask),last=Number(side.last),value=field==='BID'?bid:field==='ASK'?ask:last;
   return {token,label:row.label,field,value:Number.isFinite(value)?value:null,bid:Number.isFinite(bid)?bid:null,ask:Number.isFinite(ask)?ask:null,last:Number.isFinite(last)?last:null,time:side.quoteTimestamp||side.timestamp||side.updatedAt};
 }
+function cixCrossMarketPair(x){
+  const ids=cixFormulaTokens(x?.formula).map(t=>t.split('.')[0]);
+  return catalogRows().find(row=>ids.includes(row?.tw?.id)&&ids.includes(row?.os?.id))||null;
+}
+function cixMatchedContractsForRow(row){
+  const tw=[...(row?.tw?.contracts||[])].filter(q=>q?.month).sort((a,b)=>String(a.month).localeCompare(String(b.month)));
+  const os=[...(row?.os?.contracts||[])].filter(q=>q?.month).sort((a,b)=>String(a.month).localeCompare(String(b.month)));
+  const common=tw.map(q=>q.month).filter(m=>os.some(z=>z.month===m));
+  return {tw,os,common,matches:common.slice(0,2).map(month=>({month,tw:tw.find(q=>q.month===month),os:os.find(q=>q.month===month)}))};
+}
+function cixCrossMarketInfo(x){
+  if(['JPYTW01','JPYTW02'].includes(x?.symbol))return '';
+  const row=cixCrossMarketPair(x);if(!row)return '';
+  const m=cixMatchedContractsForRow(row),tw=row.tw||{},os=row.os||{};
+  const mult=v=>v!=null&&v!==''?Number(v):null;
+  const twMult=mult(tw.multiplier??tw.contractMultiplier),osMult=mult(os.multiplier??os.contractMultiplier);
+  const twTick=mult(tw.tick??tw.tickSize),osTick=mult(os.tick??os.tickSize);
+  const months=m.matches.length?m.matches.map(q=>q.month).join(' / '):'—';
+  const expiryStatus=m.matches.length?'MATCHED':'EXPIRY MISMATCH';
+  let ratio='—',mismatch='—';
+  const twLast=Number(tw.last),osLast=Number(os.last);
+  if(twMult>0&&osMult>0&&twLast>0&&osLast>0){
+    const twNotional=twLast*twMult,osNotional=osLast*osMult;
+    const raw=osNotional/twNotional,twLots=Math.max(1,Math.round(raw)),err=Math.abs(twLots*twNotional-osNotional)/osNotional*100;
+    ratio=twLots+' '+tw.code+' : 1 '+os.code;mismatch=tidy(err,2)+'%';
+  }
+  return `<div class="cix-hedge"><b>跨市場期貨辨識 · ${row.name}</b><span>市場：${tw.exchange||'台期所'} ${tw.code} ↔ ${os.exchange||'海外'} ${os.code}</span><span>共同到期月份：<strong>${months}</strong>｜狀態 ${expiryStatus}</span><span>合約乘數：${tw.code} ${twMult!=null?twMult:'—'}｜${os.code} ${osMult!=null?osMult:'—'}</span><span>最小跳動：${tw.code} ${twTick!=null?twTick:'—'}｜${os.code} ${osTick!=null?osTick:'—'}</span><span>名目配對參考：<strong>${ratio}</strong>｜未換匯誤差 ${mismatch}</span><small>自動辨識僅在公式同時包含商品庫中同一標的的台灣與海外代碼時顯示。跨幣別、反向報價或單位不同時，口數比例需再套用 FX／單位換算，不把未換算結果當成正式避險比例。</small></div>`;
+}
 function cixGeneralInfo(x){
   if(['JPYTW01','JPYTW02'].includes(x?.symbol))return '';
   const r=evalMarketFormula(x.formula),details=cixFormulaTokens(x.formula).map(cixTokenDetail).filter(Boolean);
@@ -631,7 +659,7 @@ function renderCixLibrary(){
   const alertCount=customIndexLibrary.filter(x=>x.watchMode==='alert').length;
   if(sum)sum.innerHTML=`<div class="spread-kpi"><span>自訂指數</span><b>${customIndexLibrary.length}</b><small>Custom Indices</small></div><div class="spread-kpi"><span>監控中</span><b>${alertCount}</b><small>Alert Mode</small></div><div class="spread-kpi"><span>方法版本</span><b>${customIndexLibrary.reduce((a,x)=>a+(x.version?1:0),0)}</b><small>Methodologies</small></div>`;
   if(!customIndexLibrary.length){box.innerHTML='<div class="cix-empty">尚未建立自訂指數。按「＋ 建立自訂指數」開始。</div>';return}
-  box.innerHTML=customIndexLibrary.map(x=>`<div class="cix-card"><div class="cix-card-title"><span class="cix-symbol">${x.symbol}</span><b>${x.name}</b><small>${x.description||'—'}</small></div><div><div class="cix-card-formula">${x.formula}</div>${jpyValuationInfo(x)}${jpyHedgeInfo(x)}${jpySignalHistoryHtml(x)}${cixGeneralInfo(x)}<div class="cix-card-meta"><span class="cix-pill">${cixModeLabel(x.mode)}</span><span class="cix-pill">Methodology v${x.version}</span><span class="cix-pill">${x.watchMode==='alert'?'ALERT':'WATCH ONLY'}</span><span class="cix-pill">${x.interval}m</span><span class="cix-pill">Fresh ≤ ${x.freshness}m</span></div></div><div class="cix-card-actions"><button data-cix-edit="${x.id}">編輯</button><button class="danger" data-cix-delete="${x.id}">刪除</button></div></div>`).join('');
+  box.innerHTML=customIndexLibrary.map(x=>`<div class="cix-card"><div class="cix-card-title"><span class="cix-symbol">${x.symbol}</span><b>${x.name}</b><small>${x.description||'—'}</small></div><div><div class="cix-card-formula">${x.formula}</div>${jpyValuationInfo(x)}${jpyHedgeInfo(x)}${jpySignalHistoryHtml(x)}${cixGeneralInfo(x)}${cixCrossMarketInfo(x)}<div class="cix-card-meta"><span class="cix-pill">${cixModeLabel(x.mode)}</span><span class="cix-pill">Methodology v${x.version}</span><span class="cix-pill">${x.watchMode==='alert'?'ALERT':'WATCH ONLY'}</span><span class="cix-pill">${x.interval}m</span><span class="cix-pill">Fresh ≤ ${x.freshness}m</span></div></div><div class="cix-card-actions"><button data-cix-edit="${x.id}">編輯</button><button class="danger" data-cix-delete="${x.id}">刪除</button></div></div>`).join('');
   $$('[data-cix-edit]').forEach(b=>b.onclick=()=>editCix(b.dataset.cixEdit));$$('[data-cix-delete]').forEach(b=>b.onclick=()=>deleteCix(b.dataset.cixDelete));
 }
 function editCix(id){
