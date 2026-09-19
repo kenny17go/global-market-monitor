@@ -215,7 +215,7 @@ function initScreenLock(){
 function quoteDecimals(code){return DISPLAY_DECIMALS[code]??2}
 function qfmt(v,code){return tidy(v,quoteDecimals(code),quoteDecimals(code))}
 const SETTLEMENT_NDF_FORMULA_TOKENS={TGF_NEAR_NDF:null,TGF_NEXT_NDF:null,BRF_NEAR_NDF:null,BRF_NEXT_NDF:null};
-function quoteTokenMap(){const m={USD_TWD_SPOT:DATA?.twd?.spotBid};Object.assign(m,SETTLEMENT_NDF_FORMULA_TOKENS);catalogRows().forEach(x=>[x.tw,x.os].forEach(q=>{if(q?.id){m[q.id+'.BID']=q.bid;m[q.id+'.ASK']=q.ask;m[q.id+'.LAST']=q.last}}));return m}
+function quoteTokenMap(){const m={USD_TWD_SPOT:DATA?.twd?.spotBid};Object.assign(m,SETTLEMENT_NDF_FORMULA_TOKENS);catalogRows().forEach(x=>[x.tw,x.os].forEach(q=>{if(q?.id){m[q.id+'.BID']=q.bid;m[q.id+'.ASK']=q.ask;m[q.id+'.LAST']=q.last}}));const jpy=catalogRows().find(r=>r?.tw?.id==='TAIFEX_XJF'&&r?.os?.id==='CME_6J');if(jpy){const tw=[...(jpy.tw?.contracts||[])].filter(q=>q?.month),os=[...(jpy.os?.contracts||[])].filter(q=>q?.month),common=tw.map(q=>q.month).filter(month=>os.some(z=>z.month===month)).sort((a,b)=>String(a).localeCompare(String(b)));[['NEAR',0],['NEXT',1]].forEach(([label,idx])=>{const month=common[idx],t=tw.find(q=>q.month===month),o=os.find(q=>q.month===month);if(t&&o){[['BID','bid'],['ASK','ask'],['LAST','last']].forEach(([field,key])=>{m['TAIFEX_XJF_'+label+'.'+field]=t[key];m['CME_6J_'+label+'.'+field]=o[key]})}})}return m}
 
 function quoteTimeLabel(q){
   const raw=q?.quoteTimestamp||q?.quoteDate||'';
@@ -581,7 +581,14 @@ function jpyHedgeInfo(x){
 function cixFormulaTokens(formula){
   return [...new Set(String(formula||'').match(/[A-Z][A-Z0-9_]*(?:\.(?:BID|ASK|LAST))?/g)||[])].filter(t=>!/^BASE\d*$/.test(t));
 }
+function cixJpyAliasDetail(token){
+  const mt=String(token||'').match(/^(TAIFEX_XJF|CME_6J)_(NEAR|NEXT)\.(BID|ASK|LAST)$/);if(!mt)return null;
+  const probe={symbol:mt[2]==='NEXT'?'JPYTW02':'JPYTW01'},matched=jpyMatchedContracts(probe);if(!matched||matched.status!=='MATCHED')return null;
+  const q=mt[1]==='TAIFEX_XJF'?matched.tw:matched.os,field=mt[3],key=field.toLowerCase(),value=Number(q?.[key]);
+  return {token,label:(mt[1]==='TAIFEX_XJF'?'TAIFEX XJF':'CME 6J')+'｜'+matched.month,field,value:Number.isFinite(value)?value:null,bid:Number(q?.bid),ask:Number(q?.ask),last:Number(q?.last),time:q?.quoteTimestamp||q?.timestamp||q?.updatedAt};
+}
 function cixTokenDetail(token){
+  const jpyAlias=cixJpyAliasDetail(token);if(jpyAlias)return jpyAlias;
   if(token==='USD_TWD_SPOT'){
     const bid=Number(DATA?.twd?.spotBid),ask=Number(DATA?.twd?.spotAsk),last=Number(DATA?.twd?.spot||DATA?.twd?.spotMid);
     return {token,label:'USD/TWD Spot',value:Number.isFinite(last)?last:(Number.isFinite(bid)&&Number.isFinite(ask)?(bid+ask)/2:null),bid,ask,time:DATA?.twd?.quoteTimestamp||DATA?.generatedAt};
