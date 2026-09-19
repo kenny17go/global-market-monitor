@@ -3,7 +3,7 @@
     "source": "Yahoo Finance + public fallbacks (Barchart key not configured)",
     "mode": "MIXED",
     "realtime": false,
-    "generatedAt": "2026-09-19T02:27:30.106Z",
+    "generatedAt": "2026-09-19T02:35:29.794Z",
     "note": "TradingView is no longer used as a JPX/OSE quote source. Yahoo remains the first public source for CME/COMEX and Brent benchmark data. When BARCHART_API_KEY is configured, Barchart OnDemand supplements missing contract Bid/Ask/Last for JPX Nikkei 225 mini, mini-TOPIX, COMEX Micro Gold and ICE Brent. Barchart mode/timestamps are preserved; missing Bid/Ask are never synthesized. Without a Barchart key, Nikkei 225 mini can fall back to a public delayed Last quote and mini-TOPIX remains unavailable rather than fabricated."
   },
   "indices": {
@@ -886,7 +886,7 @@
           "month": "202612",
           "bid": 7725.25,
           "ask": 7725.5,
-          "last": 7725.5,
+          "last": 7712.5,
           "timestamp": "2026-09-18T20:59:59.000Z",
           "quoteType": "Yahoo authenticated quote",
           "delayMinutes": 10
@@ -897,24 +897,14 @@
       "delayMinutes": 10
     },
     "CME_MNQ": {
-      "defaultMonth": "202609",
+      "defaultMonth": "202612",
       "contracts": [
-        {
-          "symbol": "MNQU26.CME",
-          "month": "202609",
-          "bid": 29510,
-          "ask": 29536,
-          "last": 29531.25,
-          "timestamp": "2026-09-18T13:29:59.000Z",
-          "quoteType": "Yahoo authenticated quote",
-          "delayMinutes": 10
-        },
         {
           "symbol": "MNQZ26.CME",
           "month": "202612",
           "bid": 29949.5,
           "ask": 29962.25,
-          "last": 29960.25,
+          "last": 29917.25,
           "timestamp": "2026-09-18T20:59:59.000Z",
           "quoteType": "Yahoo authenticated quote",
           "delayMinutes": 10
@@ -932,7 +922,7 @@
           "month": "202612",
           "bid": 52134,
           "ask": 52140,
-          "last": 52135,
+          "last": 52079,
           "timestamp": "2026-09-18T20:59:59.000Z",
           "quoteType": "Yahoo authenticated quote",
           "delayMinutes": 10
@@ -943,24 +933,14 @@
       "delayMinutes": 10
     },
     "CME_SOX": {
-      "defaultMonth": "202609",
+      "defaultMonth": "202612",
       "contracts": [
-        {
-          "symbol": "SOXU26.CME",
-          "month": "202609",
-          "bid": 11630,
-          "ask": null,
-          "last": 11630,
-          "timestamp": "2026-09-17T20:02:08.000Z",
-          "quoteType": "Yahoo authenticated quote",
-          "delayMinutes": 10
-        },
         {
           "symbol": "SOXZ26.CME",
           "month": "202612",
           "bid": null,
           "ask": 12315,
-          "last": 11930.5,
+          "last": 12034,
           "timestamp": "2026-09-18T19:50:01.000Z",
           "quoteType": "Yahoo authenticated quote",
           "delayMinutes": 10
@@ -1207,7 +1187,7 @@
           "bid": null,
           "ask": null,
           "last": 64745,
-          "timestamp": "2026-09-19T02:27:29.625Z",
+          "timestamp": "2026-09-19T02:35:29.470Z",
           "quoteType": "nikkei225jp public table",
           "quoteMode": "DELAYED",
           "delayMinutes": 15
@@ -1218,7 +1198,7 @@
           "bid": null,
           "ask": null,
           "last": 64900,
-          "timestamp": "2026-09-19T02:27:29.625Z",
+          "timestamp": "2026-09-19T02:35:29.470Z",
           "quoteType": "nikkei225jp public table",
           "quoteMode": "DELAYED",
           "delayMinutes": 15
@@ -1229,7 +1209,7 @@
           "bid": null,
           "ask": null,
           "last": 64900,
-          "timestamp": "2026-09-19T02:27:29.625Z",
+          "timestamp": "2026-09-19T02:35:29.470Z",
           "quoteType": "nikkei225jp public table",
           "quoteMode": "DELAYED",
           "delayMinutes": 15
