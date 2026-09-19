@@ -407,7 +407,7 @@ function ensureJpyCixPresets(){
   for(const p of JPY_CIX_PRESETS){
     const i=customIndexLibrary.findIndex(x=>x.symbol===p.symbol);
     if(i<0){customIndexLibrary.push(JSON.parse(JSON.stringify(p)));changed=true;continue}
-    const old=customIndexLibrary[i],legacy=old?.methodology?.cmeSymbol!=='6J'||/ICE|KSN/i.test(JSON.stringify(old));
+    const old=customIndexLibrary[i],legacy=/ICE|KSN/i.test(JSON.stringify(old));
     if(legacy){customIndexLibrary[i]={...JSON.parse(JSON.stringify(p)),createdAt:old.createdAt||p.createdAt,updatedAt:new Date().toISOString()};changed=true}
   }
   if(changed)saveCixLibrary();
@@ -693,7 +693,7 @@ function saveCustomIndexV1(){
   }
   if(customIndexLibrary.some(x=>x.symbol===symbol&&x.id!==editingCixId))return alert('Symbol 已存在，請使用另一個代碼');
   const old=customIndexLibrary.find(x=>x.id===editingCixId);
-  const obj={id:editingCixId||('cix_'+Date.now()),name,symbol,description:$('#cixDescription')?.value.trim()||'',formula,mode:$('#cixMode')?.value||'raw',version:old?.version||'1.0',watchMode:$('#cixWatchMode')?.value||'watch',upper:$('#cixUpper')?.value===''?null:Number($('#cixUpper').value),lower:$('#cixLower')?.value===''?null:Number($('#cixLower').value),interval:Number($('#cixInterval')?.value||15),freshness:Number($('#cixFreshness')?.value||20),skew:Number($('#cixSkew')?.value||15),pinned:old?.pinned||false,createdAt:old?.createdAt||new Date().toISOString(),updatedAt:new Date().toISOString()};
+  const obj={id:editingCixId||('cix_'+Date.now()),name,symbol,description:$('#cixDescription')?.value.trim()||'',formula,mode:$('#cixMode')?.value||'raw',version:old?.version||'1.0',watchMode:$('#cixWatchMode')?.value||'watch',upper:$('#cixUpper')?.value===''?null:Number($('#cixUpper').value),lower:$('#cixLower')?.value===''?null:Number($('#cixLower').value),interval:Number($('#cixInterval')?.value||15),freshness:Number($('#cixFreshness')?.value||20),skew:Number($('#cixSkew')?.value||15),pinned:old?.pinned||false,methodology:old?.methodology?{...old.methodology}:undefined,createdAt:old?.createdAt||new Date().toISOString(),updatedAt:new Date().toISOString()};
   if(editingCixId)customIndexLibrary=customIndexLibrary.map(x=>x.id===editingCixId?obj:x);else customIndexLibrary.unshift(obj);
   try{
     saveCixLibrary();
