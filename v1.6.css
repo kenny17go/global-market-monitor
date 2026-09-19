@@ -126,3 +126,16 @@
   .cix-twoway-guide{padding:12px}
   .cix-template-fields{display:grid;grid-template-columns:1fr}
 }
+
+/* v1.8.0 — Editable guided two-way valuation */
+.cix-twoway-selected{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
+.cix-twoway-selected>div{padding:10px 12px;border:1px solid rgba(74,169,255,.18);border-radius:10px;background:rgba(255,255,255,.025)}
+.cix-twoway-selected small{display:block;opacity:.7;margin-bottom:4px}
+.cix-twoway-selected strong{display:block;line-height:1.4}
+.cix-twoway-formulas.editable label{display:block}
+.cix-twoway-formulas.editable textarea{width:100%;min-height:78px;resize:vertical;margin-top:6px}
+.cix-twoway-actions{display:flex;gap:10px;flex-wrap:wrap}
+@media(max-width:720px){
+  .cix-twoway-selected{grid-template-columns:1fr}
+  .cix-twoway-actions button{flex:1 1 100%}
+}
