@@ -107,3 +107,22 @@
 /* v1.7.7 — JPY two-way valuation */
 .cix-card-value strong{max-width:210px;text-align:right}
 @media(max-width:720px){.cix-card-value strong{font-size:17px;max-width:160px;line-height:1.2}}
+
+/* v1.7.9 — Guided two-way valuation builder */
+.cix-template-fields{margin-top:10px}
+.cix-twoway-guide{margin-top:12px;padding:14px;border:1px solid rgba(74,169,255,.28);border-radius:14px;background:rgba(25,126,190,.06)}
+.cix-twoway-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cix-twoway-grid label{display:flex;flex-direction:column;gap:6px;font-size:13px}
+.cix-twoway-grid label span{font-weight:700}
+.cix-twoway-status{margin:12px 0;padding:10px 12px;border-radius:10px;background:rgba(148,163,184,.08);font-size:13px;line-height:1.45}
+.cix-twoway-status.is-ok{background:rgba(34,197,94,.10)}
+.cix-twoway-status.is-warn{background:rgba(245,158,11,.10)}
+.cix-twoway-formulas{display:grid;gap:8px;margin:10px 0 12px}
+.cix-twoway-formulas>div{padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.035)}
+.cix-twoway-formulas small{display:block;margin-bottom:4px;opacity:.72}
+.cix-twoway-formulas code{display:block;white-space:normal;word-break:break-word}
+@media(max-width:720px){
+  .cix-twoway-grid{grid-template-columns:1fr}
+  .cix-twoway-guide{padding:12px}
+  .cix-template-fields{display:grid;grid-template-columns:1fr}
+}
