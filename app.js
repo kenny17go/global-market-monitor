@@ -477,31 +477,46 @@ function syncCixTwoWayGuide(autoPair=true){
   const aMonth=am.value||oldA;
   bm.innerHTML=cixTwoWayMonthOptions(bSel.value,oldB);
   if(aMonth&&[...bm.options].some(o=>o.value===aMonth))bm.value=aMonth;
-  updateCixTwoWayGuide();
+  updateCixTwoWayGuide(true);
 }
-function updateCixTwoWayGuide(){
+function cixTwoWaySuggestedFormulas(){
+  const a=$('#cixTwoWayA')?.value,b=$('#cixTwoWayB')?.value,am=$('#cixTwoWayAMonth')?.value,bm=$('#cixTwoWayBMonth')?.value;
+  if(!a||!b||!am||!bm)return null;
+  const A=a+'_'+am,B=b+'_'+bm;
+  return {high:`100 * (${A}.BID * ${B}.ASK - 1)`,low:`100 * (1 - ${A}.ASK * ${B}.BID)`};
+}
+function cixTwoWaySelectedLabel(id,month){
+  const q=cixTwoWayMarket(id);return q&&month?`${q.name}｜${q.exchange} ${q.code}｜${monthLabel(month)}`:'—';
+}
+function updateCixTwoWayGuide(resetFormula=true){
   const a=$('#cixTwoWayA')?.value,b=$('#cixTwoWayB')?.value,am=$('#cixTwoWayAMonth')?.value,bm=$('#cixTwoWayBMonth')?.value;
   const hi=$('#cixTwoWayHighFormula'),lo=$('#cixTwoWayLowFormula'),status=$('#cixTwoWayAvailability');
+  const asel=$('#cixTwoWayASelected'),bsel=$('#cixTwoWayBSelected');
+  if(asel)asel.textContent=cixTwoWaySelectedLabel(a,am);if(bsel)bsel.textContent=cixTwoWaySelectedLabel(b,bm);
   if(!hi||!lo||!status)return;
-  if(!a||!b||!am||!bm){hi.textContent='—';lo.textContent='—';status.textContent='請先選擇市場與月份。';status.className='cix-twoway-status';return}
-  const A=a+'_'+am,B=b+'_'+bm;
-  hi.textContent=`100 × (${A}.BID × ${B}.ASK − 1)`;
-  lo.textContent=`100 × (1 − ${A}.ASK × ${B}.BID)`;
+  const suggested=cixTwoWaySuggestedFormulas();
+  if(!suggested){if(resetFormula){hi.value='';lo.value=''}status.textContent='請先選擇市場與月份。';status.className='cix-twoway-status';return}
+  if(resetFormula||!hi.value.trim()||!lo.value.trim()){hi.value=suggested.high;lo.value=suggested.low}
   const ac=cixTwoWayContract(a,am),bc=cixTwoWayContract(b,bm);
   const aOk=Number(ac?.bid)>0&&Number(ac?.ask)>0,bOk=Number(bc?.bid)>0&&Number(bc?.ask)>0,same=am===bm;
-  if(aOk&&bOk&&same){status.textContent='✓ 同月份且雙邊 Bid / Ask 完整，可計算可成交雙邊估值。';status.className='cix-twoway-status is-ok'}
-  else if(!same){status.textContent='⚠ 到期月份不同，建議改成相同月份再比較。';status.className='cix-twoway-status is-warn'}
-  else {status.textContent='⚠ 此月份缺少 Bid / Ask；只能作 Last 參考，不能視為可成交雙邊估值。';status.className='cix-twoway-status is-warn'}
+  if(aOk&&bOk&&same){status.textContent='✓ 同月份且雙邊 Bid / Ask 完整。下方公式可直接修改，再按「套用這組雙邊公式」。';status.className='cix-twoway-status is-ok'}
+  else if(!same){status.textContent='⚠ 到期月份不同。仍可自行修改公式，但建議先確認比較邏輯。';status.className='cix-twoway-status is-warn'}
+  else {status.textContent='⚠ 此月份缺少 Bid / Ask。可以修改公式，但雙邊可成交估值可能無法計算。';status.className='cix-twoway-status is-warn'}
+}
+function resetCixTwoWayFormulas(){
+  const f=cixTwoWaySuggestedFormulas();if(!f)return;
+  if($('#cixTwoWayHighFormula'))$('#cixTwoWayHighFormula').value=f.high;
+  if($('#cixTwoWayLowFormula'))$('#cixTwoWayLowFormula').value=f.low;
 }
 function applyCixTwoWayGuide(){
-  const a=$('#cixTwoWayA')?.value,b=$('#cixTwoWayB')?.value,am=$('#cixTwoWayAMonth')?.value,bm=$('#cixTwoWayBMonth')?.value,ta=$('#cixFormula');
-  if(!a||!b||!am||!bm||!ta)return alert('請先選擇市場 A、B 與到期月份');
-  const A=a+'_'+am,B=b+'_'+bm;
-  ta.value=`100 * (${A}.BID * ${B}.ASK - 1)`;
-  ta.dataset.secondaryFormula=`100 * (1 - ${A}.ASK * ${B}.BID)`;
+  const hi=$('#cixTwoWayHighFormula')?.value.trim(),lo=$('#cixTwoWayLowFormula')?.value.trim(),ta=$('#cixFormula');
+  if(!ta||!hi||!lo)return alert('請先選擇商品並確認高估、低估公式');
+  ta.value=hi;ta.dataset.secondaryFormula=lo;
   if($('#cixMode'))$('#cixMode').value='percent';
   updateCixFormulaPreview();
+  ta.scrollIntoView({behavior:'smooth',block:'center'});
 }
+
 function syncCixTemplateMode(){
   const two=$('#cixTemplate')?.value==='twoway';
   $('#cixStandardTemplateFields')?.classList.toggle('hidden',two);
@@ -572,7 +587,7 @@ function clearCixForm(){
   const vals={cixName:'',cixSymbol:'',cixDescription:'',cixFormula:'',cixUpper:'',cixLower:''};
   Object.entries(vals).forEach(([id,v])=>{const e=document.getElementById(id);if(e)e.value=v});
   if($('#cixMode'))$('#cixMode').value='raw';if($('#cixVersion'))$('#cixVersion').value='1.0';if($('#cixWatchMode'))$('#cixWatchMode').value='watch';syncCixWatchMode();if($('#cixInterval'))$('#cixInterval').value='15';if($('#cixFreshness'))$('#cixFreshness').value='20';if($('#cixSkew'))$('#cixSkew').value='15';
-  if($('#cixFormula'))delete $('#cixFormula').dataset.secondaryFormula;if($('#cixPreview'))$('#cixPreview').textContent='等待輸入公式';
+  if($('#cixFormula'))delete $('#cixFormula').dataset.secondaryFormula;if($('#cixTwoWayHighFormula'))$('#cixTwoWayHighFormula').value='';if($('#cixTwoWayLowFormula'))$('#cixTwoWayLowFormula').value='';if($('#cixPreview'))$('#cixPreview').textContent='等待輸入公式';
 }
 function jpyMatchedContracts(x){
   if(!['JPYTW01','JPYTW02'].includes(x?.symbol))return null;
@@ -752,6 +767,13 @@ function editCix(id){
   const x=customIndexLibrary.find(v=>v.id===id);if(!x)return;editingCixId=id;
   const map={cixName:x.name,cixSymbol:x.symbol,cixDescription:x.description,cixFormula:x.formula,cixMode:x.mode,cixVersion:x.version,cixWatchMode:x.watchMode,cixUpper:x.upper??'',cixLower:x.lower??'',cixInterval:String(x.interval),cixFreshness:String(x.freshness),cixSkew:String(x.skew)};
   Object.entries(map).forEach(([id,v])=>{const e=document.getElementById(id);if(e)e.value=v});
+  if($('#cixFormula')){if(x.secondaryFormula)$('#cixFormula').dataset.secondaryFormula=x.secondaryFormula;else delete $('#cixFormula').dataset.secondaryFormula}
+  if(x.valuationType==='two-way'&&x.secondaryFormula){
+    if($('#cixTemplate'))$('#cixTemplate').value='twoway';
+    syncCixTemplateMode();
+    if($('#cixTwoWayHighFormula'))$('#cixTwoWayHighFormula').value=x.formula;
+    if($('#cixTwoWayLowFormula'))$('#cixTwoWayLowFormula').value=x.secondaryFormula;
+  }
   document.querySelector('.cix-builder')?.classList.remove('is-collapsed');syncCixWatchMode();if($('#cixPreview'))$('#cixPreview').textContent=x.formula?'已載入公式 · 儲存修改將保留 Methodology 設定':'等待輸入公式';window.scrollTo({top:0,behavior:'smooth'});
 }
 function deleteCix(id){customIndexLibrary=customIndexLibrary.filter(x=>x.id!==id);saveCixLibrary();renderCixLibrary()}
@@ -802,7 +824,8 @@ function bindCixUI(){
   if($('#cixTwoWayA'))$('#cixTwoWayA').onchange=()=>syncCixTwoWayGuide(true);
   if($('#cixTwoWayB'))$('#cixTwoWayB').onchange=()=>syncCixTwoWayGuide(false);
   if($('#cixTwoWayAMonth'))$('#cixTwoWayAMonth').onchange=()=>syncCixTwoWayGuide(true);
-  if($('#cixTwoWayBMonth'))$('#cixTwoWayBMonth').onchange=updateCixTwoWayGuide;
+  if($('#cixTwoWayBMonth'))$('#cixTwoWayBMonth').onchange=()=>updateCixTwoWayGuide(true);
+  if($('#resetCixTwoWay'))$('#resetCixTwoWay').onclick=resetCixTwoWayFormulas;
   if($('#applyCixTwoWay'))$('#applyCixTwoWay').onclick=applyCixTwoWayGuide;
   syncCixTemplateMode();
   if($('#cixTokenCategory'))$('#cixTokenCategory').onchange=renderCixTokenOptions;
