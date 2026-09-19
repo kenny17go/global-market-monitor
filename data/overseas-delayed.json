@@ -3,7 +3,7 @@
     "source": "Yahoo Finance + public fallbacks (Barchart key not configured)",
     "mode": "MIXED",
     "realtime": false,
-    "generatedAt": "2026-09-19T01:56:27.912Z",
+    "generatedAt": "2026-09-19T02:27:30.106Z",
     "note": "TradingView is no longer used as a JPX/OSE quote source. Yahoo remains the first public source for CME/COMEX and Brent benchmark data. When BARCHART_API_KEY is configured, Barchart OnDemand supplements missing contract Bid/Ask/Last for JPX Nikkei 225 mini, mini-TOPIX, COMEX Micro Gold and ICE Brent. Barchart mode/timestamps are preserved; missing Bid/Ask are never synthesized. Without a Barchart key, Nikkei 225 mini can fall back to a public delayed Last quote and mini-TOPIX remains unavailable rather than fabricated."
   },
   "indices": {
@@ -879,18 +879,8 @@
   },
   "products": {
     "CME_MES": {
-      "defaultMonth": "202609",
+      "defaultMonth": "202612",
       "contracts": [
-        {
-          "symbol": "MESU26.CME",
-          "month": "202609",
-          "bid": null,
-          "ask": null,
-          "last": 7641.25,
-          "timestamp": "2026-09-18T13:29:59.000Z",
-          "quoteType": "Yahoo authenticated quote",
-          "delayMinutes": 10
-        },
         {
           "symbol": "MESZ26.CME",
           "month": "202612",
@@ -935,18 +925,8 @@
       "delayMinutes": 10
     },
     "CBOT_MYM": {
-      "defaultMonth": "202609",
+      "defaultMonth": "202612",
       "contracts": [
-        {
-          "symbol": "MYMU26.CBT",
-          "month": "202609",
-          "bid": null,
-          "ask": null,
-          "last": 51605,
-          "timestamp": "2026-09-18T13:29:20.000Z",
-          "quoteType": "Yahoo authenticated quote",
-          "delayMinutes": 10
-        },
         {
           "symbol": "MYMZ26.CBT",
           "month": "202612",
@@ -1227,7 +1207,7 @@
           "bid": null,
           "ask": null,
           "last": 64745,
-          "timestamp": "2026-09-19T01:56:27.606Z",
+          "timestamp": "2026-09-19T02:27:29.625Z",
           "quoteType": "nikkei225jp public table",
           "quoteMode": "DELAYED",
           "delayMinutes": 15
@@ -1238,7 +1218,7 @@
           "bid": null,
           "ask": null,
           "last": 64900,
-          "timestamp": "2026-09-19T01:56:27.606Z",
+          "timestamp": "2026-09-19T02:27:29.625Z",
           "quoteType": "nikkei225jp public table",
           "quoteMode": "DELAYED",
           "delayMinutes": 15
@@ -1249,7 +1229,7 @@
           "bid": null,
           "ask": null,
           "last": 64900,
-          "timestamp": "2026-09-19T01:56:27.606Z",
+          "timestamp": "2026-09-19T02:27:29.625Z",
           "quoteType": "nikkei225jp public table",
           "quoteMode": "DELAYED",
           "delayMinutes": 15
