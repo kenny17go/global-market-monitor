@@ -195,7 +195,7 @@ function catalogRows(){return DATA?.crossMarketCatalog||[]}
 function quoteDecimals(code){return DISPLAY_DECIMALS[code]??2}
 function qfmt(v,code){return tidy(v,quoteDecimals(code),quoteDecimals(code))}
 const SETTLEMENT_NDF_FORMULA_TOKENS={TGF_NEAR_NDF:null,TGF_NEXT_NDF:null,BRF_NEAR_NDF:null,BRF_NEXT_NDF:null};
-function quoteTokenMap(){const m={USD_TWD_SPOT:DATA?.twd?.spotBid};Object.assign(m,SETTLEMENT_NDF_FORMULA_TOKENS);catalogRows().forEach(x=>[x.tw,x.os].forEach(q=>{if(q?.id){m[q.id+'.BID']=q.bid;m[q.id+'.ASK']=q.ask;m[q.id+'.LAST']=q.last}}));const jpy=catalogRows().find(r=>r?.tw?.id==='TAIFEX_XJF'&&r?.os?.id==='CME_6J');if(jpy){const tw=[...(jpy.tw?.contracts||[])].filter(q=>q?.month),os=[...(jpy.os?.contracts||[])].filter(q=>q?.month),common=tw.map(q=>q.month).filter(month=>os.some(z=>z.month===month)).sort((a,b)=>String(a).localeCompare(String(b)));[['NEAR',0],['NEXT',1]].forEach(([label,idx])=>{const month=common[idx],t=tw.find(q=>q.month===month),o=os.find(q=>q.month===month);if(t&&o){[['BID','bid'],['ASK','ask'],['LAST','last']].forEach(([field,key])=>{m['TAIFEX_XJF_'+label+'.'+field]=t[key];m['CME_6J_'+label+'.'+field]=o[key]})}})}return m}
+function quoteTokenMap(){const m={USD_TWD_SPOT:DATA?.twd?.spotBid};Object.assign(m,SETTLEMENT_NDF_FORMULA_TOKENS);catalogRows().forEach(x=>[x.tw,x.os].forEach(q=>{if(q?.id){m[q.id+'.BID']=q.bid;m[q.id+'.ASK']=q.ask;m[q.id+'.LAST']=q.last;(q.contracts||[]).filter(c=>c?.month).forEach(c=>{const base=q.id+'_'+c.month;m[base+'.BID']=c.bid;m[base+'.ASK']=c.ask;m[base+'.LAST']=c.last})}}));const jpy=catalogRows().find(r=>r?.tw?.id==='TAIFEX_XJF'&&r?.os?.id==='CME_6J');if(jpy){const tw=[...(jpy.tw?.contracts||[])].filter(q=>q?.month),os=[...(jpy.os?.contracts||[])].filter(q=>q?.month),common=tw.map(q=>q.month).filter(month=>os.some(z=>z.month===month)).sort((a,b)=>String(a).localeCompare(String(b)));[['NEAR',0],['NEXT',1]].forEach(([label,idx])=>{const month=common[idx],t=tw.find(q=>q.month===month),o=os.find(q=>q.month===month);if(t&&o){[['BID','bid'],['ASK','ask'],['LAST','last']].forEach(([field,key])=>{m['TAIFEX_XJF_'+label+'.'+field]=t[key];m['CME_6J_'+label+'.'+field]=o[key]})}})}return m}
 
 function quoteTimeLabel(q){
   const raw=q?.quoteTimestamp||q?.quoteDate||'';
@@ -460,16 +460,20 @@ function renderCixTokenOptions(){
   const s=$('#cixTokenSelect');if(!s)return;
   const filter=$('#cixTokenCategory')?.value||'all',cur=s.value,groups={};
   const add=(g,label,id)=>{groups[g]??=[];groups[g].push({label,id})};
+  const addLeg=(x,q)=>{
+    const cs=[...(q?.contracts||[])].filter(c=>c?.month).sort((a,b)=>String(a.month).localeCompare(String(b.month)));
+    if(cs.length)cs.forEach(c=>add(x.category,`${x.name}｜${q.exchange} ${q.code}｜${monthLabel(c.month)}`,q.id+'_'+c.month));
+    else add(x.category,`${x.name}｜${q.exchange} ${q.code}`,q.id);
+  };
   catalogRows().forEach(x=>{
-    const addTw=()=>add(x.category,`${x.name}｜${x.tw.exchange} ${x.tw.code}`,x.tw.id);
-    const addOs=()=>add(x.category,`${x.name}｜${x.os.exchange} ${x.os.code}`,x.os.id);
+    const addTw=()=>addLeg(x,x.tw),addOs=()=>addLeg(x,x.os);
     if(filter==='all'){addTw();addOs();return}
     if(filter==='台灣指數'&&x.category==='股價指數'){addTw();return}
     if(filter==='股價指數'&&x.category==='股價指數'){addOs();return}
     if(filter==='匯率'&&x.category==='外匯'){addTw();addOs();return}
     if(filter===x.category){addTw();addOs()}
   });
-  let html='<option value="">選擇商品／代碼…</option>';
+  let html='<option value="">選擇商品／到期月份…</option>';
   html+=Object.entries(groups).map(([g,arr])=>`<optgroup label="${g}">${arr.map(q=>`<option value="${q.id}">${q.label}</option>`).join('')}</optgroup>`).join('');
   if(filter==='all'||filter==='結算日NDF')html+='<optgroup label="結算日 NDF"><option value="TGF_NEAR_NDF">TGF 近月 NDF Mid</option><option value="TGF_NEXT_NDF">TGF 次月 NDF Mid</option><option value="BRF_NEAR_NDF">BRF 近月 NDF Mid</option><option value="BRF_NEXT_NDF">BRF 次月 NDF Mid</option></optgroup>';
   if(filter==='all'||filter==='匯率')html+='<optgroup label="匯率"><option value="USD_TWD_SPOT">USD/TWD Spot</option></optgroup>';
@@ -569,6 +573,8 @@ function cixJpyAliasDetail(token){
 }
 function cixTokenDetail(token){
   const jpyAlias=cixJpyAliasDetail(token);if(jpyAlias)return jpyAlias;
+  const cm=String(token||'').match(/^([A-Z][A-Z0-9_]*?)_(\d{6})\.(BID|ASK|LAST)$/);
+  if(cm){const [,id,month,field]=cm,row=catalogRows().flatMap(x=>[{side:x.tw,label:`${x.name}｜${x.tw.exchange} ${x.tw.code}`},{side:x.os,label:`${x.name}｜${x.os.exchange} ${x.os.code}`}]).find(x=>x.side?.id===id),q=row?.side?.contracts?.find(c=>String(c.month)===month);if(row&&q){const key=field.toLowerCase(),value=Number(q[key]),bid=Number(q.bid),ask=Number(q.ask),last=Number(q.last);return {token,label:row.label+'｜'+monthLabel(month),field,value:Number.isFinite(value)?value:null,bid:Number.isFinite(bid)?bid:null,ask:Number.isFinite(ask)?ask:null,last:Number.isFinite(last)?last:null,time:q.timestamp||q.quoteTimestamp||q.date||row.side.quoteTimestamp}}}
   if(token==='USD_TWD_SPOT'){
     const bid=Number(DATA?.twd?.spotBid),ask=Number(DATA?.twd?.spotAsk),last=Number(DATA?.twd?.spot||DATA?.twd?.spotMid);
     return {token,label:'USD/TWD Spot',value:Number.isFinite(last)?last:(Number.isFinite(bid)&&Number.isFinite(ask)?(bid+ask)/2:null),bid,ask,time:DATA?.twd?.quoteTimestamp||DATA?.generatedAt};
