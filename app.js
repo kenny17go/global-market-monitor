@@ -191,26 +191,6 @@ function renderYield(){
 function catalogRows(){return DATA?.crossMarketCatalog||[]}
 
 
-const SCREEN_LOCK_PASS='GMM2026';
-function initScreenLock(){
-  const lock=document.getElementById('screenLock');
-  if(!lock)return;
-  const input=document.getElementById('screenLockPassword');
-  const btn=document.getElementById('screenLockSubmit');
-  const err=document.getElementById('screenLockError');
-  const unlocked=sessionStorage.getItem('gmmScreenUnlocked')==='1';
-  document.body.classList.toggle('screen-locked',!unlocked);
-  lock.classList.toggle('is-unlocked',unlocked);
-  if(unlocked)return;
-  setTimeout(()=>input?.focus(),120);
-  const submit=()=>{
-    if(input?.value===SCREEN_LOCK_PASS){sessionStorage.setItem('gmmScreenUnlocked','1');document.body.classList.remove('screen-locked');lock.classList.add('is-unlocked');if(err)err.textContent='';}
-    else{if(err)err.textContent='密碼錯誤，請再試一次';if(input){input.value='';input.focus();}}
-  };
-  if(btn)btn.onclick=submit;
-  if(input)input.addEventListener('keydown',e=>{if(e.key==='Enter')submit()});
-}
-
 function quoteDecimals(code){return DISPLAY_DECIMALS[code]??2}
 function qfmt(v,code){return tidy(v,quoteDecimals(code),quoteDecimals(code))}
 const SETTLEMENT_NDF_FORMULA_TOKENS={TGF_NEAR_NDF:null,TGF_NEXT_NDF:null,BRF_NEAR_NDF:null,BRF_NEXT_NDF:null};
@@ -350,72 +330,6 @@ function fillMonths(sel,arr,value){if(!sel)return;sel.innerHTML=arr.map(v=>`<opt
 function fxToTwd(currency){const c=currency||'TWD';if(c==='TWD')return 1;const usd=Number(DATA?.twd?.spotBid)||1;if(c==='USD')return usd;const pair=p=>DATA?.fx?.find(x=>x.pair===p)?.bid;if(c==='JPY'){const u=pair('USD/JPY');return u?usd/u:1}if(c==='CNH'){const u=pair('USD/CNH');return u?usd/u:1}if(c==='GBP'){const g=pair('GBP/USD');return g?g*usd:1}if(c==='EUR'){const e=pair('EUR/USD');return e?e*usd:1}if(c==='AUD'){const a=pair('AUD/USD');return a?a*usd:1}return 1}
 function selectedCostRow(){return catalogRows()[Number($('#costProduct')?.value)||0]}
 function specFor(id){return CONTRACT_SPECS[id]||{multiplier:1,tick:1,currency:'TWD',cycle:'monthly18',code:id}}
-function marginFor(id){return INITIAL_MARGINS[id]||{initial:null,currency:specFor(id).currency,asOf:'dynamic',source:'交易所動態'}}
-function marginDisplay(m){return m?.initial==null?'動態':tidy(m.initial,2)+' '+m.currency}
-function marginFor(id){return INITIAL_MARGINS[id]||{initial:null,currency:specFor(id).currency,asOf:'dynamic',source:'交易所動態'}}
-function marginDisplay(m){return m?.initial==null?'動態':tidy(m.initial,2)+' '+m.currency}
-function marginFor(id){return INITIAL_MARGINS[id]||{initial:null,currency:specFor(id).currency,asOf:'dynamic',source:'交易所動態'}}
-function marginDisplay(m){return m?.initial==null?'動態':tidy(m.initial,2)+' '+m.currency}
-function marginFor(id){return INITIAL_MARGINS[id]||{initial:null,currency:specFor(id).currency,asOf:'dynamic',source:'交易所動態'}}
-function marginDisplay(m){return m?.initial==null?'動態':tidy(m.initial,2)+' '+m.currency}
-function marginFor(id){return INITIAL_MARGINS[id]||{initial:null,currency:specFor(id).currency,asOf:'dynamic',source:'交易所動態'}}
-function marginDisplay(m){return m?.initial==null?'動態':tidy(m.initial,2)+' '+m.currency}
-function marginFor(id){return INITIAL_MARGINS[id]||{initial:null,currency:specFor(id).currency,asOf:'dynamic',source:'交易所動態'}}
-function marginDisplay(m){return m?.initial==null?'動態':tidy(m.initial,2)+' '+m.currency}
-function marginFor(id){return INITIAL_MARGINS[id]||{initial:null,currency:specFor(id).currency,asOf:'dynamic',source:'交易所動態'}}
-function marginDisplay(m){return m?.initial==null?'動態':tidy(m.initial,2)+' '+m.currency}
-function marginFor(id){return INITIAL_MARGINS[id]||{initial:null,currency:specFor(id).currency,asOf:'dynamic',source:'交易所動態'}}
-function marginDisplay(m){return m?.initial==null?'動態':tidy(m.initial,2)+' '+m.currency}
-function marginFor(id){return INITIAL_MARGINS[id]||{initial:null,currency:specFor(id).currency,asOf:'dynamic',source:'交易所動態'}}
-function marginDisplay(m){return m?.initial==null?'動態':tidy(m.initial,2)+' '+m.currency}
-function marginFor(id){return INITIAL_MARGINS[id]||{initial:null,currency:specFor(id).currency,asOf:'dynamic',source:'交易所動態'}}
-function marginDisplay(m){return m?.initial==null?'動態':tidy(m.initial,2)+' '+m.currency}
-function marginFor(id){return INITIAL_MARGINS[id]||{initial:null,currency:specFor(id).currency,asOf:'dynamic',source:'交易所動態'}}
-function marginDisplay(m){return m?.initial==null?'動態':tidy(m.initial,2)+' '+m.currency}
-function marginFor(id){return INITIAL_MARGINS[id]||{initial:null,currency:specFor(id).currency,asOf:'dynamic',source:'交易所動態'}}
-function marginDisplay(m){return m?.initial==null?'動態':tidy(m.initial,2)+' '+m.currency}
-function marginFor(id){return INITIAL_MARGINS[id]||{initial:null,currency:specFor(id).currency,asOf:'dynamic',source:'交易所動態'}}
-function marginDisplay(m){return m?.initial==null?'動態':tidy(m.initial,2)+' '+m.currency}
-function marginFor(id){return INITIAL_MARGINS[id]||{initial:null,currency:specFor(id).currency,asOf:'dynamic',source:'交易所動態'}}
-function marginDisplay(m){return m?.initial==null?'動態':tidy(m.initial,2)+' '+m.currency}
-function marginFor(id){return INITIAL_MARGINS[id]||{initial:null,currency:specFor(id).currency,asOf:'dynamic',source:'交易所動態'}}
-function marginDisplay(m){return m?.initial==null?'動態':tidy(m.initial,2)+' '+m.currency}
-function marginFor(id){return INITIAL_MARGINS[id]||{initial:null,currency:specFor(id).currency,asOf:'dynamic',source:'交易所動態'}}
-function marginDisplay(m){return m?.initial==null?'動態':tidy(m.initial,2)+' '+m.currency}
-function marginFor(id){return INITIAL_MARGINS[id]||{initial:null,currency:specFor(id).currency,asOf:'dynamic',source:'交易所動態'}}
-function marginDisplay(m){return m?.initial==null?'動態':tidy(m.initial,2)+' '+m.currency}
-function marginFor(id){return INITIAL_MARGINS[id]||{initial:null,currency:specFor(id).currency,asOf:'dynamic',source:'交易所動態'}}
-function marginDisplay(m){return m?.initial==null?'動態':tidy(m.initial,2)+' '+m.currency}
-function marginFor(id){return INITIAL_MARGINS[id]||{initial:null,currency:specFor(id).currency,asOf:'dynamic',source:'交易所動態'}}
-function marginDisplay(m){return m?.initial==null?'動態':tidy(m.initial,2)+' '+m.currency}
-function marginFor(id){return INITIAL_MARGINS[id]||{initial:null,currency:specFor(id).currency,asOf:'dynamic',source:'交易所動態'}}
-function marginDisplay(m){return m?.initial==null?'動態':tidy(m.initial,2)+' '+m.currency}
-function marginFor(id){return INITIAL_MARGINS[id]||{initial:null,currency:specFor(id).currency,asOf:'dynamic',source:'交易所動態'}}
-function marginDisplay(m){return m?.initial==null?'動態':tidy(m.initial,2)+' '+m.currency}
-function marginFor(id){return INITIAL_MARGINS[id]||{initial:null,currency:specFor(id).currency,asOf:'dynamic',source:'交易所動態'}}
-function marginDisplay(m){return m?.initial==null?'動態':tidy(m.initial,2)+' '+m.currency}
-function marginFor(id){return INITIAL_MARGINS[id]||{initial:null,currency:specFor(id).currency,asOf:'dynamic',source:'交易所動態'}}
-function marginDisplay(m){return m?.initial==null?'動態':tidy(m.initial,2)+' '+m.currency}
-function marginFor(id){return INITIAL_MARGINS[id]||{initial:null,currency:specFor(id).currency,asOf:'dynamic',source:'交易所動態'}}
-function marginDisplay(m){return m?.initial==null?'動態':tidy(m.initial,2)+' '+m.currency}
-function marginFor(id){return INITIAL_MARGINS[id]||{initial:null,currency:specFor(id).currency,asOf:'dynamic',source:'交易所動態'}}
-function marginDisplay(m){return m?.initial==null?'動態':tidy(m.initial,2)+' '+m.currency}
-function marginFor(id){return INITIAL_MARGINS[id]||{initial:null,currency:specFor(id).currency,asOf:'dynamic',source:'交易所動態'}}
-function marginDisplay(m){return m?.initial==null?'動態':tidy(m.initial,2)+' '+m.currency}
-function marginFor(id){return INITIAL_MARGINS[id]||{initial:null,currency:specFor(id).currency,asOf:'dynamic',source:'交易所動態'}}
-function marginDisplay(m){return m?.initial==null?'動態':tidy(m.initial,2)+' '+m.currency}
-function marginFor(id){return INITIAL_MARGINS[id]||{initial:null,currency:specFor(id).currency,asOf:'dynamic',source:'交易所動態'}}
-function marginDisplay(m){return m?.initial==null?'動態':tidy(m.initial,2)+' '+m.currency}
-function marginFor(id){return INITIAL_MARGINS[id]||{initial:null,currency:specFor(id).currency,asOf:'dynamic',source:'交易所動態'}}
-function marginDisplay(m){return m?.initial==null?'動態':tidy(m.initial,2)+' '+m.currency}
-function marginFor(id){return INITIAL_MARGINS[id]||{initial:null,currency:specFor(id).currency,asOf:'dynamic',source:'交易所動態'}}
-function marginDisplay(m){return m?.initial==null?'動態':tidy(m.initial,2)+' '+m.currency}
-function marginFor(id){return INITIAL_MARGINS[id]||{initial:null,currency:specFor(id).currency,asOf:'dynamic',source:'交易所動態'}}
-function marginDisplay(m){return m?.initial==null?'動態':tidy(m.initial,2)+' '+m.currency}
-function marginFor(id){return INITIAL_MARGINS[id]||{initial:null,currency:specFor(id).currency,asOf:'dynamic',source:'交易所動態'}}
-function marginDisplay(m){return m?.initial==null?'動態':tidy(m.initial,2)+' '+m.currency}
-function marginFor(id){return INITIAL_MARGINS[id]||{initial:null,currency:specFor(id).currency,asOf:'dynamic',source:'交易所動態'}}
-function marginDisplay(m){return m?.initial==null?'動態':tidy(m.initial,2)+' '+m.currency}
 function marginFor(id){return INITIAL_MARGINS[id]||{initial:null,currency:specFor(id).currency,asOf:'dynamic',source:'交易所動態'}}
 function marginDisplay(m){return m?.initial==null?'動態':tidy(m.initial,2)+' '+m.currency}
 function renderSpecSummary(row){const el=$('#contractSpecSummary');if(!el||!row)return;const a=specFor(row.tw.id),b=specFor(row.os.id),ma=marginFor(row.tw.id),mb=marginFor(row.os.id),target=row.underlying||row.name||'—';const card=(title,q,s,m)=>`<div class="spec-card"><div><b>${title} ${q.code}</b><span class="verified-badge">規格預設</span></div><div class="spec-line"><span>標的</span><strong>${target}</strong></div><div class="spec-line"><span>乘數</span><strong>${tidy(s.multiplier,6)}</strong></div><div class="spec-line"><span>Tick</span><strong>${fixedInput(s.tick,8)}</strong></div><div class="spec-line"><span>幣別</span><strong>${s.currency}</strong></div><div class="spec-line"><span>原始保證金</span><strong>${marginDisplay(m)}</strong></div><div class="source-note">${m.source}${m.asOf&&m.asOf!=='dynamic'?' · '+m.asOf:''}</div><div class="spec-line"><span>到期週期</span><strong>${s.cycle}</strong></div><div class="spec-source-block"><span>行情</span>${quoteMetaHtml(q)}</div></div>`;el.innerHTML=card(row.tw.exchange||'TAIFEX',row.tw,a,ma)+card(row.os.exchange,row.os,b,mb)}
