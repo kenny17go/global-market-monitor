@@ -448,11 +448,70 @@ function renderCixTemplateOptions(){
   const opts='<option value="">選擇商品…</option>'+cixTemplateProducts().map(p=>`<option value="${p.id}">${p.name}｜${p.exchange} ${p.code}</option>`).join('');
   ['#cixLegA','#cixLegB'].forEach((s,idx)=>{const el=$(s);if(!el)return;const old=el.value;el.innerHTML=opts;if([...el.options].some(o=>o.value===old))el.value=old;else if(idx===1&&el.options.length>2)el.selectedIndex=2});
 }
+function cixTwoWayMarketList(){
+  return catalogRows().flatMap(row=>[
+    {id:row.tw?.id,name:row.name,exchange:row.tw?.exchange,code:row.tw?.code,contracts:row.tw?.contracts||[],pairId:row.os?.id},
+    {id:row.os?.id,name:row.name,exchange:row.os?.exchange,code:row.os?.code,contracts:row.os?.contracts||[],pairId:row.tw?.id}
+  ]).filter(x=>x.id);
+}
+function cixTwoWayMarket(id){return cixTwoWayMarketList().find(x=>x.id===id)||null}
+function cixTwoWayMonthOptions(id,selected){
+  const q=cixTwoWayMarket(id),months=[...(q?.contracts||[])].filter(c=>c?.month).sort((x,y)=>String(x.month).localeCompare(String(y.month)));
+  if(!months.length)return '<option value="">無月份資料</option>';
+  return months.map(c=>`<option value="${c.month}"${String(c.month)===String(selected||'')?' selected':''}>${monthLabel(c.month)}</option>`).join('');
+}
+function cixTwoWayContract(id,month){return cixTwoWayMarket(id)?.contracts?.find(c=>String(c.month)===String(month))||null}
+function renderCixTwoWayGuide(){
+  const aSel=$('#cixTwoWayA'),bSel=$('#cixTwoWayB');if(!aSel||!bSel)return;
+  const rows=cixTwoWayMarketList(),opt='<option value="">選擇市場…</option>'+rows.map(q=>`<option value="${q.id}">${q.name}｜${q.exchange} ${q.code}</option>`).join('');
+  const av=aSel.value,bv=bSel.value;aSel.innerHTML=opt;bSel.innerHTML=opt;
+  if(rows.some(q=>q.id===av))aSel.value=av;if(rows.some(q=>q.id===bv))bSel.value=bv;
+  syncCixTwoWayGuide(false);
+}
+function syncCixTwoWayGuide(autoPair=true){
+  const aSel=$('#cixTwoWayA'),bSel=$('#cixTwoWayB'),am=$('#cixTwoWayAMonth'),bm=$('#cixTwoWayBMonth');if(!aSel||!bSel||!am||!bm)return;
+  const aId=aSel.value,aInfo=cixTwoWayMarket(aId);
+  if(autoPair&&aInfo?.pairId&&bSel.value!==aInfo.pairId)bSel.value=aInfo.pairId;
+  const oldA=am.value,oldB=bm.value;
+  am.innerHTML=cixTwoWayMonthOptions(aId,oldA);
+  const aMonth=am.value||oldA;
+  bm.innerHTML=cixTwoWayMonthOptions(bSel.value,oldB);
+  if(aMonth&&[...bm.options].some(o=>o.value===aMonth))bm.value=aMonth;
+  updateCixTwoWayGuide();
+}
+function updateCixTwoWayGuide(){
+  const a=$('#cixTwoWayA')?.value,b=$('#cixTwoWayB')?.value,am=$('#cixTwoWayAMonth')?.value,bm=$('#cixTwoWayBMonth')?.value;
+  const hi=$('#cixTwoWayHighFormula'),lo=$('#cixTwoWayLowFormula'),status=$('#cixTwoWayAvailability');
+  if(!hi||!lo||!status)return;
+  if(!a||!b||!am||!bm){hi.textContent='—';lo.textContent='—';status.textContent='請先選擇市場與月份。';status.className='cix-twoway-status';return}
+  const A=a+'_'+am,B=b+'_'+bm;
+  hi.textContent=`100 × (${A}.BID × ${B}.ASK − 1)`;
+  lo.textContent=`100 × (1 − ${A}.ASK × ${B}.BID)`;
+  const ac=cixTwoWayContract(a,am),bc=cixTwoWayContract(b,bm);
+  const aOk=Number(ac?.bid)>0&&Number(ac?.ask)>0,bOk=Number(bc?.bid)>0&&Number(bc?.ask)>0,same=am===bm;
+  if(aOk&&bOk&&same){status.textContent='✓ 同月份且雙邊 Bid / Ask 完整，可計算可成交雙邊估值。';status.className='cix-twoway-status is-ok'}
+  else if(!same){status.textContent='⚠ 到期月份不同，建議改成相同月份再比較。';status.className='cix-twoway-status is-warn'}
+  else {status.textContent='⚠ 此月份缺少 Bid / Ask；只能作 Last 參考，不能視為可成交雙邊估值。';status.className='cix-twoway-status is-warn'}
+}
+function applyCixTwoWayGuide(){
+  const a=$('#cixTwoWayA')?.value,b=$('#cixTwoWayB')?.value,am=$('#cixTwoWayAMonth')?.value,bm=$('#cixTwoWayBMonth')?.value,ta=$('#cixFormula');
+  if(!a||!b||!am||!bm||!ta)return alert('請先選擇市場 A、B 與到期月份');
+  const A=a+'_'+am,B=b+'_'+bm;
+  ta.value=`100 * (${A}.BID * ${B}.ASK - 1)`;
+  ta.dataset.secondaryFormula=`100 * (1 - ${A}.ASK * ${B}.BID)`;
+  if($('#cixMode'))$('#cixMode').value='percent';
+  updateCixFormulaPreview();
+}
+function syncCixTemplateMode(){
+  const two=$('#cixTemplate')?.value==='twoway';
+  $('#cixStandardTemplateFields')?.classList.toggle('hidden',two);
+  $('#cixTwoWayGuide')?.classList.toggle('hidden',!two);
+  if(two)renderCixTwoWayGuide();
+}
 function applyCixTemplate(){
   const type=$('#cixTemplate')?.value||'manual',a=$('#cixLegA')?.value,b=$('#cixLegB')?.value,af=$('#cixLegAField')?.value||'BID',bf=$('#cixLegBField')?.value||'ASK',ta=$('#cixFormula');
-  if(!ta)return;if(type==='manual')return ta.focus();if(!a||!b)return alert('請先選擇 A 與 B 商品');
+  if(!ta)return;if(type==='manual')return ta.focus();if(type==='twoway')return applyCixTwoWayGuide();if(!a||!b)return alert('請先選擇 A 與 B 商品');
   const A=a+'.'+af,B=b+'.'+bf;
-  if(type==='twoway'){ta.value=`100 * (${a}.BID * ${b}.ASK - 1)`;ta.dataset.secondaryFormula=`100 * (1 - ${a}.ASK * ${b}.BID)`;if($('#cixMode'))$('#cixMode').value='percent';updateCixFormulaPreview();ta.focus();return}
   delete ta.dataset.secondaryFormula;
   if(type==='spread')ta.value=`${A} - ${B}`;
   else if(type==='ratio')ta.value=`${A} / ${B}`;
@@ -739,6 +798,13 @@ function bindCixUI(){
   if(!$('#customindexView'))return;ensureJpyCixPresets();renderCixLibrary();renderCixTokenOptions();renderCixTemplateOptions();
   if($('#cixSearch'))$('#cixSearch').oninput=renderCixLibrary;if($('#cixFilter'))$('#cixFilter').onchange=renderCixLibrary;
   if($('#applyCixTemplate'))$('#applyCixTemplate').onclick=applyCixTemplate;
+  if($('#cixTemplate'))$('#cixTemplate').onchange=syncCixTemplateMode;
+  if($('#cixTwoWayA'))$('#cixTwoWayA').onchange=()=>syncCixTwoWayGuide(true);
+  if($('#cixTwoWayB'))$('#cixTwoWayB').onchange=()=>syncCixTwoWayGuide(false);
+  if($('#cixTwoWayAMonth'))$('#cixTwoWayAMonth').onchange=()=>syncCixTwoWayGuide(true);
+  if($('#cixTwoWayBMonth'))$('#cixTwoWayBMonth').onchange=updateCixTwoWayGuide;
+  if($('#applyCixTwoWay'))$('#applyCixTwoWay').onclick=applyCixTwoWayGuide;
+  syncCixTemplateMode();
   if($('#cixTokenCategory'))$('#cixTokenCategory').onchange=renderCixTokenOptions;
   if($('#cixInsertBid'))$('#cixInsertBid').onclick=()=>insertCixQuoteField('BID');
   if($('#cixInsertAsk'))$('#cixInsertAsk').onclick=()=>insertCixQuoteField('ASK');
