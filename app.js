@@ -437,15 +437,22 @@ function moveFormulaToMyIndex(){
   if($('#cixPreview'))$('#cixPreview').textContent='已從 Formula Lab 帶入公式；儲存後會依可用行情計算';
   setTimeout(()=>$('#cixName')?.focus(),80);
 }
+function cixTemplateProducts(){
+  return catalogRows().flatMap(x=>[x.tw,x.os].flatMap(q=>{
+    const cs=[...(q?.contracts||[])].filter(c=>c?.month).sort((a,b)=>String(a.month).localeCompare(String(b.month)));
+    if(!cs.length)return [{id:q.id,name:x.name,code:q.code,exchange:q.exchange}];
+    return cs.map(c=>({id:q.id+'_'+c.month,name:x.name,code:q.code+' '+monthLabel(c.month),exchange:q.exchange}));
+  }));
+}
 function renderCixTemplateOptions(){
-  const opts='<option value="">選擇商品…</option>'+builtinProducts().map(p=>`<option value="${p.id}">${p.name}｜${p.exchange} ${p.code}</option>`).join('');
+  const opts='<option value="">選擇商品…</option>'+cixTemplateProducts().map(p=>`<option value="${p.id}">${p.name}｜${p.exchange} ${p.code}</option>`).join('');
   ['#cixLegA','#cixLegB'].forEach((s,idx)=>{const el=$(s);if(!el)return;const old=el.value;el.innerHTML=opts;if([...el.options].some(o=>o.value===old))el.value=old;else if(idx===1&&el.options.length>2)el.selectedIndex=2});
 }
 function applyCixTemplate(){
   const type=$('#cixTemplate')?.value||'manual',a=$('#cixLegA')?.value,b=$('#cixLegB')?.value,af=$('#cixLegAField')?.value||'BID',bf=$('#cixLegBField')?.value||'ASK',ta=$('#cixFormula');
   if(!ta)return;if(type==='manual')return ta.focus();if(!a||!b)return alert('請先選擇 A 與 B 商品');
   const A=a+'.'+af,B=b+'.'+bf;
-  if(type==='spread')ta.value=`${A} - ${B}`;
+  if(type==='twoway'){ta.value=`100 * (${a}.BID * ${b}.ASK - 1)`;ta.dataset.secondaryFormula=`100 * (1 - ${a}.ASK * ${b}.BID)`;if($('#cixMode'))$('#cixMode').value='percent';updateCixFormulaPreview();ta.focus();return}\n  delete ta.dataset.secondaryFormula;\n  if(type==='spread')ta.value=`${A} - ${B}`;
   else if(type==='ratio')ta.value=`${A} / ${B}`;
   else if(type==='pct')ta.value=`(${A} / ${B} - 1) * 100`;
   else if(type==='cost'){
@@ -498,7 +505,7 @@ function clearCixForm(){
   const vals={cixName:'',cixSymbol:'',cixDescription:'',cixFormula:'',cixUpper:'',cixLower:''};
   Object.entries(vals).forEach(([id,v])=>{const e=document.getElementById(id);if(e)e.value=v});
   if($('#cixMode'))$('#cixMode').value='raw';if($('#cixVersion'))$('#cixVersion').value='1.0';if($('#cixWatchMode'))$('#cixWatchMode').value='watch';syncCixWatchMode();if($('#cixInterval'))$('#cixInterval').value='15';if($('#cixFreshness'))$('#cixFreshness').value='20';if($('#cixSkew'))$('#cixSkew').value='15';
-  if($('#cixPreview'))$('#cixPreview').textContent='等待輸入公式';
+  if($('#cixFormula'))delete $('#cixFormula').dataset.secondaryFormula;if($('#cixPreview'))$('#cixPreview').textContent='等待輸入公式';
 }
 function jpyMatchedContracts(x){
   if(!['JPYTW01','JPYTW02'].includes(x?.symbol))return null;
@@ -639,7 +646,7 @@ function moveCix(id,dir){
   [customIndexLibrary[ai],customIndexLibrary[bi]]=[customIndexLibrary[bi],customIndexLibrary[ai]];saveCixLibrary();renderCixLibrary();
 }
 function cixCardSnapshot(x){
-  const r=evalMarketFormula(x.formula);let value=r.ok&&r.type==='number'&&Number.isFinite(Number(r.value))?tidy(Number(r.value),8):'—',valueLabel='目前值';const jpy=['JPYTW01','JPYTW02'].includes(x?.symbol)?jpyExecutableValuation(x):null;if(jpy){valueLabel='雙邊估值';value=jpy.executable?`高 ${tidy(jpy.premium,3)}% / 低 ${tidy(jpy.discount,3)}%`:(jpy.reference!=null?`Last ${tidy(jpy.reference,3)}%`:'—')}
+  const r=evalMarketFormula(x.formula);let value=r.ok&&r.type==='number'&&Number.isFinite(Number(r.value))?tidy(Number(r.value),8):'—',valueLabel='目前值';const jpy=['JPYTW01','JPYTW02'].includes(x?.symbol)?jpyExecutableValuation(x):null;if(jpy){valueLabel='雙邊估值';value=jpy.executable?`高 ${tidy(jpy.premium,3)}% / 低 ${tidy(jpy.discount,3)}%`:(jpy.reference!=null?`Last ${tidy(jpy.reference,3)}%`:'—')}else if(x?.valuationType==='two-way'&&x?.secondaryFormula){const hi=evalMarketFormula(x.formula),lo=evalMarketFormula(x.secondaryFormula);valueLabel='雙邊估值';value=`高 ${hi.ok&&Number.isFinite(Number(hi.value))?tidy(hi.value,3)+'%':'—'} / 低 ${lo.ok&&Number.isFinite(Number(lo.value))?tidy(lo.value,3)+'%':'—'}`}
   const details=cixFormulaTokens(x.formula).map(cixTokenDetail).filter(Boolean),times=details.map(d=>d.time).filter(Boolean).map(t=>new Date(t).getTime()).filter(Number.isFinite);
   const ages=times.map(t=>(Date.now()-t)/60000),maxAge=ages.length?Math.max(...ages):null,skew=times.length>1?(Math.max(...times)-Math.min(...times))/60000:0;
   const fresh=details.length>0&&times.length===details.length&&maxAge<=Number(x.freshness||20)&&skew<=Number(x.skew||15);
@@ -698,7 +705,7 @@ function saveCustomIndexV1(){
   }
   if(customIndexLibrary.some(x=>x.symbol===symbol&&x.id!==editingCixId))return alert('Symbol 已存在，請使用另一個代碼');
   const old=customIndexLibrary.find(x=>x.id===editingCixId);
-  const obj={id:editingCixId||('cix_'+Date.now()),name,symbol,description:$('#cixDescription')?.value.trim()||'',formula,mode:$('#cixMode')?.value||'raw',version:old?.version||'1.0',watchMode:$('#cixWatchMode')?.value||'watch',upper:$('#cixUpper')?.value===''?null:Number($('#cixUpper').value),lower:$('#cixLower')?.value===''?null:Number($('#cixLower').value),interval:Number($('#cixInterval')?.value||15),freshness:Number($('#cixFreshness')?.value||20),skew:Number($('#cixSkew')?.value||15),pinned:old?.pinned||false,methodology:old?.methodology?{...old.methodology}:undefined,createdAt:old?.createdAt||new Date().toISOString(),updatedAt:new Date().toISOString()};
+  const obj={id:editingCixId||('cix_'+Date.now()),name,symbol,description:$('#cixDescription')?.value.trim()||'',formula,secondaryFormula:$('#cixFormula')?.dataset.secondaryFormula||old?.secondaryFormula||null,valuationType:($('#cixFormula')?.dataset.secondaryFormula||old?.secondaryFormula)?'two-way':(old?.valuationType||null),mode:$('#cixMode')?.value||'raw',version:old?.version||'1.0',watchMode:$('#cixWatchMode')?.value||'watch',upper:$('#cixUpper')?.value===''?null:Number($('#cixUpper').value),lower:$('#cixLower')?.value===''?null:Number($('#cixLower').value),interval:Number($('#cixInterval')?.value||15),freshness:Number($('#cixFreshness')?.value||20),skew:Number($('#cixSkew')?.value||15),pinned:old?.pinned||false,methodology:old?.methodology?{...old.methodology}:undefined,createdAt:old?.createdAt||new Date().toISOString(),updatedAt:new Date().toISOString()};
   if(editingCixId)customIndexLibrary=customIndexLibrary.map(x=>x.id===editingCixId?obj:x);else customIndexLibrary.unshift(obj);
   try{
     saveCixLibrary();
@@ -735,7 +742,7 @@ function bindCixUI(){
   if($('#newCustomIndex'))$('#newCustomIndex').onclick=()=>{document.querySelector('.cix-builder')?.classList.remove('is-collapsed');clearCixForm()};
   if($('#cancelCustomIndex'))$('#cancelCustomIndex').onclick=()=>document.querySelector('.cix-builder')?.classList.toggle('is-collapsed');
   if($('#clearCustomIndex'))$('#clearCustomIndex').onclick=clearCixForm;if($('#saveCustomIndex'))$('#saveCustomIndex').onclick=saveCustomIndexV1;
-  if($('#cixFormula'))$('#cixFormula').oninput=updateCixFormulaPreview;if($('#cixWatchMode'))$('#cixWatchMode').onchange=syncCixWatchMode;syncCixWatchMode();
+  if($('#cixFormula'))$('#cixFormula').oninput=()=>{delete $('#cixFormula').dataset.secondaryFormula;updateCixFormulaPreview()};if($('#cixWatchMode'))$('#cixWatchMode').onchange=syncCixWatchMode;syncCixWatchMode();
 }
 
 function switchView(name){$$('.view').forEach(v=>v.classList.toggle('active',v.id===name+'View'));$$('[data-view]').forEach(x=>x.classList.toggle('active',x.dataset.view===name));if(name==='connections')renderConnections();if(name==='indicators')renderIndicatorDashboard();window.scrollTo({top:0,behavior:'smooth'})}
