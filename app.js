@@ -452,7 +452,9 @@ function applyCixTemplate(){
   const type=$('#cixTemplate')?.value||'manual',a=$('#cixLegA')?.value,b=$('#cixLegB')?.value,af=$('#cixLegAField')?.value||'BID',bf=$('#cixLegBField')?.value||'ASK',ta=$('#cixFormula');
   if(!ta)return;if(type==='manual')return ta.focus();if(!a||!b)return alert('請先選擇 A 與 B 商品');
   const A=a+'.'+af,B=b+'.'+bf;
-  if(type==='twoway'){ta.value=`100 * (${a}.BID * ${b}.ASK - 1)`;ta.dataset.secondaryFormula=`100 * (1 - ${a}.ASK * ${b}.BID)`;if($('#cixMode'))$('#cixMode').value='percent';updateCixFormulaPreview();ta.focus();return}\n  delete ta.dataset.secondaryFormula;\n  if(type==='spread')ta.value=`${A} - ${B}`;
+  if(type==='twoway'){ta.value=`100 * (${a}.BID * ${b}.ASK - 1)`;ta.dataset.secondaryFormula=`100 * (1 - ${a}.ASK * ${b}.BID)`;if($('#cixMode'))$('#cixMode').value='percent';updateCixFormulaPreview();ta.focus();return}
+  delete ta.dataset.secondaryFormula;
+  if(type==='spread')ta.value=`${A} - ${B}`;
   else if(type==='ratio')ta.value=`${A} / ${B}`;
   else if(type==='pct')ta.value=`(${A} / ${B} - 1) * 100`;
   else if(type==='cost'){
@@ -490,7 +492,13 @@ function updateCixFormulaPreview(){
   const f=$('#cixFormula')?.value.trim()||'',p=$('#cixPreview'),v=$('#cixLiveValue');
   if(p)p.textContent=f||'等待輸入公式';
   if(!v)return;if(!f){v.textContent='目前值 —';return}
-  const r=evalMarketFormula(f);
+  const r=evalMarketFormula(f),secondary=$('#cixFormula')?.dataset.secondaryFormula||'';
+  if(secondary){
+    const r2=evalMarketFormula(secondary);
+    v.textContent='高估 '+(r.ok&&Number.isFinite(Number(r.value))?tidy(r.value,4)+'%':'—')+' / 低估 '+(r2.ok&&Number.isFinite(Number(r2.value))?tidy(r2.value,4)+'%':'—');
+    if(p)p.textContent=f+' ｜ 低估：'+secondary;
+    return;
+  }
   v.textContent=r.ok&&r.type==='number'&&Number.isFinite(Number(r.value))?'目前值 '+tidy(r.value,8):'目前值 — · '+(r.error||'等待可用行情');
 }
 function insertCixQuoteField(field){
