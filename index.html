@@ -89,7 +89,7 @@
   </div>
 </div>
             <div class="cix-advanced-label">進階手動編輯</div>
-            <div class="formula-tools cix-formula-tools"><select id="cixTokenCategory"><option value="all">全部欄位</option><option value="台灣指數">台灣指數</option><option value="股價指數">海外股價指數</option><option value="匯率">匯率</option><option value="貴金屬">貴金屬</option><option value="能源">能源</option><option value="結算日NDF">結算日 NDF</option></select><select id="cixTokenSelect"></select><button id="cixInsertBid">插入 BID</button><button id="cixInsertAsk">插入 ASK</button><button id="cixInsertLast">插入 LAST</button><button data-cix-op=" + ">＋</button><button data-cix-op=" - ">−</button><button data-cix-op=" * ">＊</button><button data-cix-op=" / ">／</button><button data-cix-op=" ( ">(</button><button data-cix-op=" ) ">)</button></div>
+            <div class="formula-tools cix-formula-tools"><select id="cixTokenCategory"><option value="all">全部欄位</option><option value="台灣指數">台灣指數</option><option value="股價指數">海外股價指數</option><option value="匯率">匯率</option><option value="貴金屬">貴金屬</option><option value="能源">能源</option><option value="結算日NDF">結算日 NDF</option><option value="我的指數">我的指數</option></select><select id="cixTokenSelect"></select><button id="cixInsertBid">插入 BID</button><button id="cixInsertAsk">插入 ASK</button><button id="cixInsertLast">插入 LAST</button><button data-cix-op=" + ">＋</button><button data-cix-op=" - ">−</button><button data-cix-op=" * ">＊</button><button data-cix-op=" / ">／</button><button data-cix-op=" ( ">(</button><button data-cix-op=" ) ">)</button></div>
             <textarea id="cixFormula" rows="3" placeholder="例：TAIFEX_GDF.BID - CME_MGC.ASK"></textarea>
             <div class="cix-preview"><span>公式預覽</span><b id="cixPreview">等待輸入公式</b><strong id="cixLiveValue">目前值 —</strong><small id="cixPreviewNote">雙邊估值：先選 A、B 的月份與 BID / ASK / LAST，再直接修改同一條公式。高估或低估由你選的行情方向決定。</small></div>
           </section>
@@ -100,7 +100,7 @@
               <label>監控模式<select id="cixWatchMode"><option value="watch">Watch Only</option><option value="alert">Alert</option></select></label>
               <label class="cix-alert-only">上方門檻 ≥<input id="cixUpper" type="number" step="any" placeholder="例如 101"></label>
               <label class="cix-alert-only">下方門檻 ≤<input id="cixLower" type="number" step="any" placeholder="例如 99"></label>
-              <label>檢查頻率<select id="cixInterval"><option value="5">5 分鐘</option><option value="10">10 分鐘</option><option value="15" selected>15 分鐘</option><option value="30">30 分鐘</option><option value="60">60 分鐘</option></select></label>
+              <label>指數更新頻率<select id="cixInterval"><option value="5">5 分鐘</option><option value="15" selected>15 分鐘</option><option value="30">30 分鐘</option><option value="60">60 分鐘</option><option value="1440">每天一次</option></select></label><label class="cix-alert-only">提醒冷卻時間<select id="cixAlertCooldown"><option value="5">5 分鐘</option><option value="15" selected>15 分鐘</option><option value="30">30 分鐘</option><option value="60">60 分鐘</option></select></label>
               <label>最大資料年齡<select id="cixFreshness"><option value="10">10 分鐘</option><option value="20" selected>20 分鐘</option><option value="30">30 分鐘</option><option value="60">60 分鐘</option></select></label>
               <label>成分最大時間差<select id="cixSkew"><option value="5">5 分鐘</option><option value="15" selected>15 分鐘</option><option value="30">30 分鐘</option></select></label>
             </div><small id="cixWatchNote" class="cix-watch-note">Watch Only：只持續監看，不觸發門檻提醒。</small>
