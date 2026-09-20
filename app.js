@@ -479,44 +479,36 @@ function syncCixTwoWayGuide(autoPair=true){
   if(aMonth&&[...bm.options].some(o=>o.value===aMonth))bm.value=aMonth;
   updateCixTwoWayGuide(true);
 }
-function cixTwoWaySuggestedFormulas(){
-  const a=$('#cixTwoWayA')?.value,b=$('#cixTwoWayB')?.value,am=$('#cixTwoWayAMonth')?.value,bm=$('#cixTwoWayBMonth')?.value;
+function cixTwoWaySuggestedFormula(){
+  const a=$('#cixTwoWayA')?.value,b=$('#cixTwoWayB')?.value,am=$('#cixTwoWayAMonth')?.value,bm=$('#cixTwoWayBMonth')?.value,af=$('#cixTwoWayAField')?.value||'BID',bf=$('#cixTwoWayBField')?.value||'ASK';
   if(!a||!b||!am||!bm)return null;
-  const A=a+'_'+am,B=b+'_'+bm;
-  return {high:`100 * (${A}.BID * ${B}.ASK - 1)`,low:`100 * (1 - ${A}.ASK * ${B}.BID)`};
+  return `100 * (${a}_${am}.${af} * ${b}_${bm}.${bf} - 1)`;
 }
-function cixTwoWaySelectedLabel(id,month){
-  const q=cixTwoWayMarket(id);return q&&month?`${q.name}｜${q.exchange} ${q.code}｜${monthLabel(month)}`:'—';
+function cixTwoWaySelectedLabel(id,month,field){
+  const q=cixTwoWayMarket(id);return q&&month?`${q.name}｜${q.exchange} ${q.code}｜${monthLabel(month)}｜${field||'—'}`:'—';
 }
 function updateCixTwoWayGuide(resetFormula=true){
-  const a=$('#cixTwoWayA')?.value,b=$('#cixTwoWayB')?.value,am=$('#cixTwoWayAMonth')?.value,bm=$('#cixTwoWayBMonth')?.value;
-  const hi=$('#cixTwoWayHighFormula'),lo=$('#cixTwoWayLowFormula'),status=$('#cixTwoWayAvailability');
-  const asel=$('#cixTwoWayASelected'),bsel=$('#cixTwoWayBSelected');
-  if(asel)asel.textContent=cixTwoWaySelectedLabel(a,am);if(bsel)bsel.textContent=cixTwoWaySelectedLabel(b,bm);
-  if(!hi||!lo||!status)return;
-  const suggested=cixTwoWaySuggestedFormulas();
-  if(!suggested){if(resetFormula){hi.value='';lo.value=''}status.textContent='請先選擇市場與月份。';status.className='cix-twoway-status';return}
-  if(resetFormula||!hi.value.trim()||!lo.value.trim()){hi.value=suggested.high;lo.value=suggested.low}
-  const ac=cixTwoWayContract(a,am),bc=cixTwoWayContract(b,bm);
-  const aOk=Number(ac?.bid)>0&&Number(ac?.ask)>0,bOk=Number(bc?.bid)>0&&Number(bc?.ask)>0,same=am===bm;
-  if(aOk&&bOk&&same){status.textContent='✓ 同月份且雙邊 Bid / Ask 完整。下方公式可直接修改，再按「套用這組雙邊公式」。';status.className='cix-twoway-status is-ok'}
-  else if(!same){status.textContent='⚠ 到期月份不同。仍可自行修改公式，但建議先確認比較邏輯。';status.className='cix-twoway-status is-warn'}
-  else {status.textContent='⚠ 此月份缺少 Bid / Ask。可以修改公式，但雙邊可成交估值可能無法計算。';status.className='cix-twoway-status is-warn'}
+  const a=$('#cixTwoWayA')?.value,b=$('#cixTwoWayB')?.value,am=$('#cixTwoWayAMonth')?.value,bm=$('#cixTwoWayBMonth')?.value,af=$('#cixTwoWayAField')?.value||'BID',bf=$('#cixTwoWayBField')?.value||'ASK';
+  const box=$('#cixTwoWayFormula'),status=$('#cixTwoWayAvailability'),live=$('#cixTwoWayValue');
+  if($('#cixTwoWayASelected'))$('#cixTwoWayASelected').textContent=cixTwoWaySelectedLabel(a,am,af);
+  if($('#cixTwoWayBSelected'))$('#cixTwoWayBSelected').textContent=cixTwoWaySelectedLabel(b,bm,bf);
+  if(!box||!status)return;
+  const suggested=cixTwoWaySuggestedFormula();
+  if(!suggested){if(resetFormula)box.value='';status.textContent='請先選擇兩個市場與到期月份。';status.className='cix-twoway-status';if(live)live.textContent='目前值 —';return}
+  if(resetFormula||!box.value.trim())box.value=suggested;
+  const ac=cixTwoWayContract(a,am),bc=cixTwoWayContract(b,bm),fieldA=Number(ac?.[af.toLowerCase()]),fieldB=Number(bc?.[bf.toLowerCase()]),same=am===bm;
+  if(fieldA>0&&fieldB>0&&same){status.textContent='✓ 所選月份與行情欄位都有資料。公式可直接修改。';status.className='cix-twoway-status is-ok'}
+  else if(!same){status.textContent='⚠ 到期月份不同；仍可計算，但請確認這是你要比較的組合。';status.className='cix-twoway-status is-warn'}
+  else {status.textContent=`⚠ 所選行情缺值：A ${af} / B ${bf}。可改選 BID、ASK 或 LAST。`;status.className='cix-twoway-status is-warn'}
+  const r=evalMarketFormula(box.value.trim());if(live)live.textContent=r.ok&&r.type==='number'&&Number.isFinite(Number(r.value))?'目前值 '+tidy(r.value,6):'目前值 —';
 }
-function resetCixTwoWayFormulas(){
-  const f=cixTwoWaySuggestedFormulas();if(!f)return;
-  if($('#cixTwoWayHighFormula'))$('#cixTwoWayHighFormula').value=f.high;
-  if($('#cixTwoWayLowFormula'))$('#cixTwoWayLowFormula').value=f.low;
-}
+function resetCixTwoWayFormulas(){const f=cixTwoWaySuggestedFormula();if(f&&$('#cixTwoWayFormula')){$('#cixTwoWayFormula').value=f;updateCixTwoWayGuide(false)}}
 function applyCixTwoWayGuide(){
-  const hi=$('#cixTwoWayHighFormula')?.value.trim(),lo=$('#cixTwoWayLowFormula')?.value.trim(),ta=$('#cixFormula');
-  if(!ta||!hi||!lo)return alert('請先選擇商品並確認高估、低估公式');
-  ta.value=hi;ta.dataset.secondaryFormula=lo;
+  const formula=$('#cixTwoWayFormula')?.value.trim(),ta=$('#cixFormula');if(!ta||!formula)return alert('請先選擇商品並確認公式');
+  ta.value=formula;delete ta.dataset.secondaryFormula;
   if($('#cixMode'))$('#cixMode').value='percent';
-  updateCixFormulaPreview();
-  ta.scrollIntoView({behavior:'smooth',block:'center'});
+  updateCixFormulaPreview();ta.scrollIntoView({behavior:'smooth',block:'center'});
 }
-
 function syncCixTemplateMode(){
   const two=$('#cixTemplate')?.value==='twoway';
   $('#cixStandardTemplateFields')?.classList.toggle('hidden',two);
@@ -587,7 +579,7 @@ function clearCixForm(){
   const vals={cixName:'',cixSymbol:'',cixDescription:'',cixFormula:'',cixUpper:'',cixLower:''};
   Object.entries(vals).forEach(([id,v])=>{const e=document.getElementById(id);if(e)e.value=v});
   if($('#cixMode'))$('#cixMode').value='raw';if($('#cixVersion'))$('#cixVersion').value='1.0';if($('#cixWatchMode'))$('#cixWatchMode').value='watch';syncCixWatchMode();if($('#cixInterval'))$('#cixInterval').value='15';if($('#cixFreshness'))$('#cixFreshness').value='20';if($('#cixSkew'))$('#cixSkew').value='15';
-  if($('#cixFormula'))delete $('#cixFormula').dataset.secondaryFormula;if($('#cixTwoWayHighFormula'))$('#cixTwoWayHighFormula').value='';if($('#cixTwoWayLowFormula'))$('#cixTwoWayLowFormula').value='';if($('#cixPreview'))$('#cixPreview').textContent='等待輸入公式';
+  if($('#cixFormula'))delete $('#cixFormula').dataset.secondaryFormula;if($('#cixTwoWayFormula'))$('#cixTwoWayFormula').value='';if($('#cixPreview'))$('#cixPreview').textContent='等待輸入公式';
 }
 function jpyMatchedContracts(x){
   if(!['JPYTW01','JPYTW02'].includes(x?.symbol))return null;
@@ -771,8 +763,7 @@ function editCix(id){
   if(x.valuationType==='two-way'&&x.secondaryFormula){
     if($('#cixTemplate'))$('#cixTemplate').value='twoway';
     syncCixTemplateMode();
-    if($('#cixTwoWayHighFormula'))$('#cixTwoWayHighFormula').value=x.formula;
-    if($('#cixTwoWayLowFormula'))$('#cixTwoWayLowFormula').value=x.secondaryFormula;
+    if($('#cixTwoWayFormula'))$('#cixTwoWayFormula').value=x.formula;
   }
   document.querySelector('.cix-builder')?.classList.remove('is-collapsed');syncCixWatchMode();if($('#cixPreview'))$('#cixPreview').textContent=x.formula?'已載入公式 · 儲存修改將保留 Methodology 設定':'等待輸入公式';window.scrollTo({top:0,behavior:'smooth'});
 }
@@ -825,6 +816,9 @@ function bindCixUI(){
   if($('#cixTwoWayB'))$('#cixTwoWayB').onchange=()=>syncCixTwoWayGuide(false);
   if($('#cixTwoWayAMonth'))$('#cixTwoWayAMonth').onchange=()=>syncCixTwoWayGuide(true);
   if($('#cixTwoWayBMonth'))$('#cixTwoWayBMonth').onchange=()=>updateCixTwoWayGuide(true);
+  if($('#cixTwoWayAField'))$('#cixTwoWayAField').onchange=()=>updateCixTwoWayGuide(true);
+  if($('#cixTwoWayBField'))$('#cixTwoWayBField').onchange=()=>updateCixTwoWayGuide(true);
+  if($('#cixTwoWayFormula'))$('#cixTwoWayFormula').oninput=()=>updateCixTwoWayGuide(false);
   if($('#resetCixTwoWay'))$('#resetCixTwoWay').onclick=resetCixTwoWayFormulas;
   if($('#applyCixTwoWay'))$('#applyCixTwoWay').onclick=applyCixTwoWayGuide;
   syncCixTemplateMode();
