@@ -3,7 +3,7 @@
     "source": "Yahoo Finance + public fallbacks (Barchart key not configured)",
     "mode": "MIXED",
     "realtime": false,
-    "generatedAt": "2026-09-20T14:37:41.757Z",
+    "generatedAt": "2026-09-20T14:41:37.126Z",
     "note": "TradingView is no longer used as a JPX/OSE quote source. Yahoo remains the first public source for CME/COMEX and Brent benchmark data. When BARCHART_API_KEY is configured, Barchart OnDemand supplements missing contract Bid/Ask/Last for JPX Nikkei 225 mini, mini-TOPIX, COMEX Micro Gold and ICE Brent. Barchart mode/timestamps are preserved; missing Bid/Ask are never synthesized. Without a Barchart key, Nikkei 225 mini can fall back to a public delayed Last quote and mini-TOPIX remains unavailable rather than fabricated."
   },
   "indices": {
@@ -1185,7 +1185,7 @@
           "bid": null,
           "ask": null,
           "last": 64745,
-          "timestamp": "2026-09-20T14:37:41.439Z",
+          "timestamp": "2026-09-20T14:41:36.680Z",
           "quoteType": "nikkei225jp public table",
           "quoteMode": "DELAYED",
           "delayMinutes": 15
@@ -1196,7 +1196,7 @@
           "bid": null,
           "ask": null,
           "last": 64900,
-          "timestamp": "2026-09-20T14:37:41.439Z",
+          "timestamp": "2026-09-20T14:41:36.680Z",
           "quoteType": "nikkei225jp public table",
           "quoteMode": "DELAYED",
           "delayMinutes": 15
@@ -1207,7 +1207,7 @@
           "bid": null,
           "ask": null,
           "last": 64900,
-          "timestamp": "2026-09-20T14:37:41.439Z",
+          "timestamp": "2026-09-20T14:41:36.680Z",
           "quoteType": "nikkei225jp public table",
           "quoteMode": "DELAYED",
           "delayMinutes": 15
