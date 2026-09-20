@@ -1,4 +1,4 @@
-<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#071422"><meta name="gmm-build" content="20260919-nolock-final3"><title>Global Market Monitor</title><link rel="stylesheet" href="styles.css?v=20260919-nolock-final3"><link rel="stylesheet" href="v1.4.css?v=20260919-nolock-final3"><link rel="stylesheet" href="v1.5.css?v=20260919-nolock-final3"><link rel="stylesheet" href="v1.6.css?v=20260920-singleformula1"><link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=20260917b"><link rel="icon" type="image/png" sizes="512x512" href="icon-512.png?v=20260917b"><link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon-v2.png"><link rel="manifest" href="manifest.webmanifest?v=20260917b"></head><body>
+<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#071422"><meta name="gmm-build" content="20260919-nolock-final3"><title>Global Market Monitor</title><link rel="stylesheet" href="styles.css?v=20260919-nolock-final3"><link rel="stylesheet" href="v1.4.css?v=20260919-nolock-final3"><link rel="stylesheet" href="v1.5.css?v=20260919-nolock-final3"><link rel="stylesheet" href="v1.6.css?v=20260920-composable2"><link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=20260917b"><link rel="icon" type="image/png" sizes="512x512" href="icon-512.png?v=20260917b"><link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon-v2.png"><link rel="manifest" href="manifest.webmanifest?v=20260917b"></head><body>
 <div class="app">
   <aside class="sidebar"><div class="brand">Global Market Monitor<small>Markets in One View</small></div><div class="nav">
     <button class="active" data-view="dashboard">⌂ 首頁 Dashboard</button><button data-view="customindex">◈ 我的指數 Custom Index</button><button data-view="spread">⇄ 價差比較 Spread</button><button data-view="indicators">◆ 自訂指標 Indicators</button><button>◉ 外匯 FX</button><button>▥ 股市 Equity</button><button>◫ 商品 Commodities</button><button>≋ 利率 Rates</button><button>▦ 經濟數據 Macro</button><button>☆ 自選 Watchlist</button><button>♢ 我的警示 Alerts</button><div class="spacer"></div><button data-view="connections">⚙ 行情連線 Connections</button><button>ⓘ 關於 About</button>
@@ -63,36 +63,16 @@
           </section>
 
           <section class="cix-step" data-step="2">
-            <div class="cix-step-title"><span>2</span><div><b>建立公式</b><small>先用範本快速建立，需要時再手動微調</small></div></div>
-            <div class="cix-template-tools">
-  <select id="cixTemplate"><option value="manual">自訂公式</option><option value="twoway">雙邊估值（高估 / 低估）</option><option value="spread">價差 A − B</option><option value="ratio">比率 A / B</option><option value="pct">百分比價差 (A / B − 1) × 100</option><option value="cost">成本後價差 A×規格 − B×規格 − 成本</option></select>
-  <div id="cixStandardTemplateFields" class="formula-tools cix-template-fields"><select id="cixLegA"></select><select id="cixLegAField"><option value="BID">A：BID</option><option value="ASK">A：ASK</option><option value="LAST">A：LAST</option></select><select id="cixLegB"></select><select id="cixLegBField"><option value="ASK">B：ASK</option><option value="BID">B：BID</option><option value="LAST">B：LAST</option></select><button id="applyCixTemplate">套用範本</button></div>
-  <div id="cixTwoWayGuide" class="cix-twoway-guide hidden">
-    <div class="cix-twoway-grid">
-      <label><span>市場 A</span><select id="cixTwoWayA"></select></label>
-      <label><span>A 到期月份</span><select id="cixTwoWayAMonth"></select></label>
-      <label><span>A 行情</span><select id="cixTwoWayAField"><option value="BID">BID</option><option value="ASK">ASK</option><option value="LAST">LAST</option></select></label>
-      <label><span>市場 B</span><select id="cixTwoWayB"></select></label>
-      <label><span>B 到期月份</span><select id="cixTwoWayBMonth"></select></label>
-      <label><span>B 行情</span><select id="cixTwoWayBField"><option value="ASK">ASK</option><option value="BID">BID</option><option value="LAST">LAST</option></select></label>
-    </div>
-    <div id="cixTwoWayAvailability" class="cix-twoway-status">選好兩個市場、月份與 BID / ASK / LAST，公式會自動帶入。</div>
-    <div class="cix-twoway-selected">
-      <div><small>指標 A</small><strong id="cixTwoWayASelected">—</strong></div>
-      <div><small>指標 B</small><strong id="cixTwoWayBSelected">—</strong></div>
-    </div>
-    <div class="cix-twoway-single-formula">
-      <label><small>雙邊公式（可直接修改）</small><textarea id="cixTwoWayFormula" rows="3"></textarea></label>
-      <div id="cixTwoWayValue" class="cix-twoway-live">目前值 —</div>
-    </div>
-    <div class="cix-twoway-actions"><button id="resetCixTwoWay" class="secondary-btn">恢復建議公式</button><button id="applyCixTwoWay" class="cix-primary">套用這條公式</button></div>
-  </div>
+<div class="cix-step-title"><span>2</span><div><b>建立公式</b><small>原始行情與已儲存指標都能組合成新的指標</small></div></div>
+<div class="cix-compose">
+<label class="cix-compose-source"><span>資料／指標</span><select id="cixTokenCategory"><option value="all">全部</option><option value="my">我的指標</option><option value="台灣指數">台灣指數</option><option value="股價指數">海外股價指數</option><option value="匯率">匯率</option><option value="貴金屬">貴金屬</option><option value="能源">能源</option><option value="結算日NDF">結算日 NDF</option></select><select id="cixTokenSelect"></select></label>
+<label><span>欄位</span><select id="cixComposeField"><option value="LAST">LAST / Value</option><option value="BID">BID</option><option value="ASK">ASK</option></select></label>
+<button id="cixInsertSelected" class="cix-primary">加入公式</button>
 </div>
-            <div class="cix-advanced-label">進階手動編輯</div>
-            <div class="formula-tools cix-formula-tools"><select id="cixTokenCategory"><option value="all">全部欄位</option><option value="台灣指數">台灣指數</option><option value="股價指數">海外股價指數</option><option value="匯率">匯率</option><option value="貴金屬">貴金屬</option><option value="能源">能源</option><option value="結算日NDF">結算日 NDF</option></select><select id="cixTokenSelect"></select><button id="cixInsertBid">插入 BID</button><button id="cixInsertAsk">插入 ASK</button><button id="cixInsertLast">插入 LAST</button><button data-cix-op=" + ">＋</button><button data-cix-op=" - ">−</button><button data-cix-op=" * ">＊</button><button data-cix-op=" / ">／</button><button data-cix-op=" ( ">(</button><button data-cix-op=" ) ">)</button></div>
-            <textarea id="cixFormula" rows="3" placeholder="例：TAIFEX_GDF.BID - CME_MGC.ASK"></textarea>
-            <div class="cix-preview"><span>公式預覽</span><b id="cixPreview">等待輸入公式</b><strong id="cixLiveValue">目前值 —</strong><small id="cixPreviewNote">雙邊估值：先選 A、B 的月份與 BID / ASK / LAST，再直接修改同一條公式。高估或低估由你選的行情方向決定。</small></div>
-          </section>
+<div class="cix-opbar"><button data-cix-op=" + ">＋</button><button data-cix-op=" - ">−</button><button data-cix-op=" * ">×</button><button data-cix-op=" / ">÷</button><button data-cix-op=" ( ">(</button><button data-cix-op=" ) ">)</button></div>
+<textarea id="cixFormula" rows="4" placeholder="例：MY.JPY_HIGH * 2 - TAIFEX_XJF_202612.LAST"></textarea>
+<div class="cix-preview"><span>公式預覽</span><b id="cixPreview">等待輸入公式</b><strong id="cixLiveValue">目前值 —</strong><small id="cixPreviewNote">可以直接寫公式，也可以加入市場行情或「我的指標」。新指標儲存後，可再被下一個新指標引用。</small></div>
+</section>
 
           <section class="cix-step" data-step="3">
             <div class="cix-step-title"><span>3</span><div><b>監控設定</b><small>Watch Only 可直接使用；需要提醒時再設定門檻</small></div></div>
@@ -176,7 +156,7 @@
 
       <section id="connectionsView" class="view"><section class="connections-hero panel"><div><h2>行情連線 / Connections</h2><p>免費來源與官方延遲資料作為預設；若你有券商或行情權限，可透過私人 Gateway 切換 LIVE。</p></div><div class="connection-mode-box"><label><input id="preferLive" type="checkbox"> 優先使用 LIVE Gateway</label><span id="activeConnectionStatus" class="connection-status">免費延遲 / 官方模式</span></div></section><section class="market-source-grid" id="marketSourceGrid"></section><article class="panel connections-panel"><div class="connections-head"><div><h3>國內券商</h3><p>主要用於 TAIFEX 即時行情。連線需透過使用者自己的本機 Bridge 或私人後端。</p></div></div><div class="broker-grid" id="domesticBrokerGrid"></div></article><article class="panel connections-panel"><div class="connections-head"><div><h3>國外券商 / 行情服務</h3><p>可用於 CME、JPX / OSE、ICE 等海外期貨；實際可用市場取決於帳戶行情訂閱。</p></div></div><div class="broker-grid" id="overseasBrokerGrid"></div></article><article class="panel gateway-panel"><div class="connections-head"><div><h3>連線設定</h3><p>只填 Gateway URL，不在此頁輸入券商密碼或 API Secret。憑證應存放在 Local Bridge / Private Backend。</p></div></div><div class="gateway-form"><label>目前選擇<select id="brokerSelect"></select></label><label>Gateway URL<input id="brokerEndpoint" placeholder="例：http://127.0.0.1:8787/quotes"></label><label>備註<input id="brokerNote" placeholder="例如：家用 Mac mini / Private Worker"></label></div><div class="gateway-actions"><button id="saveBrokerConnection">儲存設定</button><button id="testBrokerConnection" class="secondary-btn">測試連線</button><button id="disconnectBroker" class="secondary-btn">停用 LIVE</button><span id="brokerTestResult" class="source-note">尚未測試</span></div><div class="connection-warning">安全原則：不要把券商密碼、API Secret、憑證檔或 session token 寫入 GitHub、LocalStorage 或前端 JavaScript。網站只保存 Gateway URL、偏好與非敏感備註。</div></article></section>
 
-      <footer class="footer"><span>Global Market Monitor v1.8.1 · Single Formula Builder</span><span>僅供資訊參考，不構成投資建議</span></footer>
+      <footer class="footer"><span>Global Market Monitor v1.9.0 · Composable Indicators</span><span>僅供資訊參考，不構成投資建議</span></footer>
     </div>
   </main>
 </div>
@@ -192,4 +172,4 @@
   });
   window.__gmmEmergencySwitch=emergencySwitch;
 })();
-</script><script src="config.example.js?v=20260918-fix1"></script><script src="providers.js?v=20260916-ndf3"></script><script src="app.js?v=20260920-singleformula1"></script><script src="tv-spark-widget.js?v=20260918-fix1"></script></body></html>
+</script><script src="config.example.js?v=20260918-fix1"></script><script src="providers.js?v=20260916-ndf3"></script><script src="app.js?v=20260920-composable2"></script><script src="tv-spark-widget.js?v=20260918-fix1"></script></body></html>
