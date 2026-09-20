@@ -424,6 +424,42 @@ function ensureJpyCixPresets(){
 }
 
 function saveCixLibrary(){localStorage.setItem(CIX_KEY,JSON.stringify(customIndexLibrary))}
+function cixEscRe(s){return String(s).replace(/[.*+?^${()}|[\]\\]/g,'\\function saveCixLibrary(){localStorage.setItem(CIX_KEY,JSON.stringify(customIndexLibrary))}')}
+function cixIndexBySymbol(symbol){return customIndexLibrary.find(x=>String(x.symbol||'').toUpperCase()===String(symbol||'').toUpperCase())||null}
+function cixReferencedSymbols(formula){
+  const raw=String(formula||'').toUpperCase();
+  return customIndexLibrary.map(x=>String(x.symbol||'').toUpperCase()).filter(Boolean).filter(sym=>new RegExp('\\b'+cixEscRe(sym)+'\\b').test(raw));
+}
+function evalCixFormula(raw,stack=[]){
+  try{
+    let e=String(raw||'').trim();if(!e)return{ok:false,error:'請輸入公式'};
+    const refs=cixReferencedSymbols(e).sort((a,b)=>b.length-a.length);
+    for(const sym of refs){
+      if(stack.includes(sym))return{ok:false,error:'循環引用：'+[...stack,sym].join(' → ')};
+      const ind=cixIndexBySymbol(sym);if(!ind)continue;
+      const r=evalCixFormula(ind.formula,[...stack,sym]);
+      if(!r.ok||r.type!=='number'||!Number.isFinite(Number(r.value)))return{ok:false,error:sym+' 無法計算'+(r.error?'：'+r.error:'')};
+      e=e.replace(new RegExp('\\b'+cixEscRe(sym)+'\\b','g'),'('+Number(r.value)+')');
+    }
+    return evalMarketFormula(e);
+  }catch(err){return{ok:false,error:err?.message||String(err)}}
+}
+function cixFindCycle(symbol,formula){
+  const target=String(symbol||'').toUpperCase();if(!target)return null;
+  const map=new Map(customIndexLibrary.map(x=>[String(x.symbol||'').toUpperCase(),String(x.formula||'')]));
+  map.set(target,String(formula||''));
+  const walk=(sym,path)=>{
+    if(path.includes(sym))return [...path,sym];
+    const f=map.get(sym)||'',refs=[...map.keys()].filter(k=>k&&new RegExp('\\b'+cixEscRe(k)+'\\b').test(f.toUpperCase()));
+    for(const r of refs){const hit=walk(r,[...path,sym]);if(hit)return hit}
+    return null;
+  };
+  return walk(target,[]);
+}
+function cixIntervalLabel(v){const n=Number(v||15);return n>=1440?'每天一次':n+' 分鐘'}
+function cixLegFormulaToken(id,field){
+  const raw=String(id||'');return raw.startsWith('CIX::')?raw.slice(5):raw+'.'+field;
+}
 function exportCixBackup(){
   const payload={version:1,exportedAt:new Date().toISOString(),customIndexLibrary};
   const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),link=document.createElement('a');
@@ -448,11 +484,13 @@ function moveFormulaToMyIndex(){
   setTimeout(()=>$('#cixName')?.focus(),80);
 }
 function cixTemplateProducts(){
-  return catalogRows().flatMap(x=>[x.tw,x.os].flatMap(q=>{
+  const market=catalogRows().flatMap(x=>[x.tw,x.os].flatMap(q=>{
     const cs=[...(q?.contracts||[])].filter(c=>c?.month).sort((a,b)=>String(a.month).localeCompare(String(b.month)));
     if(!cs.length)return [{id:q.id,name:x.name,code:q.code,exchange:q.exchange}];
     return cs.map(c=>({id:q.id+'_'+c.month,name:x.name,code:q.code+' '+monthLabel(c.month),exchange:q.exchange}));
   }));
+  const mine=customIndexLibrary.filter(x=>x.id!==editingCixId).map(x=>({id:'CIX::'+x.symbol,name:x.name,code:x.symbol,exchange:'我的指數',custom:true}));
+  return [...market,...mine];
 }
 function renderCixTemplateOptions(){
   const opts='<option value="">選擇商品…</option>'+cixTemplateProducts().map(p=>`<option value="${p.id}">${p.name}｜${p.exchange} ${p.code}</option>`).join('');
@@ -528,12 +566,13 @@ function syncCixTemplateMode(){
 function applyCixTemplate(){
   const type=$('#cixTemplate')?.value||'manual',a=$('#cixLegA')?.value,b=$('#cixLegB')?.value,af=$('#cixLegAField')?.value||'BID',bf=$('#cixLegBField')?.value||'ASK',ta=$('#cixFormula');
   if(!ta)return;if(type==='manual')return ta.focus();if(type==='twoway')return applyCixTwoWayGuide();if(!a||!b)return alert('請先選擇 A 與 B 商品');
-  const A=a+'.'+af,B=b+'.'+bf;
+  const A=cixLegFormulaToken(a,af),B=cixLegFormulaToken(b,bf);
   delete ta.dataset.secondaryFormula;
   if(type==='spread')ta.value=`${A} - ${B}`;
   else if(type==='ratio')ta.value=`${A} / ${B}`;
   else if(type==='pct')ta.value=`(${A} / ${B} - 1) * 100`;
   else if(type==='cost'){
+    if(String(a).startsWith('CIX::')||String(b).startsWith('CIX::'))return alert('成本後價差需要原始市場商品；我的指數可使用價差、比率或百分比範本');
     const ap=getAnyProduct(a),bp=getAnyProduct(b);
     if(!ap||!bp)return alert('找不到合約規格');
     const am=Number(ap.multiplier||1),au=Number(ap.unitFactor||1),afx=Number(ap.fx||1),bm=Number(bp.multiplier||1),bu=Number(bp.unitFactor||1),bfx=Number(bp.fx||1),cost=Number(ap.cost||0)+Number(bp.cost||0);
@@ -562,15 +601,17 @@ function renderCixTokenOptions(){
   html+=Object.entries(groups).map(([g,arr])=>`<optgroup label="${g}">${arr.map(q=>`<option value="${q.id}">${q.label}</option>`).join('')}</optgroup>`).join('');
   if(filter==='all'||filter==='結算日NDF')html+='<optgroup label="結算日 NDF"><option value="TGF_NEAR_NDF">TGF 近月 NDF Mid</option><option value="TGF_NEXT_NDF">TGF 次月 NDF Mid</option><option value="BRF_NEAR_NDF">BRF 近月 NDF Mid</option><option value="BRF_NEXT_NDF">BRF 次月 NDF Mid</option></optgroup>';
   if(filter==='all'||filter==='匯率')html+='<optgroup label="匯率"><option value="USD_TWD_SPOT">USD/TWD Spot</option></optgroup>';
+  const mine=customIndexLibrary.filter(x=>x.id!==editingCixId);
+  if((filter==='all'||filter==='我的指數')&&mine.length)html+='<optgroup label="我的指數">'+mine.map(x=>'<option value="CIX::'+x.symbol+'">'+x.name+'｜'+x.symbol+'</option>').join('')+'</optgroup>';
   s.innerHTML=html;if([...s.options].some(o=>o.value===cur))s.value=cur;
 }
 function updateCixFormulaPreview(){
   const f=$('#cixFormula')?.value.trim()||'',p=$('#cixPreview'),v=$('#cixLiveValue');
   if(p)p.textContent=f||'等待輸入公式';
   if(!v)return;if(!f){v.textContent='目前值 —';return}
-  const r=evalMarketFormula(f),secondary=$('#cixFormula')?.dataset.secondaryFormula||'';
+  const r=evalCixFormula(f),secondary=$('#cixFormula')?.dataset.secondaryFormula||'';
   if(secondary){
-    const r2=evalMarketFormula(secondary);
+    const r2=evalCixFormula(secondary);
     v.textContent='高估 '+(r.ok&&Number.isFinite(Number(r.value))?tidy(r.value,4)+'%':'—')+' / 低估 '+(r2.ok&&Number.isFinite(Number(r2.value))?tidy(r2.value,4)+'%':'—');
     if(p)p.textContent=f+' ｜ 低估：'+secondary;
     return;
@@ -580,7 +621,7 @@ function updateCixFormulaPreview(){
 function insertCixQuoteField(field){
   const sel=$('#cixTokenSelect'),ta=$('#cixFormula');if(!sel||!ta)return;
   const base=sel.value;if(!base)return alert('請先選擇商品／代碼');
-  const token=/_(NDF)$|USD_TWD_SPOT/.test(base)?base:base+'.'+field;
+  const token=base.startsWith('CIX::')?base.slice(5):(/_(NDF)$|USD_TWD_SPOT/.test(base)?base:base+'.'+field);
   ta.value+=(ta.value&&!ta.value.endsWith(' ')?' ':'')+token;ta.focus();updateCixFormulaPreview();
 }
 function cixModeLabel(v){return ({raw:'RAW',percent:'%',base100:'BASE 100',base1000:'BASE 1,000'})[v]||v}
@@ -588,7 +629,7 @@ function clearCixForm(){
   editingCixId=null;
   const vals={cixName:'',cixSymbol:'',cixDescription:'',cixFormula:'',cixUpper:'',cixLower:''};
   Object.entries(vals).forEach(([id,v])=>{const e=document.getElementById(id);if(e)e.value=v});
-  if($('#cixMode'))$('#cixMode').value='raw';if($('#cixVersion'))$('#cixVersion').value='1.0';if($('#cixWatchMode'))$('#cixWatchMode').value='watch';syncCixWatchMode();if($('#cixInterval'))$('#cixInterval').value='15';if($('#cixFreshness'))$('#cixFreshness').value='20';if($('#cixSkew'))$('#cixSkew').value='15';
+  if($('#cixMode'))$('#cixMode').value='raw';if($('#cixVersion'))$('#cixVersion').value='1.0';if($('#cixWatchMode'))$('#cixWatchMode').value='watch';syncCixWatchMode();if($('#cixInterval'))$('#cixInterval').value='15';if($('#cixAlertCooldown'))$('#cixAlertCooldown').value='15';if($('#cixFreshness'))$('#cixFreshness').value='20';if($('#cixSkew'))$('#cixSkew').value='15';
   if($('#cixFormula'))delete $('#cixFormula').dataset.secondaryFormula;if($('#cixTwoWayFormula'))$('#cixTwoWayFormula').value='';if($('#cixPreview'))$('#cixPreview').textContent='等待輸入公式';
 }
 function jpyMatchedContracts(x){
@@ -607,7 +648,7 @@ function saveCixSignalHistory(v){localStorage.setItem(CIX_SIGNAL_KEY,JSON.string
 function recordJpySignal(x,m,signal,premium,discount,fresh){
   if(!fresh||!['高估','低估'].includes(signal)||x.watchMode!=='alert')return;
   const key=[x.symbol,m.month,signal].join('|'),now=Date.now(),hist=cixSignalHistory(),last=hist.find(v=>v.key===key);
-  const cooldown=Number(x.interval||15)*60000;if(last&&now-new Date(last.at).getTime()<cooldown)return;
+  const cooldown=Number(x.alertCooldown||15)*60000;if(last&&now-new Date(last.at).getTime()<cooldown)return;
   const row={key,symbol:x.symbol,name:x.name,month:m.month,signal,premium,discount,at:new Date(now).toISOString()};
   saveCixSignalHistory([row,...hist]);
   if('Notification'in window&&Notification.permission==='granted')new Notification(`${x.symbol} ${signal}`,{body:`${m.month}｜高估 ${premium!=null?tidy(premium,3)+'%':'—'}｜低估 ${discount!=null?tidy(discount,3)+'%':'—'}`});
@@ -661,6 +702,17 @@ function jpyHedgeInfo(x){
 function cixFormulaTokens(formula){
   return [...new Set(String(formula||'').match(/[A-Z][A-Z0-9_]*(?:\.(?:BID|ASK|LAST))?/g)||[])].filter(t=>!/^BASE\d*$/.test(t));
 }
+function cixLeafFormulaTokens(formula,stack=[]){
+  const out=[];
+  for(const token of cixFormulaTokens(formula)){
+    const sym=token.includes('.')?null:token,ind=sym?cixIndexBySymbol(sym):null;
+    if(ind){
+      if(stack.includes(sym))continue;
+      out.push(...cixLeafFormulaTokens(ind.formula,[...stack,sym]));
+    }else out.push(token);
+  }
+  return [...new Set(out)];
+}
 function cixJpyAliasDetail(token){
   const mt=String(token||'').match(/^(TAIFEX_XJF|CME_6J)_(NEAR|NEXT)\.(BID|ASK|LAST)$/);if(!mt)return null;
   const probe={symbol:mt[2]==='NEXT'?'JPYTW02':'JPYTW01'},matched=jpyMatchedContracts(probe);if(!matched||matched.status!=='MATCHED')return null;
@@ -682,7 +734,7 @@ function cixTokenDetail(token){
   return {token,label:row.label,field,value:Number.isFinite(value)?value:null,bid:Number.isFinite(bid)?bid:null,ask:Number.isFinite(ask)?ask:null,last:Number.isFinite(last)?last:null,time:side.quoteTimestamp||side.timestamp||side.updatedAt};
 }
 function cixCrossMarketPair(x){
-  const ids=cixFormulaTokens(x?.formula).map(t=>t.split('.')[0]);
+  const ids=cixLeafFormulaTokens(x?.formula).map(t=>t.split('.')[0]);
   return catalogRows().find(row=>ids.includes(row?.tw?.id)&&ids.includes(row?.os?.id))||null;
 }
 function cixMatchedContractsForRow(row){
@@ -708,7 +760,7 @@ function cixCrossMarketInfo(x){
 }
 function cixGeneralInfo(x){
   if(['JPYTW01','JPYTW02'].includes(x?.symbol))return '';
-  const r=evalMarketFormula(x.formula),details=cixFormulaTokens(x.formula).map(cixTokenDetail).filter(Boolean);
+  const r=evalCixFormula(x.formula),details=cixLeafFormulaTokens(x.formula).map(cixTokenDetail).filter(Boolean);
   const times=details.map(d=>d.time).filter(Boolean).map(t=>new Date(t).getTime()).filter(Number.isFinite),now=Date.now();
   const ages=times.map(t=>(now-t)/60000),maxAge=ages.length?Math.max(...ages):null,skew=times.length>1?(Math.max(...times)-Math.min(...times))/60000:0;
   const fresh=details.length>0&&times.length===details.length&&maxAge<=Number(x.freshness||20)&&skew<=Number(x.skew||15);
@@ -730,8 +782,8 @@ function moveCix(id,dir){
   [customIndexLibrary[ai],customIndexLibrary[bi]]=[customIndexLibrary[bi],customIndexLibrary[ai]];saveCixLibrary();renderCixLibrary();
 }
 function cixCardSnapshot(x){
-  const r=evalMarketFormula(x.formula);let value=r.ok&&r.type==='number'&&Number.isFinite(Number(r.value))?tidy(Number(r.value),8):'—',valueLabel='目前值';const jpy=['JPYTW01','JPYTW02'].includes(x?.symbol)?jpyExecutableValuation(x):null;if(jpy){valueLabel='雙邊估值';value=jpy.executable?`高 ${tidy(jpy.premium,3)}% / 低 ${tidy(jpy.discount,3)}%`:(jpy.reference!=null?`Last ${tidy(jpy.reference,3)}%`:'—')}else if(x?.valuationType==='two-way'&&x?.secondaryFormula){const hi=evalMarketFormula(x.formula),lo=evalMarketFormula(x.secondaryFormula);valueLabel='雙邊估值';value=`高 ${hi.ok&&Number.isFinite(Number(hi.value))?tidy(hi.value,3)+'%':'—'} / 低 ${lo.ok&&Number.isFinite(Number(lo.value))?tidy(lo.value,3)+'%':'—'}`}
-  const details=cixFormulaTokens(x.formula).map(cixTokenDetail).filter(Boolean),times=details.map(d=>d.time).filter(Boolean).map(t=>new Date(t).getTime()).filter(Number.isFinite);
+  const r=evalCixFormula(x.formula);let value=r.ok&&r.type==='number'&&Number.isFinite(Number(r.value))?tidy(Number(r.value),8):'—',valueLabel='目前值';const jpy=['JPYTW01','JPYTW02'].includes(x?.symbol)?jpyExecutableValuation(x):null;if(jpy){valueLabel='雙邊估值';value=jpy.executable?`高 ${tidy(jpy.premium,3)}% / 低 ${tidy(jpy.discount,3)}%`:(jpy.reference!=null?`Last ${tidy(jpy.reference,3)}%`:'—')}else if(x?.valuationType==='two-way'&&x?.secondaryFormula){const hi=evalCixFormula(x.formula),lo=evalCixFormula(x.secondaryFormula);valueLabel='雙邊估值';value=`高 ${hi.ok&&Number.isFinite(Number(hi.value))?tidy(hi.value,3)+'%':'—'} / 低 ${lo.ok&&Number.isFinite(Number(lo.value))?tidy(lo.value,3)+'%':'—'}`}
+  const details=cixLeafFormulaTokens(x.formula).map(cixTokenDetail).filter(Boolean),times=details.map(d=>d.time).filter(Boolean).map(t=>new Date(t).getTime()).filter(Number.isFinite);
   const ages=times.map(t=>(Date.now()-t)/60000),maxAge=ages.length?Math.max(...ages):null,skew=times.length>1?(Math.max(...times)-Math.min(...times))/60000:0;
   const fresh=details.length>0&&times.length===details.length&&maxAge<=Number(x.freshness||20)&&skew<=Number(x.skew||15);
   let signal=x.watchMode==='alert'?'ALERT':'WATCH';
@@ -758,7 +810,7 @@ function renderCixLibrary(){
   if(!customIndexLibrary.length){box.innerHTML='<div class="cix-empty">尚未建立自訂指數。按「＋ 建立自訂指數」開始。</div>';return}
   const visible=filteredCixLibrary();if(!visible.length){box.innerHTML='<div class="cix-empty">目前沒有符合搜尋／篩選條件的指數。</div>';return}box.innerHTML=visible.map(x=>{const snap=cixCardSnapshot(x);return `<article class="cix-card">
     <div class="cix-card-head"><div class="cix-card-title"><span class="cix-symbol">${x.symbol}</span><b>${x.name}</b><small>${x.description||'—'}</small></div><div class="cix-card-value"><small>${snap.valueLabel||'目前值'}</small><strong>${snap.value}</strong></div></div>
-    <div class="cix-card-status"><span class="cix-status ${snap.fresh?'is-pass':'is-stale'}">${snap.fresh?'PASS':'STALE'}</span><span class="cix-status">${snap.signal}</span><span class="cix-pill">${cixModeLabel(x.mode)}</span><span class="cix-pill">${x.interval}m</span></div>
+    <div class="cix-card-status"><span class="cix-status ${snap.fresh?'is-pass':'is-stale'}">${snap.fresh?'PASS':'STALE'}</span><span class="cix-status">${snap.signal}</span><span class="cix-pill">${cixModeLabel(x.mode)}</span><span class="cix-pill">${cixIntervalLabel(x.interval)}</span></div>
     <div class="cix-card-formula"><small>Formula</small><code>${x.formula}</code></div>
     <details class="cix-card-details"><summary>查看成分行情與進階資訊</summary><div class="cix-card-detail-body">${jpyValuationInfo(x)}${jpyHedgeInfo(x)}${jpySignalHistoryHtml(x)}${cixGeneralInfo(x)}${cixCrossMarketInfo(x)}<div class="cix-card-meta"><span class="cix-pill">Methodology v${x.version}</span><span class="cix-pill">${x.watchMode==='alert'?'ALERT':'WATCH ONLY'}</span><span class="cix-pill">Fresh ≤ ${x.freshness}m</span></div></div></details>
     <div class="cix-card-actions"><button class="cix-pin ${x.pinned?'is-pinned':''}" data-cix-pin="${x.id}">${x.pinned?'★ 已置頂':'☆ 置頂'}</button><button data-cix-move="${x.id}" data-dir="-1" aria-label="向上移動">↑</button><button data-cix-move="${x.id}" data-dir="1" aria-label="向下移動">↓</button><button data-cix-edit="${x.id}">編輯</button><button class="danger" data-cix-delete="${x.id}">刪除</button></div>
@@ -767,7 +819,7 @@ function renderCixLibrary(){
 }
 function editCix(id){
   const x=customIndexLibrary.find(v=>v.id===id);if(!x)return;editingCixId=id;
-  const map={cixName:x.name,cixSymbol:x.symbol,cixDescription:x.description,cixFormula:x.formula,cixMode:x.mode,cixVersion:x.version,cixWatchMode:x.watchMode,cixUpper:x.upper??'',cixLower:x.lower??'',cixInterval:String(x.interval),cixFreshness:String(x.freshness),cixSkew:String(x.skew)};
+  const map={cixName:x.name,cixSymbol:x.symbol,cixDescription:x.description,cixFormula:x.formula,cixMode:x.mode,cixVersion:x.version,cixWatchMode:x.watchMode,cixUpper:x.upper??'',cixLower:x.lower??'',cixInterval:String(x.interval||15),cixAlertCooldown:String(x.alertCooldown||15),cixFreshness:String(x.freshness),cixSkew:String(x.skew)};
   Object.entries(map).forEach(([id,v])=>{const e=document.getElementById(id);if(e)e.value=v});
   if($('#cixFormula')){if(x.secondaryFormula)$('#cixFormula').dataset.secondaryFormula=x.secondaryFormula;else delete $('#cixFormula').dataset.secondaryFormula}
   if(x.valuationType==='two-way'&&x.secondaryFormula){
@@ -794,8 +846,10 @@ function saveCustomIndexV1(){
     if($('#cixSymbol'))$('#cixSymbol').value=symbol;
   }
   if(customIndexLibrary.some(x=>x.symbol===symbol&&x.id!==editingCixId))return alert('Symbol 已存在，請使用另一個代碼');
+  const cycle=cixFindCycle(symbol,formula);if(cycle)return alert('公式存在循環引用：'+cycle.join(' → '));
+  const test=evalCixFormula(formula);if(!test.ok&&!/尚未載入|無法計算/.test(test.error||''))return alert('公式無法解析：'+(test.error||'請檢查公式'));
   const old=customIndexLibrary.find(x=>x.id===editingCixId);
-  const obj={id:editingCixId||('cix_'+Date.now()),name,symbol,description:$('#cixDescription')?.value.trim()||'',formula,secondaryFormula:$('#cixFormula')?.dataset.secondaryFormula||old?.secondaryFormula||null,valuationType:($('#cixFormula')?.dataset.secondaryFormula||old?.secondaryFormula)?'two-way':(old?.valuationType||null),mode:$('#cixMode')?.value||'raw',version:old?.version||'1.0',watchMode:$('#cixWatchMode')?.value||'watch',upper:$('#cixUpper')?.value===''?null:Number($('#cixUpper').value),lower:$('#cixLower')?.value===''?null:Number($('#cixLower').value),interval:Number($('#cixInterval')?.value||15),freshness:Number($('#cixFreshness')?.value||20),skew:Number($('#cixSkew')?.value||15),pinned:old?.pinned||false,methodology:old?.methodology?{...old.methodology}:undefined,createdAt:old?.createdAt||new Date().toISOString(),updatedAt:new Date().toISOString()};
+  const obj={id:editingCixId||('cix_'+Date.now()),name,symbol,description:$('#cixDescription')?.value.trim()||'',formula,secondaryFormula:$('#cixFormula')?.dataset.secondaryFormula||old?.secondaryFormula||null,valuationType:($('#cixFormula')?.dataset.secondaryFormula||old?.secondaryFormula)?'two-way':(old?.valuationType||null),mode:$('#cixMode')?.value||'raw',version:old?.version||'1.0',watchMode:$('#cixWatchMode')?.value||'watch',upper:$('#cixUpper')?.value===''?null:Number($('#cixUpper').value),lower:$('#cixLower')?.value===''?null:Number($('#cixLower').value),interval:Number($('#cixInterval')?.value||15),alertCooldown:Number($('#cixAlertCooldown')?.value||15),freshness:Number($('#cixFreshness')?.value||20),skew:Number($('#cixSkew')?.value||15),pinned:old?.pinned||false,methodology:old?.methodology?{...old.methodology}:undefined,createdAt:old?.createdAt||new Date().toISOString(),updatedAt:new Date().toISOString()};
   if(editingCixId)customIndexLibrary=customIndexLibrary.map(x=>x.id===editingCixId?obj:x);else customIndexLibrary.unshift(obj);
   try{
     saveCixLibrary();
