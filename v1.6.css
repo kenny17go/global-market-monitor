@@ -139,3 +139,11 @@
   .cix-twoway-selected{grid-template-columns:1fr}
   .cix-twoway-actions button{flex:1 1 100%}
 }
+
+/* v1.8.1 — Single-formula two-way builder */
+.cix-twoway-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+.cix-twoway-single-formula{margin:10px 0 12px}
+.cix-twoway-single-formula label{display:block}
+.cix-twoway-single-formula textarea{width:100%;min-height:84px;margin-top:6px;resize:vertical}
+.cix-twoway-live{margin-top:8px;padding:9px 11px;border-radius:9px;background:rgba(255,255,255,.04);font-weight:700}
+@media(max-width:720px){.cix-twoway-grid{grid-template-columns:1fr 1fr}.cix-twoway-grid label:nth-child(1),.cix-twoway-grid label:nth-child(4){grid-column:1/-1}}
