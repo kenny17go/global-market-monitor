@@ -3,7 +3,7 @@
     "source": "Stooq + XAUS + FRED/EIA + Yahoo Finance",
     "mode": "MIXED PUBLIC/DELAYED/DAILY",
     "realtime": false,
-    "generatedAt": "2026-09-20T11:08:47.881Z",
+    "generatedAt": "2026-09-20T14:28:50.074Z",
     "note": "Price-comparison first: public spot/reference quotes are preferred when available; gold has an XAUS public API fallback with its own freshness timestamp. Yahoo futures are explicitly tagged DELAYED (10 min reference delay) and FRED/EIA fallbacks are DAILY. No synthetic price path is created."
   },
   "commodities": {
@@ -17,7 +17,7 @@
         "previousClose": null,
         "change": null,
         "pct": null,
-        "timestamp": "2026-09-20T11:08:33.930Z",
+        "timestamp": "2026-09-20T14:28:33.815Z",
         "source": "XAUS public spot API",
         "mode": "PUBLIC WEB QUOTE",
         "delayMinutes": 0,
