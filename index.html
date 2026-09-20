@@ -63,35 +63,14 @@
           </section>
 
           <section class="cix-step" data-step="2">
-            <div class="cix-step-title"><span>2</span><div><b>建立公式</b><small>先用範本快速建立，需要時再手動微調</small></div></div>
-            <div class="cix-template-tools">
-  <select id="cixTemplate"><option value="manual">自訂公式</option><option value="twoway">雙邊估值（高估 / 低估）</option><option value="spread">價差 A − B</option><option value="ratio">比率 A / B</option><option value="pct">百分比價差 (A / B − 1) × 100</option><option value="cost">成本後價差 A×規格 − B×規格 − 成本</option></select>
-  <div id="cixStandardTemplateFields" class="formula-tools cix-template-fields"><select id="cixLegA"></select><select id="cixLegAField"><option value="BID">A：BID</option><option value="ASK">A：ASK</option><option value="LAST">A：LAST</option></select><select id="cixLegB"></select><select id="cixLegBField"><option value="ASK">B：ASK</option><option value="BID">B：BID</option><option value="LAST">B：LAST</option></select><button id="applyCixTemplate">套用範本</button></div>
-  <div id="cixTwoWayGuide" class="cix-twoway-guide hidden">
-    <div class="cix-twoway-grid">
-      <label><span>市場 A</span><select id="cixTwoWayA"></select></label>
-      <label><span>A 到期月份</span><select id="cixTwoWayAMonth"></select></label>
-      <label><span>A 行情</span><select id="cixTwoWayAField"><option value="BID">BID</option><option value="ASK">ASK</option><option value="LAST">LAST</option></select></label>
-      <label><span>市場 B</span><select id="cixTwoWayB"></select></label>
-      <label><span>B 到期月份</span><select id="cixTwoWayBMonth"></select></label>
-      <label><span>B 行情</span><select id="cixTwoWayBField"><option value="ASK">ASK</option><option value="BID">BID</option><option value="LAST">LAST</option></select></label>
-    </div>
-    <div id="cixTwoWayAvailability" class="cix-twoway-status">選好兩個市場、月份與 BID / ASK / LAST，公式會自動帶入。</div>
-    <div class="cix-twoway-selected">
-      <div><small>指標 A</small><strong id="cixTwoWayASelected">—</strong></div>
-      <div><small>指標 B</small><strong id="cixTwoWayBSelected">—</strong></div>
-    </div>
-    <div class="cix-twoway-single-formula">
-      <label><small>雙邊公式（可直接修改）</small><textarea id="cixTwoWayFormula" rows="3"></textarea></label>
-      <div id="cixTwoWayValue" class="cix-twoway-live">目前值 —</div>
-    </div>
-    <div class="cix-twoway-actions"><button id="resetCixTwoWay" class="secondary-btn">恢復建議公式</button><button id="applyCixTwoWay" class="cix-primary">套用這條公式</button></div>
-  </div>
-</div>
-            <div class="cix-advanced-label">進階手動編輯</div>
-            <div class="formula-tools cix-formula-tools"><select id="cixTokenCategory"><option value="all">全部欄位</option><option value="台灣指數">台灣指數</option><option value="股價指數">海外股價指數</option><option value="匯率">匯率</option><option value="貴金屬">貴金屬</option><option value="能源">能源</option><option value="結算日NDF">結算日 NDF</option><option value="我的指數">我的指數</option></select><select id="cixTokenSelect"></select><button id="cixInsertBid">插入 BID</button><button id="cixInsertAsk">插入 ASK</button><button id="cixInsertLast">插入 LAST</button><button data-cix-op=" + ">＋</button><button data-cix-op=" - ">−</button><button data-cix-op=" * ">＊</button><button data-cix-op=" / ">／</button><button data-cix-op=" ( ">(</button><button data-cix-op=" ) ">)</button></div>
-            <textarea id="cixFormula" rows="3" placeholder="例：TAIFEX_GDF.BID - CME_MGC.ASK"></textarea>
-            <div class="cix-preview"><span>公式預覽</span><b id="cixPreview">等待輸入公式</b><strong id="cixLiveValue">目前值 —</strong><small id="cixPreviewNote">雙邊估值：先選 A、B 的月份與 BID / ASK / LAST，再直接修改同一條公式。高估或低估由你選的行情方向決定。</small></div>
+            <div class="cix-step-title"><span>2</span><div><b>建立公式</b><small>全部手動建立；選擇指標後插入行情欄位與運算符號</small></div></div>
+            <div class="cix-advanced-label">選擇指標</div>
+            <div class="formula-tools cix-formula-tools"><select id="cixTokenCategory"><option value="all">全部欄位</option><option value="台灣指數">台灣指數</option><option value="股價指數">海外股價指數</option><option value="匯率">匯率</option><option value="貴金屬">貴金屬</option><option value="能源">能源</option><option value="結算日NDF">結算日 NDF</option><option value="我的指數">我的指數</option></select><select id="cixTokenSelect"></select><button id="cixInsertBid">插入 BID</button><button id="cixInsertAsk">插入 ASK</button><button id="cixInsertLast">插入 LAST</button></div>
+            <div class="cix-advanced-label">運算</div>
+            <div class="formula-tools cix-formula-tools"><button data-cix-op=" + ">＋</button><button data-cix-op=" - ">−</button><button data-cix-op=" * ">＊</button><button data-cix-op=" / ">／</button><button data-cix-op=" ( ">(</button><button data-cix-op=" ) ">)</button></div>
+            <div class="cix-advanced-label">公式</div>
+            <textarea id="cixFormula" rows="4" placeholder="直接輸入或由上方按鈕組合，例如：TAIFEX_GDF.BID - CME_MGC.ASK"></textarea>
+            <div class="cix-preview"><span>公式預覽</span><b id="cixPreview">等待輸入公式</b><strong id="cixLiveValue">目前值 —</strong><small id="cixPreviewNote">市場指標可選 BID / ASK / LAST；已建立的「我的指數」可直接加入公式，再組成新的自訂指數。</small></div>
           </section>
 
           <section class="cix-step" data-step="3">
@@ -192,4 +171,4 @@
   });
   window.__gmmEmergencySwitch=emergencySwitch;
 })();
-</script><script src="config.example.js?v=20260918-fix1"></script><script src="providers.js?v=20260916-ndf3"></script><script src="app.js?v=20260920-cixcompose2"></script><script src="tv-spark-widget.js?v=20260918-fix1"></script></body></html>
+</script><script src="config.example.js?v=20260918-fix1"></script><script src="providers.js?v=20260916-ndf3"></script><script src="app.js?v=20260921-manualformula1"></script><script src="tv-spark-widget.js?v=20260918-fix1"></script></body></html>
