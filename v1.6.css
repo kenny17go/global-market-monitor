@@ -147,3 +147,6 @@
 .cix-twoway-single-formula textarea{width:100%;min-height:84px;margin-top:6px;resize:vertical}
 .cix-twoway-live{margin-top:8px;padding:9px 11px;border-radius:9px;background:rgba(255,255,255,.04);font-weight:700}
 @media(max-width:720px){.cix-twoway-grid{grid-template-columns:1fr 1fr}.cix-twoway-grid label:nth-child(1),.cix-twoway-grid label:nth-child(4){grid-column:1/-1}}
+
+/* v1.9.0 — Composable Indicator Builder */
+.cix-compose{display:grid;grid-template-columns:minmax(0,2fr) minmax(120px,.7fr) auto;gap:10px;align-items:end;margin:12px 0}.cix-compose label{display:flex;flex-direction:column;gap:6px}.cix-compose label span{font-size:13px;font-weight:700;opacity:.82}.cix-opbar{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}.cix-opbar button{min-width:52px}#cixFormula{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;line-height:1.55}@media(max-width:720px){.cix-compose{grid-template-columns:1fr 120px}.cix-compose-source{grid-column:1/-1}#cixInsertSelected{grid-column:1/-1;width:100%}}
