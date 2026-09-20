@@ -229,16 +229,7 @@ function renderTokenOptions(){
   s.innerHTML=html;
   if([...s.options].some(o=>o.value===cur))s.value=cur;
 }
-function evalMarketFormula(raw,stack=[]){try{
-  let e=String(raw||'').trim();if(!e)return{ok:false,error:'請輸入公式'};
-  const vars=quoteTokenMap();
-  customIndexLibrary.forEach(ind=>{const token='MY.'+ind.symbol;if(stack.includes(ind.symbol)){vars[token]=null;return}const r=evalMarketFormula(ind.formula,[...stack,ind.symbol]);vars[token]=r.ok&&r.type==='number'&&Number.isFinite(Number(r.value))?Number(r.value):null});
-  Object.keys(vars).sort((x,y)=>y.length-x.length).forEach(k=>e=e.split(k).join(vars[k]==null?'NaN':String(vars[k])));
-  if(/[A-DF-Za-df-z_]/.test(e))throw new Error('含未知欄位代碼');
-  const comp=e.match(/^(.+?)(>=|<=|==|>|<)(.+)$/),calc=t=>{if(!/^[0-9eENa+-*/().\s]+$/.test(t))throw new Error('公式含不支援字元');const v=Function('"use strict";return ('+t+')')();if(!Number.isFinite(Number(v)))throw new Error('行情資料不足');return v};
-  if(comp){const l=calc(comp[1]),r=calc(comp[3]),op=comp[2];return{ok:true,type:'condition',value:({'>':l>r,'<':l<r,'>=':l>=r,'<=':l<=r,'==':l==r})[op],left:l,right:r}}
-  return{ok:true,type:'number',value:calc(e)}
-}catch(err){return{ok:false,error:err.message}}}
+function evalMarketFormula(raw){try{let e=raw.trim();if(!e)return{ok:false,error:'請輸入公式'};const vars=quoteTokenMap();Object.keys(vars).sort((a,b)=>b.length-a.length).forEach(k=>e=e.split(k).join(String(vars[k])));if(/[A-Za-z_]/.test(e))throw new Error('含未知欄位代碼');const comp=e.match(/^(.+?)(>=|<=|==|>|<)(.+)$/);const calc=t=>{if(!/^[0-9eE+\-*/().\s]+$/.test(t))throw new Error('公式含不支援字元');return Function('"use strict";return ('+t+')')()};if(comp){const l=calc(comp[1]),r=calc(comp[3]),op=comp[2];return{ok:true,type:'condition',value:({'>':l>r,'<':l<r,'>=':l>=r,'<=':l<=r,'==':l==r})[op],left:l,right:r}}return{ok:true,type:'number',value:calc(e)}}catch(err){return{ok:false,error:err.message}}}
 function calcFormula(){const r=evalMarketFormula($('#spreadFormula').value),el=$('#formulaResult');if(!r.ok){el.className='formula-result neg';el.textContent='公式錯誤：'+r.error;return}el.className='formula-result '+(r.type==='condition'?(r.value?'pos':'neg'):'pos');el.textContent=r.type==='condition'?`條件 ${r.value?'成立':'未成立'}｜左值 ${tidy(r.left,6)} / 右值 ${tidy(r.right,6)}`:`計算結果：${tidy(r.value,8)}`}
 
 function indicatorValue(ind){
@@ -399,18 +390,7 @@ function renderUsdtwdFx(){setTimeout(()=>renderTaifexSettlementNdf().catch(e=>{c
   $('#usdtwdFxFreshness').textContent=(dt&&!Number.isNaN(dt.getTime())?`更新 ${dt.toLocaleString('zh-TW')}`:'更新時間 —')+` · Onshore ${p?.onshore?.mode||'UNAVAILABLE'} · Offshore ${p?.offshore?.mode||'UNAVAILABLE'}`;
 }
 
-function render(){if(!DATA)return;
-  try{renderUsdtwdFx()}catch(e){console.error('USD/TWD panel render failed',e)}
-  try{renderConnectionSources()}catch(e){console.error('Connection sources render failed',e)}
-  if($('#asof'))$('#asof').textContent=new Date(DATA.asOf).toLocaleString('zh-TW');
-  renderTopPicker();renderTopCards();
-  $('#fxBody').innerHTML=DATA.fx.map(x=>`<tr><td>${x.pair}</td><td>${x.bid}</td><td>${x.ask}</td><td class="${cls(x.change)}">${x.change>=0?'+':''}${x.change}</td><td>${fxPoint2(x.p1m)}</td><td>${fxPoint2(x.p3m)}</td><td>${fxPoint2(x.p6m)}</td><td>${fxPoint2(x.p1y)}</td></tr>`).join('')+`<tr><td><b>USD/TWD Spot</b></td><td>${DATA.twd.spotBid}</td><td>${DATA.twd.spotAsk}</td><td>—</td><td colspan="4" class="source-note">Spot 與 Forward/NDF 分開顯示</td></tr>`;
-  $('#eqBody').innerHTML=DATA.equities.map(x=>`<tr><td>${x.name}<div class="source-note">${x.futureCode}</div></td><td>${fmt(x.cash)}</td><td>${fmt(x.future)}</td><td class="${cls(x.basis)}">${x.basis>=0?'+':''}${fmt(x.basis)}</td><td class="${cls(x.pct)}">${x.pct>=0?'+':''}${fmt(x.pct)}%</td></tr>`).join('');
-  $('#cmdBody').innerHTML=DATA.commodities.map(x=>`<tr><td>${x.name}<div class="source-note">${x.futureCode}</div></td><td>${fmt(x.spot)}</td><td>${fmt(x.future)}</td><td class="${cls(x.basis)}">${x.basis>=0?'+':''}${fmt(x.basis)}</td><td class="${cls(x.pct)}">${x.pct>=0?'+':''}${fmt(x.pct)}%</td></tr>`).join('');
-  $('#rateBody').innerHTML=DATA.rates.map(x=>`<tr><td>${x.name}<div class="source-note">${x.source||''}</div></td><td>${x.displayRate||((Number.isFinite(Number(x.rate))?fmt(x.rate):'—')+'%')}</td><td>${x.next||'—'}</td></tr>`).join('');
-  renderYield();renderAlerts();renderCatalog();
-  try{renderCixTokenOptions();renderCixTemplateOptions();updateCixFormulaPreview();renderCixLibrary();renderCustomIndicators();renderIndicatorAlertControls();renderIndicatorDashboard();evaluateAlerts();evaluateIndicatorAlerts()}catch(e){console.error('Optional indicator UI render failed',e)}
-}
+function render(){if(!DATA)return;renderUsdtwdFx();renderConnectionSources();renderUsdtwdFx();renderConnectionSources();renderUsdtwdFx();try{renderUsdtwdFx()}catch(e){console.error('USD/TWD panel render failed',e)}try{renderConnectionSources()}catch(e){console.error('Connection sources render failed',e)}if($('#asof'))$('#asof').textContent=new Date(DATA.asOf).toLocaleString('zh-TW');renderTopPicker();renderTopCards();$('#fxBody').innerHTML=DATA.fx.map(x=>`<tr><td>${x.pair}</td><td>${x.bid}</td><td>${x.ask}</td><td class="${cls(x.change)}">${x.change>=0?'+':''}${x.change}</td><td>${fxPoint2(x.p1m)}</td><td>${fxPoint2(x.p3m)}</td><td>${fxPoint2(x.p6m)}</td><td>${fxPoint2(x.p1y)}</td></tr>`).join('')+`<tr><td><b>USD/TWD Spot</b></td><td>${DATA.twd.spotBid}</td><td>${DATA.twd.spotAsk}</td><td>—</td><td colspan="4" class="source-note">Spot 與 Forward/NDF 分開顯示</td></tr>`;$('#eqBody').innerHTML=DATA.equities.map(x=>`<tr><td>${x.name}<div class="source-note">${x.futureCode}</div></td><td>${fmt(x.cash)}</td><td>${fmt(x.future)}</td><td class="${cls(x.basis)}">${x.basis>=0?'+':''}${fmt(x.basis)}</td><td class="${cls(x.pct)}">${x.pct>=0?'+':''}${fmt(x.pct)}%</td></tr>`).join('');$('#cmdBody').innerHTML=DATA.commodities.map(x=>`<tr><td>${x.name}<div class="source-note">${x.futureCode}</div></td><td>${fmt(x.spot)}</td><td>${fmt(x.future)}</td><td class="${cls(x.basis)}">${x.basis>=0?'+':''}${fmt(x.basis)}</td><td class="${cls(x.pct)}">${x.pct>=0?'+':''}${fmt(x.pct)}%</td></tr>`).join('');$('#rateBody').innerHTML=DATA.rates.map(x=>`<tr><td>${x.name}<div class="source-note">${x.source||''}</div></td><td>${x.displayRate||((Number.isFinite(Number(x.rate))?fmt(x.rate):'—')+'%')}</td><td>${x.next||'—'}</td></tr>`).join('');renderYield();renderAlerts();renderCatalog();renderCixTokenOptions();renderCixTemplateOptions();updateCixFormulaPreview();renderCixLibrary();renderCustomIndicators();renderIndicatorAlertControls();renderIndicatorDashboard();evaluateAlerts();evaluateIndicatorAlerts()}
 
 
 /* Custom Index Library V1 */
@@ -552,17 +532,28 @@ function applyCixTemplate(){
   updateCixFormulaPreview();ta.focus();
 }
 function renderCixTokenOptions(){
- const s=$('#cixTokenSelect');if(!s)return;const filter=$('#cixTokenCategory')?.value||'all',cur=s.value,groups={},add=(g,label,id,kind='market')=>{groups[g]??=[];groups[g].push({label,id,kind})};
- if(filter==='all'||filter==='my')customIndexLibrary.forEach(x=>add('我的指標',`${x.symbol}｜${x.name}`,'MY.'+x.symbol,'custom'));
- const addLeg=(x,q)=>{const cs=[...(q?.contracts||[])].filter(c=>c?.month).sort((m,n)=>String(m.month).localeCompare(String(n.month)));if(cs.length)cs.forEach(c=>add(x.category,`${x.name}｜${q.exchange} ${q.code}｜${monthLabel(c.month)}`,q.id+'_'+c.month));else add(x.category,`${x.name}｜${q.exchange} ${q.code}`,q.id)};
- if(filter!=='my')catalogRows().forEach(x=>{const tw=()=>addLeg(x,x.tw),os=()=>addLeg(x,x.os);if(filter==='all'){tw();os();return}if(filter==='台灣指數'&&x.category==='股價指數'){tw();return}if(filter==='股價指數'&&x.category==='股價指數'){os();return}if(filter==='匯率'&&x.category==='外匯'){tw();os();return}if(filter===x.category){tw();os()}});
- let html='<option value="">選擇資料／指標…</option>'+Object.entries(groups).map(([g,arr])=>`<optgroup label="${g}">${arr.map(q=>`<option value="${q.id}" data-kind="${q.kind}">${q.label}</option>`).join('')}</optgroup>`).join('');
- if(filter==='all'||filter==='結算日NDF')html+='<optgroup label="結算日 NDF"><option value="TGF_NEAR_NDF" data-kind="scalar">TGF 近月 NDF Mid</option><option value="TGF_NEXT_NDF" data-kind="scalar">TGF 次月 NDF Mid</option><option value="BRF_NEAR_NDF" data-kind="scalar">BRF 近月 NDF Mid</option><option value="BRF_NEXT_NDF" data-kind="scalar">BRF 次月 NDF Mid</option></optgroup>';
- if(filter==='all'||filter==='匯率')html+='<optgroup label="匯率"><option value="USD_TWD_SPOT" data-kind="scalar">USD/TWD Spot</option></optgroup>';
- s.innerHTML=html;if([...s.options].some(o=>o.value===cur))s.value=cur;syncCixComposeField();
+  const s=$('#cixTokenSelect');if(!s)return;
+  const filter=$('#cixTokenCategory')?.value||'all',cur=s.value,groups={};
+  const add=(g,label,id)=>{groups[g]??=[];groups[g].push({label,id})};
+  const addLeg=(x,q)=>{
+    const cs=[...(q?.contracts||[])].filter(c=>c?.month).sort((a,b)=>String(a.month).localeCompare(String(b.month)));
+    if(cs.length)cs.forEach(c=>add(x.category,`${x.name}｜${q.exchange} ${q.code}｜${monthLabel(c.month)}`,q.id+'_'+c.month));
+    else add(x.category,`${x.name}｜${q.exchange} ${q.code}`,q.id);
+  };
+  catalogRows().forEach(x=>{
+    const addTw=()=>addLeg(x,x.tw),addOs=()=>addLeg(x,x.os);
+    if(filter==='all'){addTw();addOs();return}
+    if(filter==='台灣指數'&&x.category==='股價指數'){addTw();return}
+    if(filter==='股價指數'&&x.category==='股價指數'){addOs();return}
+    if(filter==='匯率'&&x.category==='外匯'){addTw();addOs();return}
+    if(filter===x.category){addTw();addOs()}
+  });
+  let html='<option value="">選擇商品／到期月份…</option>';
+  html+=Object.entries(groups).map(([g,arr])=>`<optgroup label="${g}">${arr.map(q=>`<option value="${q.id}">${q.label}</option>`).join('')}</optgroup>`).join('');
+  if(filter==='all'||filter==='結算日NDF')html+='<optgroup label="結算日 NDF"><option value="TGF_NEAR_NDF">TGF 近月 NDF Mid</option><option value="TGF_NEXT_NDF">TGF 次月 NDF Mid</option><option value="BRF_NEAR_NDF">BRF 近月 NDF Mid</option><option value="BRF_NEXT_NDF">BRF 次月 NDF Mid</option></optgroup>';
+  if(filter==='all'||filter==='匯率')html+='<optgroup label="匯率"><option value="USD_TWD_SPOT">USD/TWD Spot</option></optgroup>';
+  s.innerHTML=html;if([...s.options].some(o=>o.value===cur))s.value=cur;
 }
-function syncCixComposeField(){const s=$('#cixTokenSelect'),f=$('#cixComposeField');if(!s||!f)return;const kind=s.options[s.selectedIndex]?.dataset?.kind||'market',scalar=kind==='custom'||kind==='scalar';f.disabled=scalar;f.value=scalar?'LAST':(f.value||'LAST')}
-function insertCixSelected(){const s=$('#cixTokenSelect'),ta=$('#cixFormula'),f=$('#cixComposeField');if(!s||!ta)return;const base=s.value;if(!base)return alert('請先選擇資料／指標');const kind=s.options[s.selectedIndex]?.dataset?.kind||'market',token=(kind==='custom'||kind==='scalar')?base:base+'.'+(f?.value||'LAST');ta.value+=(ta.value&&!ta.value.endsWith(' ')?' ':'')+token;ta.focus();updateCixFormulaPreview()}
 function updateCixFormulaPreview(){
   const f=$('#cixFormula')?.value.trim()||'',p=$('#cixPreview'),v=$('#cixLiveValue');
   if(p)p.textContent=f||'等待輸入公式';
@@ -765,12 +756,18 @@ function renderCixLibrary(){
   document.querySelectorAll('[data-cix-pin]').forEach(b=>b.onclick=()=>toggleCixPin(b.dataset.cixPin));document.querySelectorAll('[data-cix-move]').forEach(b=>b.onclick=()=>moveCix(b.dataset.cixMove,Number(b.dataset.dir)));document.querySelectorAll('[data-cix-edit]').forEach(b=>b.onclick=()=>editCix(b.dataset.cixEdit));document.querySelectorAll('[data-cix-delete]').forEach(b=>b.onclick=()=>deleteCix(b.dataset.cixDelete));
 }
 function editCix(id){
- const x=customIndexLibrary.find(v=>v.id===id);if(!x)return;editingCixId=id;
- const map={cixName:x.name,cixSymbol:x.symbol,cixDescription:x.description,cixFormula:x.formula,cixMode:x.mode,cixVersion:x.version,cixWatchMode:x.watchMode,cixUpper:x.upper??'',cixLower:x.lower??'',cixInterval:String(x.interval),cixFreshness:String(x.freshness),cixSkew:String(x.skew)};
- Object.entries(map).forEach(([key,v])=>{const e=document.getElementById(key);if(e)e.value=v});if($('#cixFormula'))delete $('#cixFormula').dataset.secondaryFormula;
- document.querySelector('.cix-builder')?.classList.remove('is-collapsed');syncCixWatchMode();updateCixFormulaPreview();window.scrollTo({top:0,behavior:'smooth'});
+  const x=customIndexLibrary.find(v=>v.id===id);if(!x)return;editingCixId=id;
+  const map={cixName:x.name,cixSymbol:x.symbol,cixDescription:x.description,cixFormula:x.formula,cixMode:x.mode,cixVersion:x.version,cixWatchMode:x.watchMode,cixUpper:x.upper??'',cixLower:x.lower??'',cixInterval:String(x.interval),cixFreshness:String(x.freshness),cixSkew:String(x.skew)};
+  Object.entries(map).forEach(([id,v])=>{const e=document.getElementById(id);if(e)e.value=v});
+  if($('#cixFormula')){if(x.secondaryFormula)$('#cixFormula').dataset.secondaryFormula=x.secondaryFormula;else delete $('#cixFormula').dataset.secondaryFormula}
+  if(x.valuationType==='two-way'&&x.secondaryFormula){
+    if($('#cixTemplate'))$('#cixTemplate').value='twoway';
+    syncCixTemplateMode();
+    if($('#cixTwoWayFormula'))$('#cixTwoWayFormula').value=x.formula;
+  }
+  document.querySelector('.cix-builder')?.classList.remove('is-collapsed');syncCixWatchMode();if($('#cixPreview'))$('#cixPreview').textContent=x.formula?'已載入公式 · 儲存修改將保留 Methodology 設定':'等待輸入公式';window.scrollTo({top:0,behavior:'smooth'});
 }
-function deleteCix(id){customIndexLibrary=customIndexLibrary.filter(x=>x.id!==id);saveCixLibrary();renderCixLibrary();renderCixTokenOptions()}
+function deleteCix(id){customIndexLibrary=customIndexLibrary.filter(x=>x.id!==id);saveCixLibrary();renderCixLibrary()}
 function saveCustomIndexV1(){
   const formula=$('#cixFormula')?.value.trim();
   if(!formula)return alert('請先建立 Formula');
@@ -786,15 +783,15 @@ function saveCustomIndexV1(){
     do{symbol='CIX'+String(n++).padStart(3,'0')}while(used.has(symbol));
     if($('#cixSymbol'))$('#cixSymbol').value=symbol;
   }
-  if(customIndexLibrary.some(x=>x.symbol===symbol&&x.id!==editingCixId))return alert('Symbol 已存在，請使用另一個代碼');if(formula.includes('MY.'+symbol))return alert('公式不能引用自己：MY.'+symbol);
+  if(customIndexLibrary.some(x=>x.symbol===symbol&&x.id!==editingCixId))return alert('Symbol 已存在，請使用另一個代碼');
   const old=customIndexLibrary.find(x=>x.id===editingCixId);
-  const obj={id:editingCixId||('cix_'+Date.now()),name,symbol,description:$('#cixDescription')?.value.trim()||'',formula,secondaryFormula:null,valuationType:null,mode:$('#cixMode')?.value||'raw',version:old?.version||'1.0',watchMode:$('#cixWatchMode')?.value||'watch',upper:$('#cixUpper')?.value===''?null:Number($('#cixUpper').value),lower:$('#cixLower')?.value===''?null:Number($('#cixLower').value),interval:Number($('#cixInterval')?.value||15),freshness:Number($('#cixFreshness')?.value||20),skew:Number($('#cixSkew')?.value||15),pinned:old?.pinned||false,methodology:old?.methodology?{...old.methodology}:undefined,createdAt:old?.createdAt||new Date().toISOString(),updatedAt:new Date().toISOString()};
+  const obj={id:editingCixId||('cix_'+Date.now()),name,symbol,description:$('#cixDescription')?.value.trim()||'',formula,secondaryFormula:$('#cixFormula')?.dataset.secondaryFormula||old?.secondaryFormula||null,valuationType:($('#cixFormula')?.dataset.secondaryFormula||old?.secondaryFormula)?'two-way':(old?.valuationType||null),mode:$('#cixMode')?.value||'raw',version:old?.version||'1.0',watchMode:$('#cixWatchMode')?.value||'watch',upper:$('#cixUpper')?.value===''?null:Number($('#cixUpper').value),lower:$('#cixLower')?.value===''?null:Number($('#cixLower').value),interval:Number($('#cixInterval')?.value||15),freshness:Number($('#cixFreshness')?.value||20),skew:Number($('#cixSkew')?.value||15),pinned:old?.pinned||false,methodology:old?.methodology?{...old.methodology}:undefined,createdAt:old?.createdAt||new Date().toISOString(),updatedAt:new Date().toISOString()};
   if(editingCixId)customIndexLibrary=customIndexLibrary.map(x=>x.id===editingCixId?obj:x);else customIndexLibrary.unshift(obj);
   try{
     saveCixLibrary();
     const saved=customIndexLibrary.find(x=>x.id===obj.id);
     if(!saved)throw new Error('儲存後找不到指數');
-    renderCixLibrary();renderCixTokenOptions();
+    renderCixLibrary();
     alert('已儲存：'+saved.symbol+'｜'+saved.name);
     clearCixForm();
     document.querySelector('.cix-builder')?.classList.add('is-collapsed');
@@ -811,13 +808,32 @@ function syncCixWatchMode(){
   if(note)note.textContent=alertMode?'Alert 模式：設定上／下門檻後，條件成立時才提醒。':'Watch Only：只持續監看，不觸發門檻提醒。';
 }
 function bindCixUI(){
- if(!$('#customindexView'))return;ensureJpyCixPresets();renderCixLibrary();renderCixTokenOptions();
- if($('#cixSearch'))$('#cixSearch').oninput=renderCixLibrary;if($('#cixFilter'))$('#cixFilter').onchange=renderCixLibrary;
- if($('#cixTokenCategory'))$('#cixTokenCategory').onchange=renderCixTokenOptions;if($('#cixTokenSelect'))$('#cixTokenSelect').onchange=syncCixComposeField;if($('#cixInsertSelected'))$('#cixInsertSelected').onclick=insertCixSelected;
- document.querySelectorAll('[data-cix-op]').forEach(b=>b.onclick=()=>{const ta=$('#cixFormula');if(!ta)return;ta.value+=b.dataset.cixOp;ta.focus();updateCixFormulaPreview()});
- if($('#exportCix'))$('#exportCix').onclick=exportCixBackup;if($('#importCix'))$('#importCix').onclick=()=>$('#cixImportFile')?.click();if($('#cixImportFile'))$('#cixImportFile').onchange=async e=>{const f=e.target.files?.[0];if(f)await importCixBackup(f);e.target.value=''};
- if($('#newCustomIndex'))$('#newCustomIndex').onclick=()=>{document.querySelector('.cix-builder')?.classList.remove('is-collapsed');clearCixForm()};if($('#cancelCustomIndex'))$('#cancelCustomIndex').onclick=()=>document.querySelector('.cix-builder')?.classList.toggle('is-collapsed');
- if($('#clearCustomIndex'))$('#clearCustomIndex').onclick=clearCixForm;if($('#saveCustomIndex'))$('#saveCustomIndex').onclick=saveCustomIndexV1;if($('#cixFormula'))$('#cixFormula').oninput=updateCixFormulaPreview;if($('#cixWatchMode'))$('#cixWatchMode').onchange=syncCixWatchMode;syncCixWatchMode();
+  if(!$('#customindexView'))return;ensureJpyCixPresets();renderCixLibrary();renderCixTokenOptions();renderCixTemplateOptions();
+  if($('#cixSearch'))$('#cixSearch').oninput=renderCixLibrary;if($('#cixFilter'))$('#cixFilter').onchange=renderCixLibrary;
+  if($('#applyCixTemplate'))$('#applyCixTemplate').onclick=applyCixTemplate;
+  if($('#cixTemplate'))$('#cixTemplate').onchange=syncCixTemplateMode;
+  if($('#cixTwoWayA'))$('#cixTwoWayA').onchange=()=>syncCixTwoWayGuide(true);
+  if($('#cixTwoWayB'))$('#cixTwoWayB').onchange=()=>syncCixTwoWayGuide(false);
+  if($('#cixTwoWayAMonth'))$('#cixTwoWayAMonth').onchange=()=>syncCixTwoWayGuide(true);
+  if($('#cixTwoWayBMonth'))$('#cixTwoWayBMonth').onchange=()=>updateCixTwoWayGuide(true);
+  if($('#cixTwoWayAField'))$('#cixTwoWayAField').onchange=()=>updateCixTwoWayGuide(true);
+  if($('#cixTwoWayBField'))$('#cixTwoWayBField').onchange=()=>updateCixTwoWayGuide(true);
+  if($('#cixTwoWayFormula'))$('#cixTwoWayFormula').oninput=()=>updateCixTwoWayGuide(false);
+  if($('#resetCixTwoWay'))$('#resetCixTwoWay').onclick=resetCixTwoWayFormulas;
+  if($('#applyCixTwoWay'))$('#applyCixTwoWay').onclick=applyCixTwoWayGuide;
+  syncCixTemplateMode();
+  if($('#cixTokenCategory'))$('#cixTokenCategory').onchange=renderCixTokenOptions;
+  if($('#cixInsertBid'))$('#cixInsertBid').onclick=()=>insertCixQuoteField('BID');
+  if($('#cixInsertAsk'))$('#cixInsertAsk').onclick=()=>insertCixQuoteField('ASK');
+  if($('#cixInsertLast'))$('#cixInsertLast').onclick=()=>insertCixQuoteField('LAST');
+  document.querySelectorAll('[data-cix-op]').forEach(b=>b.onclick=()=>{const ta=$('#cixFormula');if(!ta)return;ta.value+=b.dataset.cixOp;ta.focus();updateCixFormulaPreview()});
+  if($('#exportCix'))$('#exportCix').onclick=exportCixBackup;
+  if($('#importCix'))$('#importCix').onclick=()=>$('#cixImportFile')?.click();
+  if($('#cixImportFile'))$('#cixImportFile').onchange=async e=>{const f=e.target.files?.[0];if(f)await importCixBackup(f);e.target.value=''};
+  if($('#newCustomIndex'))$('#newCustomIndex').onclick=()=>{document.querySelector('.cix-builder')?.classList.remove('is-collapsed');clearCixForm()};
+  if($('#cancelCustomIndex'))$('#cancelCustomIndex').onclick=()=>document.querySelector('.cix-builder')?.classList.toggle('is-collapsed');
+  if($('#clearCustomIndex'))$('#clearCustomIndex').onclick=clearCixForm;if($('#saveCustomIndex'))$('#saveCustomIndex').onclick=saveCustomIndexV1;
+  if($('#cixFormula'))$('#cixFormula').oninput=()=>{delete $('#cixFormula').dataset.secondaryFormula;updateCixFormulaPreview()};if($('#cixWatchMode'))$('#cixWatchMode').onchange=syncCixWatchMode;syncCixWatchMode();
 }
 
 function switchView(name){$$('.view').forEach(v=>v.classList.toggle('active',v.id===name+'View'));$$('[data-view]').forEach(x=>x.classList.toggle('active',x.dataset.view===name));if(name==='connections')renderConnections();if(name==='indicators')renderIndicatorDashboard();window.scrollTo({top:0,behavior:'smooth'})}
