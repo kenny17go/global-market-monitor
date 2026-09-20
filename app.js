@@ -599,7 +599,7 @@ function cixTokenProducts(){
   const filter=$('#cixTokenCategory')?.value||'all',rows=[];
   const addLeg=(x,q)=>{
     if(!q?.id)return;
-    if(filter==='台灣指數'&&!(x.category==='股價指數'&&q===x.tw))return;
+    if(filter==='台灣指數'&&!((x.category==='台灣指數')||(x.category==='股價指數'&&q===x.tw)))return;
     if(filter==='股價指數'&&!(x.category==='股價指數'&&q===x.os))return;
     if(filter==='匯率'&&x.category!=='外匯')return;
     if(!['all','台灣指數','股價指數','匯率'].includes(filter)&&filter!==x.category)return;
