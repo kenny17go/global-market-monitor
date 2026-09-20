@@ -424,7 +424,7 @@ function ensureJpyCixPresets(){
 }
 
 function saveCixLibrary(){localStorage.setItem(CIX_KEY,JSON.stringify(customIndexLibrary))}
-function cixEscRe(s){return String(s).replace(/[.*+?^${()}|[\]\\]/g,'\\function saveCixLibrary(){localStorage.setItem(CIX_KEY,JSON.stringify(customIndexLibrary))}')}
+function cixEscRe(s){return String(s)}
 function cixIndexBySymbol(symbol){return customIndexLibrary.find(x=>String(x.symbol||'').toUpperCase()===String(symbol||'').toUpperCase())||null}
 function cixReferencedSymbols(formula){
   const raw=String(formula||'').toUpperCase();
