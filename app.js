@@ -595,30 +595,41 @@ function applyCixTemplate(){
   }
   updateCixFormulaPreview();ta.focus();
 }
+function cixTokenProducts(){
+  const filter=$('#cixTokenCategory')?.value||'all',rows=[];
+  const addLeg=(x,q)=>{
+    if(!q?.id)return;
+    if(filter==='台灣指數'&&!(x.category==='股價指數'&&q===x.tw))return;
+    if(filter==='股價指數'&&!(x.category==='股價指數'&&q===x.os))return;
+    if(filter==='匯率'&&x.category!=='外匯')return;
+    if(!['all','台灣指數','股價指數','匯率'].includes(filter)&&filter!==x.category)return;
+    rows.push({id:q.id,label:`${x.name}｜${q.exchange} ${q.code}`,contracts:[...(q.contracts||[])].filter(c=>c?.month).sort((m,n)=>String(m.month).localeCompare(String(n.month)))});
+  };
+  catalogRows().forEach(x=>{addLeg(x,x.tw);addLeg(x,x.os)});
+  if(filter==='all'||filter==='結算日NDF'){
+    rows.push({id:'TGF_NDF',label:'TGF｜結算日 NDF',special:[['TGF_NEAR_NDF','近月'],['TGF_NEXT_NDF','次月']]});
+    rows.push({id:'BRF_NDF',label:'BRF｜結算日 NDF',special:[['BRF_NEAR_NDF','近月'],['BRF_NEXT_NDF','次月']]});
+  }
+  if(filter==='all'||filter==='匯率')rows.push({id:'USD_TWD_SPOT',label:'USD/TWD Spot',direct:true});
+  if(filter==='all'||filter==='我的指數')customIndexLibrary.filter(x=>x.id!==editingCixId).forEach(x=>rows.push({id:'CIX::'+x.symbol,label:x.name+'｜'+x.symbol,direct:true}));
+  return rows;
+}
+function renderCixTokenExpiry(){
+  const p=$('#cixTokenSelect'),m=$('#cixTokenExpiry');if(!p||!m)return;
+  const row=cixTokenProducts().find(x=>x.id===p.value);
+  if(!row){m.innerHTML='<option value="">選擇到期月份…</option>';m.disabled=true;return}
+  if(row.direct){m.innerHTML='<option value="">不適用</option>';m.disabled=true;return}
+  const opts=row.special||row.contracts.map(c=>[row.id+'_'+c.month,monthLabel(c.month)]);
+  if(!opts.length){m.innerHTML='<option value="'+row.id+'">無到期月份</option>';m.disabled=true;return}
+  const old=m.value;m.disabled=false;m.innerHTML='<option value="">選擇到期月份…</option>'+opts.map(([v,l])=>'<option value="'+v+'">'+l+'</option>').join('');
+  if(opts.some(([v])=>v===old))m.value=old;
+}
 function renderCixTokenOptions(){
   const s=$('#cixTokenSelect');if(!s)return;
-  const filter=$('#cixTokenCategory')?.value||'all',cur=s.value,groups={};
-  const add=(g,label,id)=>{groups[g]??=[];groups[g].push({label,id})};
-  const addLeg=(x,q)=>{
-    const cs=[...(q?.contracts||[])].filter(c=>c?.month).sort((a,b)=>String(a.month).localeCompare(String(b.month)));
-    if(cs.length)cs.forEach(c=>add(x.category,`${x.name}｜${q.exchange} ${q.code}｜${monthLabel(c.month)}`,q.id+'_'+c.month));
-    else add(x.category,`${x.name}｜${q.exchange} ${q.code}`,q.id);
-  };
-  catalogRows().forEach(x=>{
-    const addTw=()=>addLeg(x,x.tw),addOs=()=>addLeg(x,x.os);
-    if(filter==='all'){addTw();addOs();return}
-    if(filter==='台灣指數'&&x.category==='股價指數'){addTw();return}
-    if(filter==='股價指數'&&x.category==='股價指數'){addOs();return}
-    if(filter==='匯率'&&x.category==='外匯'){addTw();addOs();return}
-    if(filter===x.category){addTw();addOs()}
-  });
-  let html='<option value="">選擇商品／到期月份…</option>';
-  html+=Object.entries(groups).map(([g,arr])=>`<optgroup label="${g}">${arr.map(q=>`<option value="${q.id}">${q.label}</option>`).join('')}</optgroup>`).join('');
-  if(filter==='all'||filter==='結算日NDF')html+='<optgroup label="結算日 NDF"><option value="TGF_NEAR_NDF">TGF 近月 NDF Mid</option><option value="TGF_NEXT_NDF">TGF 次月 NDF Mid</option><option value="BRF_NEAR_NDF">BRF 近月 NDF Mid</option><option value="BRF_NEXT_NDF">BRF 次月 NDF Mid</option></optgroup>';
-  if(filter==='all'||filter==='匯率')html+='<optgroup label="匯率"><option value="USD_TWD_SPOT">USD/TWD Spot</option></optgroup>';
-  const mine=customIndexLibrary.filter(x=>x.id!==editingCixId);
-  if((filter==='all'||filter==='我的指數')&&mine.length)html+='<optgroup label="我的指數">'+mine.map(x=>'<option value="CIX::'+x.symbol+'">'+x.name+'｜'+x.symbol+'</option>').join('')+'</optgroup>';
-  s.innerHTML=html;if([...s.options].some(o=>o.value===cur))s.value=cur;
+  const cur=s.value,rows=cixTokenProducts();
+  s.innerHTML='<option value="">選擇商品…</option>'+rows.map(q=>'<option value="'+q.id+'">'+q.label+'</option>').join('');
+  if(rows.some(q=>q.id===cur))s.value=cur;
+  renderCixTokenExpiry();
 }
 function updateCixFormulaPreview(){
   const f=$('#cixFormula')?.value.trim()||'',p=$('#cixPreview'),v=$('#cixLiveValue');
@@ -634,8 +645,11 @@ function updateCixFormulaPreview(){
   v.textContent=r.ok&&r.type==='number'&&Number.isFinite(Number(r.value))?'目前值 '+tidy(r.value,8):'目前值 — · '+(r.error||'等待可用行情');
 }
 function insertCixQuoteField(field){
-  const sel=$('#cixTokenSelect'),ta=$('#cixFormula');if(!sel||!ta)return;
-  const base=sel.value;if(!base)return alert('請先選擇商品／代碼');
+  const sel=$('#cixTokenSelect'),expiry=$('#cixTokenExpiry'),ta=$('#cixFormula');if(!sel||!ta)return;
+  const product=sel.value;if(!product)return alert('請先選擇商品');
+  const direct=product.startsWith('CIX::')||product==='USD_TWD_SPOT';
+  const base=direct?product:expiry?.value;
+  if(!base)return alert('請再選擇到期月份');
   const token=base.startsWith('CIX::')?base.slice(5):(/_(NDF)$|USD_TWD_SPOT/.test(base)?base:base+'.'+field);
   ta.value+=(ta.value&&!ta.value.endsWith(' ')?' ':'')+token;ta.focus();updateCixFormulaPreview();
 }
@@ -903,6 +917,7 @@ function bindCixUI(){
   if($('#applyCixTwoWay'))$('#applyCixTwoWay').onclick=applyCixTwoWayGuide;
   syncCixTemplateMode();
   if($('#cixTokenCategory'))$('#cixTokenCategory').onchange=renderCixTokenOptions;
+  if($('#cixTokenSelect'))$('#cixTokenSelect').onchange=renderCixTokenExpiry;
   if($('#cixInsertBid'))$('#cixInsertBid').onclick=()=>insertCixQuoteField('BID');
   if($('#cixInsertAsk'))$('#cixInsertAsk').onclick=()=>insertCixQuoteField('ASK');
   if($('#cixInsertLast'))$('#cixInsertLast').onclick=()=>insertCixQuoteField('LAST');
