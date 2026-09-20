@@ -3,7 +3,7 @@
     "source": "Yahoo Finance + public fallbacks (Barchart key not configured)",
     "mode": "MIXED",
     "realtime": false,
-    "generatedAt": "2026-09-19T13:33:12.749Z",
+    "generatedAt": "2026-09-20T11:08:34.296Z",
     "note": "TradingView is no longer used as a JPX/OSE quote source. Yahoo remains the first public source for CME/COMEX and Brent benchmark data. When BARCHART_API_KEY is configured, Barchart OnDemand supplements missing contract Bid/Ask/Last for JPX Nikkei 225 mini, mini-TOPIX, COMEX Micro Gold and ICE Brent. Barchart mode/timestamps are preserved; missing Bid/Ask are never synthesized. Without a Barchart key, Nikkei 225 mini can fall back to a public delayed Last quote and mini-TOPIX remains unavailable rather than fabricated."
   },
   "indices": {
@@ -560,11 +560,11 @@
       "id": "TAIEX",
       "symbol": "^TWII",
       "label": "台灣加權",
-      "last": 47180.75,
+      "last": 47368.04,
       "previousClose": 45848.9,
-      "change": 1331.8499999999985,
-      "pct": 2.904867946668292,
-      "timestamp": "2026-09-18T05:33:15.000Z",
+      "change": 1519.1399999999994,
+      "pct": 3.3133619345284173,
+      "timestamp": "2026-09-20T04:01:15.000Z",
       "source": "Yahoo Finance",
       "mode": "DELAYED",
       "series": [
@@ -621,8 +621,7 @@
         47078.44140625,
         47117.140625,
         47124.69140625,
-        47122.1796875,
-        47180.75
+        47122.1796875
       ],
       "seriesTimes": [
         "2026-09-18T01:00:00.000Z",
@@ -678,8 +677,7 @@
         "2026-09-18T05:10:00.000Z",
         "2026-09-18T05:15:00.000Z",
         "2026-09-18T05:20:00.000Z",
-        "2026-09-18T05:25:00.000Z",
-        "2026-09-18T05:30:00.000Z"
+        "2026-09-18T05:25:00.000Z"
       ],
       "seriesMeta": {
         "range": "1D",
@@ -688,7 +686,7 @@
         "source": "Yahoo Finance",
         "mode": "DELAYED",
         "timezone": "Asia/Taipei",
-        "points": 55
+        "points": 54
       }
     },
     "NIKKEI": {
@@ -1187,7 +1185,7 @@
           "bid": null,
           "ask": null,
           "last": 64745,
-          "timestamp": "2026-09-19T13:33:12.347Z",
+          "timestamp": "2026-09-20T11:08:33.920Z",
           "quoteType": "nikkei225jp public table",
           "quoteMode": "DELAYED",
           "delayMinutes": 15
@@ -1198,7 +1196,7 @@
           "bid": null,
           "ask": null,
           "last": 64900,
-          "timestamp": "2026-09-19T13:33:12.347Z",
+          "timestamp": "2026-09-20T11:08:33.920Z",
           "quoteType": "nikkei225jp public table",
           "quoteMode": "DELAYED",
           "delayMinutes": 15
@@ -1209,7 +1207,7 @@
           "bid": null,
           "ask": null,
           "last": 64900,
-          "timestamp": "2026-09-19T13:33:12.347Z",
+          "timestamp": "2026-09-20T11:08:33.920Z",
           "quoteType": "nikkei225jp public table",
           "quoteMode": "DELAYED",
           "delayMinutes": 15
