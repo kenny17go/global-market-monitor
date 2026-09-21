@@ -58,4 +58,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -m "data: refresh USD TWD FX curves and preserve overview market bridges"
+          git pull --rebase origin main
           git push
