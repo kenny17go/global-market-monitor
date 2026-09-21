@@ -116,6 +116,55 @@ async function yahooIndexQuote(id,symbol,label,range){
   }
 }
 
+
+async function readPreviousOverseas(){
+  try{return JSON.parse(await fs.readFile('data/overseas-delayed.json','utf8'))}catch{return null}
+}
+function tokyoNowParts(d=new Date()){
+  const parts=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(d);
+  const get=t=>parts.find(x=>x.type===t)?.value||'';
+  return {year:Number(get('year')),month:Number(get('month')),day:Number(get('day')),hour:Number(get('hour')),minute:Number(get('minute')),date:`${get('year')}-${get('month')}-${get('day')}`};
+}
+function topixQuoteDateFromPage(plain,nowParts){
+  const m=plain.match(/リアルタイム株価\s*(?:(\d{1,2})\/(\d{1,2}))?/);
+  if(!m?.[1]||!m?.[2])return nowParts.date;
+  let y=nowParts.year,mo=Number(m[1]),d=Number(m[2]);
+  if(mo-nowParts.month>6)y--;else if(nowParts.month-mo>6)y++;
+  return `${y}-${String(mo).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+}
+async function yahooJapanTopix(previous){
+  try{
+    const html=await fetchText('https://finance.yahoo.co.jp/quote/998405.T');
+    const plain=stripHtml(html);
+    const m=plain.match(/TOPIX[\s\S]{0,1600}?([0-9]{1,2},[0-9]{3}\.[0-9]{2})/);
+    const last=valid(m?.[1],[100,10000]);if(last==null)throw new Error('TOPIX value not found');
+    const pm=plain.match(/前日比[\s\S]{0,260}?([+\-−]?\s*[0-9,]+\.[0-9]{2})\s*\(([+\-−]?\s*[0-9.]+)%\)/);
+    const change=pm?num(pm[1].replace('−','-').replace(/\s/g,'')):null;
+    const pct=pm?num(pm[2].replace('−','-').replace(/\s/g,'')):null;
+    const now=tokyoNowParts(),quoteDate=topixQuoteDateFromPage(plain,now);
+    const tm=plain.match(/リアルタイム株価[\s\S]{0,80}?(\d{1,2}:\d{2})/);
+    const hhmm=tm?.[1]||`${String(now.hour).padStart(2,'0')}:${String(now.minute).padStart(2,'0')}`;
+    const timestamp=new Date(`${quoteDate}T${hhmm}:00+09:00`).toISOString();
+    const old=previous?.indices?.TOPIX;
+    const sameSession=old?.seriesMeta?.session===quoteDate;
+    const series=sameSession&&Array.isArray(old?.series)?[...old.series]:[];
+    const seriesTimes=sameSession&&Array.isArray(old?.seriesTimes)?[...old.seriesTimes]:[];
+    const minutes=now.hour*60+now.minute;
+    const inSession=quoteDate===now.date&&((minutes>=540&&minutes<=690)||(minutes>=750&&minutes<=930));
+    if(inSession&&seriesTimes.at(-1)!==timestamp){
+      series.push(last);seriesTimes.push(timestamp);
+      while(series.length>90){series.shift();seriesTimes.shift()}
+    }
+    return {
+      id:'TOPIX',symbol:'998405.T',label:'東證 TOPIX',
+      last,previousClose:change!=null?last-change:null,change,pct,timestamp,
+      source:'Yahoo!ファイナンス Japan',mode:'PUBLIC WEB QUOTE',
+      series,seriesTimes,
+      seriesMeta:{range:'1D',interval:'5m',session:quoteDate,source:'Yahoo!ファイナンス Japan snapshots',mode:'PUBLIC WEB QUOTE',timezone:'Asia/Tokyo',points:series.length,collection:'5-minute workflow snapshots'}
+    };
+  }catch(e){console.warn('Yahoo Japan TOPIX fallback failed',e.message);return null}
+}
+
 async function nikkei225jpMini(){try{const plain=stripHtml(await fetchText('https://nikkei225jp.com/cme/'));const contracts=[];const re=/大証ミニ\s*(\d{2})年(\d{1,2})月限\s*([\d,]+)/g;let m;while((m=re.exec(plain))){const month=`20${m[1]}${String(m[2]).padStart(2,'0')}`,last=valid(m[3],[1000,100000]);if(last!=null)contracts.push({symbol:`OSE Nikkei225 mini ${month}`,month,bid:null,ask:null,last,timestamp:new Date().toISOString(),quoteType:'nikkei225jp public table',quoteMode:'DELAYED',delayMinutes:15})}return {defaultMonth:contracts[0]?.month||null,contracts,source:'nikkei225jp.com · OSE public quote fallback',mode:contracts.length?'DELAYED':'UNAVAILABLE',delayMinutes:15}}catch(e){console.warn('nikkei225jp fallback failed',e.message);return {defaultMonth:null,contracts:[],source:'nikkei225jp.com · OSE public quote fallback',mode:'UNAVAILABLE'}}}
 
 async function twseTaiexQuote(yahoo){
@@ -171,7 +220,7 @@ const INDEX_TARGETS=[
   {id:'NIKKEI',symbol:'^N225',label:'日經 225',range:[1000,100000]},
   {id:'TOPIX',symbol:'998405.T',label:'東證 TOPIX',range:[100,10000]}
 ];
-const indices={};for(const x of INDEX_TARGETS)indices[x.id]=await yahooIndexQuote(x.id,x.symbol,x.label,x.range);const yahooTaiex=await yahooIndexQuote('TAIEX','^TWII','台灣加權',[1000,100000]);indices.TAIEX=await twseTaiexQuote(yahooTaiex);
+const previousOverseas=await readPreviousOverseas();const indices={};for(const x of INDEX_TARGETS)indices[x.id]=await yahooIndexQuote(x.id,x.symbol,x.label,x.range);if(indices.TOPIX?.last==null){const topix=await yahooJapanTopix(previousOverseas);if(topix)indices.TOPIX=topix}const yahooTaiex=await yahooIndexQuote('TAIEX','^TWII','台灣加權',[1000,100000]);indices.TAIEX=await twseTaiexQuote(yahooTaiex);
 const products={};for(const t of ROOTS)products[t.id]=await yahooRootProduct(t);
 
 const [bcNikkei,bcTopix,bcMgc,bcBrent]=await Promise.all([
