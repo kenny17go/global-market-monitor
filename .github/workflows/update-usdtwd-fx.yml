@@ -13,7 +13,6 @@ on:
       - 'scripts/patch-formula-category-filter.mjs'
       - 'scripts/patch-custom-indicators.mjs'
       - 'scripts/patch-indicator-dashboard.mjs'
-      - 'scripts/patch-screen-lock.mjs'
       - 'scripts/patch-overview-major-fx.mjs'
       - 'scripts/patch-overview-equities.mjs'
       - 'scripts/patch-overview-commodities.mjs'
@@ -57,8 +56,6 @@ jobs:
         run: node scripts/patch-formula-category-filter.mjs
       - name: Install custom indicator dashboard
         run: node scripts/patch-indicator-dashboard.mjs
-      - name: Install screen lock demo
-        run: node scripts/patch-screen-lock.mjs
       - name: Restore overview FX market bridge
         run: node scripts/patch-overview-major-fx.mjs
       - name: Restore overview equity market bridge
