@@ -44,43 +44,13 @@ jobs:
         run: node scripts/fetch-usdtwd-fx.mjs
       - name: Apply BOT plain-text onshore fallback
         run: node scripts/apply-bot-onshore-fallback.mjs
-      - name: Apply USD TWD panel
-        run: node scripts/apply-fx-v1.mjs
-      - name: Install TAIFEX settlement NDF panel
-        run: node scripts/patch-taifex-settlement-ndf.mjs
-      - name: Force-refresh NDF frontend assets
-        run: node scripts/patch-ndf-runtime-cache.mjs
-      - name: Install settlement NDF formula tokens
-        run: node scripts/patch-ndf-formula-tokens.mjs
-      - name: Install Formula Lab category filter
-        run: node scripts/patch-formula-category-filter.mjs
-      - name: Install custom indicator dashboard
-        run: node scripts/patch-indicator-dashboard.mjs
-      - name: Restore overview FX market bridge
-        run: node scripts/patch-overview-major-fx.mjs
-      - name: Restore overview equity market bridge
-        run: node scripts/patch-overview-equities.mjs
-      - name: Restore overview commodity market bridge
-        run: node scripts/patch-overview-commodities.mjs
-      - name: Restore overview rates market bridge
-        run: node scripts/patch-overview-rates.mjs
-      - name: Restore UST yield chart and tenor table
-        run: node scripts/patch-ust-yield-panel.mjs
-      - name: Install USD TWD toggle binding
-        run: node scripts/fix-usdtwd-toggle.mjs
-      - name: Apply FX V1.1 labels
-        run: node scripts/patch-fx-v11.mjs
       - name: Validate refreshed FX data and runtime
         run: |
           node -e "const d=JSON.parse(require('fs').readFileSync('data/usdtwd-fx.json','utf8')); if(!d.spot||d.spot.mid==null||!d.offshore||!d.offshore.curve) process.exit(1); console.log('USD/TWD spot:',d.spot.mid,'generated:',d.meta?.generatedAt);"
-          node --check app.js
-          node --check providers.js
           node --check scripts/fetch-usdtwd-fx.mjs
-          grep -q "mergeUsdtwd(base,fxTwd)" providers.js
-          grep -q "mergeOverviewEquities(base,delayed,taifex)" providers.js
-      - name: Commit FX data and UI
+      - name: Commit FX data
         run: |
-          git add data/usdtwd-fx.json index.html app.js providers.js styles.css scripts/fetch-overseas-delayed.mjs
+          git add data/usdtwd-fx.json
           if git diff --cached --quiet; then
             echo "No FX changes"
             exit 0
