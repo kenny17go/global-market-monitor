@@ -46,7 +46,7 @@ jobs:
         run: node scripts/apply-bot-onshore-fallback.mjs
       - name: Validate refreshed FX data and runtime
         run: |
-          node -e "const d=JSON.parse(require('fs').readFileSync('data/usdtwd-fx.json','utf8')); if(!d.spot||d.spot.mid==null||!d.offshore||!d.offshore.curve) process.exit(1); console.log('USD/TWD spot:',d.spot.mid,'generated:',d.meta?.generatedAt);"
+          node -e "const d=JSON.parse(require('fs').readFileSync('data/usdtwd-fx.json','utf8')); if(!d.spot||d.spot.mid==null||!d.offshore||!d.offshore.curve||!Array.isArray(d.spot.series)||d.spot.series.length<2) process.exit(1); console.log('USD/TWD spot:',d.spot.mid,'intraday points:',d.spot.series.length,'generated:',d.meta?.generatedAt);"
           node --check scripts/fetch-usdtwd-fx.mjs
       - name: Commit FX data
         run: |
