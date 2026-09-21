@@ -208,7 +208,7 @@ function quoteStatusClass(mode){const m=String(mode||'').toUpperCase();return m=
 function quoteMetaHtml(q){const mode=q?.quoteMode||'SOURCE';const source=q?.source||q?.exchange||'—';return '<div class="quote-meta"><span class="quote-status '+quoteStatusClass(mode)+'">'+mode+'</span><span>'+source+'</span><span>'+quoteTimeLabel(q)+'</span></div>'}
 
 function catalogNote(x){return x.compare==='inverse'?'報價方向不同：海外報價需倒數換向':x.compare==='conversion'?'需加入匯率 / 單位換算':'可直接比較，但仍須對齊月份與時間'}
-function renderCatalog(){if(!$('#catalogBody'))return;const type=$('#catalogFilter')?.value||'all',rows=catalogRows().filter(x=>type==='all'||x.category===type);$('#catalogBody').innerHTML=rows.map(x=>`<tr><td><span class="category-pill">${x.category}</span></td><td><b>${x.name}</b><div class="source-note">${x.underlying}</div></td><td><b>${x.tw.code}</b><div class="source-note">${x.tw.expiry?monthLabel(x.tw.expiry):'—'}</div>${quoteMetaHtml(x.tw)}</td><td>${qfmt(x.tw.bid,x.tw.code)}</td><td>${qfmt(x.tw.ask,x.tw.code)}</td><td>${qfmt(x.tw.last,x.tw.code)}</td><td>${x.os.exchange}</td><td><b>${x.os.code}</b>${quoteMetaHtml(x.os)}</td><td>${qfmt(x.os.bid,x.os.code)}</td><td>${qfmt(x.os.ask,x.os.code)}</td><td>${qfmt(x.os.last,x.os.code)}</td><td class="catalog-note">${catalogNote(x)}</td></tr>`).join('')||`<tr><td colspan="12" class="empty">此分類目前沒有項目</td></tr>`;const cats=[...new Set(catalogRows().map(x=>x.category))];$('#catalogSummary').innerHTML=`<div class="kpi"><span>期貨商品</span><b>${catalogRows().length}</b><small>跨市場 / 同標的</small></div><div class="kpi"><span>商品分類</span><b>${cats.length}</b><small>${cats.join(' / ')}</small></div><div class="kpi"><span>比較重點</span><b>規格</b><small>乘數 / Tick / 幣別 / 到期</small></div><div class="kpi"><span>風險資訊</span><b>保證金</b><small>原始保證金 / 成本試算</small></div>`;if(!costInitialized)initCostLab();else calcCostLab();renderCustomProducts()}
+function renderCatalog(){if(!$('#catalogBody'))return;const type=$('#catalogFilter')?.value||'all',rows=catalogRows().filter(x=>type==='all'||x.category===type);$('#catalogBody').innerHTML=rows.map(x=>`<tr><td><span class="category-pill">${x.category}</span></td><td><b>${x.name}</b><div class="source-note">${x.underlying}</div></td><td><b>${x.tw.code}</b><div class="source-note">${x.tw.expiry?monthLabel(x.tw.expiry):'—'}</div>${quoteMetaHtml(x.tw)}</td><td>${qfmt(x.tw.bid,x.tw.code)}</td><td>${qfmt(x.tw.ask,x.tw.code)}</td><td>${qfmt(x.tw.last,x.tw.code)}</td><td>${x.os.exchange}</td><td><b>${x.os.code}</b>${quoteMetaHtml(x.os)}</td><td>${qfmt(x.os.bid,x.os.code)}</td><td>${qfmt(x.os.ask,x.os.code)}</td><td>${qfmt(x.os.last,x.os.code)}</td><td class="catalog-note">${catalogNote(x)}</td></tr>`).join('')||`<tr><td colspan="12" class="empty">此分類目前沒有項目</td></tr>`;const cats=[...new Set(catalogRows().map(x=>x.category))];$('#catalogSummary').innerHTML=`<div class="kpi"><span>期貨商品</span><b>${catalogRows().length}</b><small>跨市場 / 同標的</small></div><div class="kpi"><span>商品分類</span><b>${cats.length}</b><small>${cats.join(' / ')}</small></div><div class="kpi"><span>比較重點</span><b>規格</b><small>乘數 / Tick / 幣別 / 到期</small></div><div class="kpi"><span>風險資訊</span><b>保證金</b><small>原始保證金 / 成本試算</small></div>`;if(!costInitialized)initCostLab();else renderFuturesSpecCompare(false);renderCustomProducts()}
 function renderTokenOptions(){
   const s=$('#tokenSelect');if(!s)return;
   const filter=$('#tokenCategory')?.value||'all',cur=s.value,groups={};
@@ -335,26 +335,107 @@ function marginFor(id){return INITIAL_MARGINS[id]||{initial:null,currency:specFo
 function marginDisplay(m){return m?.initial==null?'動態':tidy(m.initial,2)+' '+m.currency}
 function futuresCompareUniverse(){
   const seen=new Set(),out=[];
-  catalogRows().forEach(row=>[row.tw,row.os].forEach(q=>{if(!q?.id||seen.has(q.id))return;seen.add(q.id);const s=specFor(q.id),m=marginFor(q.id);out.push({id:q.id,name:s.label||row.name,code:q.code||s.code,exchange:q.exchange||'—',spec:s,margin:m})}));
+  catalogRows().forEach(row=>[row.tw,row.os].forEach(q=>{
+    if(!q?.id||seen.has(q.id))return;seen.add(q.id);
+    const s=specFor(q.id),m=marginFor(q.id);
+    out.push({id:q.id,name:s.label||row.name,code:q.code||s.code,exchange:q.exchange||'—',spec:s,margin:m,q,row});
+  }));
   return out;
 }
-function renderFuturesSpecCompare(){
+function futuresCompareItem(id){return futuresCompareUniverse().find(x=>x.id===id)||null}
+function futuresCompareMonths(item){
+  const actual=[...(item?.q?.contracts||[])].filter(c=>c?.month).map(c=>c.month);
+  return actual.length?[...new Set(actual)].sort():contractMonths(item?.id);
+}
+function futuresCompareQuote(item,month){
+  if(!item)return null;
+  const c=(item.q?.contracts||[]).find(x=>String(x.month)===String(month));
+  return c||item.q||null;
+}
+function futuresCompareDate(q){
+  const raw=q?.quoteTimestamp||q?.quoteDate||q?.updatedAt||'';
+  if(!raw)return '—';
+  if(/^\d{8}$/.test(String(raw)))return String(raw).slice(0,4)+'/'+String(raw).slice(4,6)+'/'+String(raw).slice(6,8);
+  const d=new Date(raw);return Number.isNaN(d.getTime())?String(raw):d.toLocaleString('zh-TW',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false});
+}
+function fillFuturesCompareMonths(sel,item,preferred){
+  if(!sel||!item)return;
+  const months=futuresCompareMonths(item);
+  sel.innerHTML=months.map(m=>'<option value="'+m+'">'+monthLabel(m)+'</option>').join('');
+  sel.value=months.includes(preferred)?preferred:(months[0]||'');
+}
+function futuresCompareNotional(item,month){
+  const q=futuresCompareQuote(item,month),p=Number(q?.last)||((Number(q?.bid)+Number(q?.ask))/2);
+  if(Number.isFinite(p)&&p>0)return p*Number(item.spec.multiplier||1)*fxToTwd(item.spec.currency);
+  return Number(item.spec.multiplier||1)*fxToTwd(item.spec.currency);
+}
+function suggestedFuturesRatio(A,B,am,bm){
+  const av=futuresCompareNotional(A,am),bv=futuresCompareNotional(B,bm);
+  if(!(av>0&&bv>0))return{a:1,b:1,error:null};
+  let best={a:1,b:1,error:Infinity};
+  for(let x=1;x<=20;x++)for(let y=1;y<=20;y++){
+    const va=x*av,vb=y*bv,err=Math.abs(va-vb)/Math.max(va,vb);
+    if(err<best.error)best={a:x,b:y,error:err};
+  }
+  return best;
+}
+function renderFuturesSpecCompare(resetMonths=false){
   const aSel=$('#futuresCompareA'),bSel=$('#futuresCompareB'),box=$('#futuresSpecCompare');if(!aSel||!bSel||!box)return;
   const list=futuresCompareUniverse(),opts=list.map(x=>`<option value="${x.id}">${x.name}｜${x.exchange} ${x.code}</option>`).join('');
-  const oldA=aSel.value,oldB=bSel.value;aSel.innerHTML=opts;bSel.innerHTML=opts;
-  if(list.some(x=>x.id===oldA))aSel.value=oldA;
+  const oldA=aSel.value,oldB=bSel.value;
+  aSel.innerHTML=opts;bSel.innerHTML=opts;
+  if(list.some(x=>x.id===oldA))aSel.value=oldA;else if(list.length)aSel.value=list[0].id;
   if(list.some(x=>x.id===oldB))bSel.value=oldB;else if(list.length>1)bSel.value=list[1].id;
-  const A=list.find(x=>x.id===aSel.value)||list[0],B=list.find(x=>x.id===bSel.value)||list[1]||list[0];if(!A||!B)return;
+  const A=futuresCompareItem(aSel.value),B=futuresCompareItem(bSel.value);if(!A||!B)return;
+  const am=$('#futuresCompareAMonth'),bm=$('#futuresCompareBMonth');
+  const oldAm=resetMonths?'':am?.value,oldBm=resetMonths?'':bm?.value;
+  fillFuturesCompareMonths(am,A,oldAm);fillFuturesCompareMonths(bm,B,oldBm);
+  const aq=futuresCompareQuote(A,am?.value),bq=futuresCompareQuote(B,bm?.value);
   const tickValue=x=>Number(x.spec.multiplier)*Number(x.spec.tick);
   const marginTwd=x=>x.margin.initial==null?null:Number(x.margin.initial)*fxToTwd(x.margin.currency);
-  const val=(x,f)=>f(x);
   const rows=[
     ['交易所',x=>x.exchange],['商品代碼',x=>x.code],['合約乘數',x=>tidy(x.spec.multiplier,6)+' '+x.spec.currency],['最小跳動 Tick',x=>fixedInput(x.spec.tick,8)],['每 Tick 價值',x=>tidy(tickValue(x),6)+' '+x.spec.currency],['幣別',x=>x.spec.currency],['原始保證金',x=>marginDisplay(x.margin)],['保證金約當 TWD',x=>{const v=marginTwd(x);return v==null?'動態':tidy(v,0)+' TWD'}],['到期週期',x=>x.spec.cycle],['規格說明',x=>x.spec.note||'—']
   ];
-  box.innerHTML=`<table class="futures-spec-table"><thead><tr><th>規格</th><th>${A.name}<small>${A.exchange} · ${A.code}</small></th><th>${B.name}<small>${B.exchange} · ${B.code}</small></th></tr></thead><tbody>${rows.map(([n,fn])=>`<tr><th>${n}</th><td>${val(A,fn)}</td><td>${val(B,fn)}</td></tr>`).join('')}</tbody></table><div class="source-note">保證金依目前內建來源日期顯示；標示「動態」者須以交易所、清算所或券商當日要求為準。</div>`;
+  box.innerHTML=`<table class="futures-spec-table"><thead><tr><th>規格</th><th>${A.name}<small>${A.exchange} · ${A.code}</small></th><th>${B.name}<small>${B.exchange} · ${B.code}</small></th></tr></thead><tbody>${rows.map(([n,fn])=>`<tr><th>${n}</th><td>${fn(A)}</td><td>${fn(B)}</td></tr>`).join('')}</tbody></table>`;
+  const updated=$('#futuresCompareUpdated');if(updated)updated.textContent='更新日期｜A '+futuresCompareDate(aq)+' ｜ B '+futuresCompareDate(bq);
+  updateFuturesRatioHint();
+  calcFuturesIntegrated();
+}
+function updateFuturesRatioHint(){
+  const A=futuresCompareItem($('#futuresCompareA')?.value),B=futuresCompareItem($('#futuresCompareB')?.value);if(!A||!B)return;
+  const r=suggestedFuturesRatio(A,B,$('#futuresCompareAMonth')?.value,$('#futuresCompareBMonth')?.value),el=$('#futuresRatioHint');
+  if(el)el.textContent=`建議比例 A:B = ${r.a}:${r.b}（依目前名目金額配對，差距約 ${tidy((r.error||0)*100,2)}%）`;
+}
+function applySuggestedFuturesRatio(){
+  const A=futuresCompareItem($('#futuresCompareA')?.value),B=futuresCompareItem($('#futuresCompareB')?.value);if(!A||!B)return;
+  const r=suggestedFuturesRatio(A,B,$('#futuresCompareAMonth')?.value,$('#futuresCompareBMonth')?.value);
+  if($('#futuresCompareAQty'))$('#futuresCompareAQty').value=r.a;
+  if($('#futuresCompareBQty'))$('#futuresCompareBQty').value=r.b;
+  calcFuturesIntegrated();
+}
+function calcFuturesIntegrated(){
+  const A=futuresCompareItem($('#futuresCompareA')?.value),B=futuresCompareItem($('#futuresCompareB')?.value),out=$('#futuresCompareResults');if(!A||!B||!out)return;
+  const aq=futuresCompareQuote(A,$('#futuresCompareAMonth')?.value),bq=futuresCompareQuote(B,$('#futuresCompareBMonth')?.value);
+  const dir=$('#futuresCompareDirection')?.value||'sellA',aQty=Math.max(1,Number($('#futuresCompareAQty')?.value)||1),bQty=Math.max(1,Number($('#futuresCompareBQty')?.value)||1),other=Number($('#futuresCompareOtherCost')?.value)||0;
+  const aField=dir==='sellA'?'bid':'ask',bField=dir==='sellA'?'ask':'bid',ap=Number(aq?.[aField]),bp=Number(bq?.[bField]);
+  const aFx=fxToTwd(A.spec.currency),bFx=fxToTwd(B.spec.currency);
+  const aNot=Number.isFinite(ap)?ap*Number(A.spec.multiplier||1)*aFx*aQty:null,bNot=Number.isFinite(bp)?bp*Number(B.spec.multiplier||1)*bFx*bQty:null;
+  const gross=aNot==null||bNot==null?null:(dir==='sellA'?aNot-bNot:bNot-aNot),net=gross==null?null:gross-other;
+  const am=A.margin.initial==null?null:Number(A.margin.initial)*aQty*fxToTwd(A.margin.currency),bm=B.margin.initial==null?null:Number(B.margin.initial)*bQty*fxToTwd(B.margin.currency);
+  const r=suggestedFuturesRatio(A,B,$('#futuresCompareAMonth')?.value,$('#futuresCompareBMonth')?.value);
+  out.innerHTML=`<div class="cost-metric"><span>A 執行價格</span><b>${Number.isFinite(ap)?qfmt(ap,A.code):'—'}</b><small>${A.code} ${aField.toUpperCase()} · ${aQty} 口</small></div><div class="cost-metric"><span>B 執行價格</span><b>${Number.isFinite(bp)?qfmt(bp,B.code):'—'}</b><small>${B.code} ${bField.toUpperCase()} · ${bQty} 口</small></div><div class="cost-metric"><span>A 名目金額</span><b>${aNot==null?'—':tidy(aNot,0)+' TWD'}</b><small>價格 × 乘數 × FX × 口數</small></div><div class="cost-metric"><span>B 名目金額</span><b>${bNot==null?'—':tidy(bNot,0)+' TWD'}</b><small>價格 × 乘數 × FX × 口數</small></div><div class="cost-metric"><span>換算後差額</span><b class="${net==null?'':cls(net)}">${net==null?'—':(net>=0?'+':'')+tidy(net,0)+' TWD'}</b><small>已扣除其他成本 / 稅</small></div><div class="cost-metric"><span>建議比例</span><b>${r.a} : ${r.b}</b><small>依目前名目金額最接近配對</small></div><div class="cost-metric"><span>A 原始保證金</span><b>${am==null?'動態':tidy(am,0)+' TWD'}</b><small>${A.margin.source}</small></div><div class="cost-metric"><span>B 原始保證金</span><b>${bm==null?'動態':tidy(bm,0)+' TWD'}</b><small>${B.margin.source}</small></div><div class="cost-warning">建議比例以目前報價、合約乘數與匯率做名目金額近似，不代表最佳避險比率。實際避險仍會受標的差異、Beta、相關性、基差與流動性影響。</div>`;
 }
 function bindFuturesSpecCompare(){
-  const a=$('#futuresCompareA'),b=$('#futuresCompareB');if(a)a.onchange=renderFuturesSpecCompare;if(b)b.onchange=renderFuturesSpecCompare;renderFuturesSpecCompare();
+  const a=$('#futuresCompareA'),b=$('#futuresCompareB'),am=$('#futuresCompareAMonth'),bm=$('#futuresCompareBMonth');
+  if(a)a.onchange=()=>renderFuturesSpecCompare(true);
+  if(b)b.onchange=()=>renderFuturesSpecCompare(true);
+  if(am)am.onchange=()=>renderFuturesSpecCompare(false);
+  if(bm)bm.onchange=()=>renderFuturesSpecCompare(false);
+  ['futuresCompareDirection','futuresCompareAQty','futuresCompareBQty','futuresCompareOtherCost'].forEach(id=>{const el=$('#'+id);if(el){el.oninput=calcFuturesIntegrated;el.onchange=calcFuturesIntegrated}});
+  if($('#applySuggestedRatio'))$('#applySuggestedRatio').onclick=applySuggestedFuturesRatio;
+  if($('#calcFuturesCompare'))$('#calcFuturesCompare').onclick=calcFuturesIntegrated;
+  if($('#resetFuturesCompare'))$('#resetFuturesCompare').onclick=()=>{if(a)a.selectedIndex=0;if(b)b.selectedIndex=Math.min(1,b.options.length-1);if($('#futuresCompareAQty'))$('#futuresCompareAQty').value='1';if($('#futuresCompareBQty'))$('#futuresCompareBQty').value='1';if($('#futuresCompareOtherCost'))$('#futuresCompareOtherCost').value='0';renderFuturesSpecCompare(true)};
+  renderFuturesSpecCompare(true);
 }
 function renderSpecSummary(row){const el=$('#contractSpecSummary');if(!el||!row)return;const a=specFor(row.tw.id),b=specFor(row.os.id),ma=marginFor(row.tw.id),mb=marginFor(row.os.id),target=row.underlying||row.name||'—';const card=(title,q,s,m)=>`<div class="spec-card"><div><b>${title} ${q.code}</b><span class="verified-badge">規格預設</span></div><div class="spec-line"><span>標的</span><strong>${target}</strong></div><div class="spec-line"><span>乘數</span><strong>${tidy(s.multiplier,6)}</strong></div><div class="spec-line"><span>Tick</span><strong>${fixedInput(s.tick,8)}</strong></div><div class="spec-line"><span>幣別</span><strong>${s.currency}</strong></div><div class="spec-line"><span>原始保證金</span><strong>${marginDisplay(m)}</strong></div><div class="source-note">${m.source}${m.asOf&&m.asOf!=='dynamic'?' · '+m.asOf:''}</div><div class="spec-line"><span>到期週期</span><strong>${s.cycle}</strong></div><div class="spec-source-block"><span>行情</span>${quoteMetaHtml(q)}</div></div>`;el.innerHTML=card(row.tw.exchange||'TAIFEX',row.tw,a,ma)+card(row.os.exchange,row.os,b,mb)}
 function renderMonthSummary(row,twMonths,osMonths){let el=$('#monthMatchSummary');if(!el){el=document.createElement('div');el.id='monthMatchSummary';el.className='month-match-summary';$('#contractSpecSummary')?.insertAdjacentElement('afterend',el)}const tw=$('#twExpiry')?.value,os=$('#osExpiry')?.value,exact=tw===os,gap=monthDistance(tw,os);el.innerHTML=`<div class="month-match-card ${exact?'exact':'near'}"><div><b>合約月份配對</b><span class="match-badge">${exact?'同月份':'最近月份'}</span></div><div class="month-pair"><span>TAIFEX ${row.tw.code}<strong>${monthLabel(tw)}</strong></span><span>↔</span><span>${row.os.exchange} ${row.os.code}<strong>${monthLabel(os)}</strong></span></div><small>${exact?'預設選擇最近共同可交易月。':`無完全同月時選最近月份，相差 ${gap} 個月。`}</small><div class="month-list"><span>TAIFEX：${twMonths.map(monthLabel).join(' · ')}</span><span>海外：${osMonths.slice(0,12).map(monthLabel).join(' · ')}</span></div></div>`}
@@ -365,7 +446,7 @@ function costFieldValue(q,field,month){const key=String(field).toLowerCase();if(
 function normalizedPrice(row,side,p){if(!isQuoteNumber(p))return null;if(row.compare==='inverse'&&side==='os')return Number(p)!==0?1/Number(p):null;return Number(p)}
 function calcCostLab(){const row=selectedCostRow();if(!row||!$('#costResults'))return;const d=$('#costDirection').value,twField=$('#twPriceField').value,osField=$('#osPriceField').value,twP=costFieldValue(row.tw,twField,$('#twExpiry').value),osP=costFieldValue(row.os,osField,$('#osExpiry').value),twMult=n($('#twMultiplier').value),osMult=n($('#osMultiplier').value),twN=n($('#twContracts').value,1),osN=n($('#osContracts').value,1),twU=n($('#twUnitFactor').value,1),osU=n($('#osUnitFactor').value,1),twFx=n($('#twFx').value,1),osFx=n($('#osFx').value,1),twCost=n($('#twCost').value),osCost=n($('#osCost').value),other=n($('#otherCost').value);const twCmp=normalizedPrice(row,'tw',twP)*twU,osCmp=normalizedPrice(row,'os',osP)*osU,rawSpread=d==='sellTw'?twCmp-osCmp:osCmp-twCmp,twPoint=twMult*twU*twFx,osPoint=osMult*osU*osFx,hedge=twPoint?osPoint/twPoint:0,twNot=twP*twPoint*twN,osNot=osP*osPoint*osN,gross=d==='sellTw'?twNot-osNot:osNot-twNot,costs=twCost*twN+osCost*osN+other,net=gross-costs;const tm=marginFor(row.tw.id),om=marginFor(row.os.id),twMargin=tm.initial==null?null:tm.initial*twN,osMargin=om.initial==null?null:om.initial*osN,twMarginTwd=twMargin==null?null:twMargin*fxToTwd(tm.currency),osMarginTwd=osMargin==null?null:osMargin*fxToTwd(om.currency),knownMarginTwd=(twMarginTwd||0)+(osMarginTwd||0),hasDynamic=twMargin==null||osMargin==null;$('#costResults').innerHTML=`<div class="cost-metric"><span>台期所選價</span><b>${qfmt(twP,row.tw.code)}</b><small>${row.tw.code} ${twField} · ${monthLabel($('#twExpiry').value)}</small></div><div class="cost-metric"><span>海外/比較腿選價</span><b>${qfmt(osP,row.os.code)}</b><small>${row.os.code} ${osField} · ${monthLabel($('#osExpiry').value)}</small></div><div class="cost-metric"><span>台灣腿原始保證金</span><b>${twMargin==null?'動態':tidy(twMargin,2)+' '+tm.currency}</b><small>${tm.source} · ${twN} 口</small></div><div class="cost-metric"><span>海外/比較腿原始保證金</span><b>${osMargin==null?'動態':tidy(osMargin,2)+' '+om.currency}</b><small>${om.source} · ${osN} 口</small></div><div class="cost-metric"><span>已知保證金合計</span><b>${tidy(knownMarginTwd,0)} TWD</b><small>依目前 Dashboard FX 換算${hasDynamic?'；不含動態保證金腿':''}</small></div><div class="cost-metric"><span>換算後價格價差</span><b class="${cls(rawSpread)}">${rawSpread>=0?'+':''}${tidy(rawSpread,6)}</b><small>${row.compare==='inverse'?'海外報價已倒數換向':''}</small></div><div class="cost-metric"><span>每點價值比</span><b>${tidy(hedge,4)}</b><small>台 / 海外已換成共同幣別</small></div><div class="cost-metric"><span>雙邊總交易成本</span><b>${tidy(costs,2)}</b><small>含口數；不含保證金</small></div><div class="cost-metric"><span>成本後名目差額</span><b class="${cls(net)}">${net>=0?'+':''}${tidy(net,2)}</b><small>不等同套利獲利</small></div><div class="cost-warning">原始保證金與交易成本是不同概念。海外交易所/清算所可能依波動、組合與帳戶類型動態調整保證金；顯示為「動態」者不以舊數字冒充現行要求。</div>`}
 function bindCostInputs(){if($('#costProduct'))$('#costProduct').onchange=()=>loadCostProductDefaults(true);if($('#costDirection'))$('#costDirection').onchange=()=>{setDirectionalFields();calcCostLab()};['twExpiry','osExpiry'].forEach(id=>{const el=$('#'+id);if(el)el.onchange=()=>{const row=selectedCostRow();renderMonthSummary(row,contractMonths(row.tw.id),contractMonths(row.os.id));calcCostLab()}});['twPriceField','osPriceField','twMultiplier','osMultiplier','twTick','osTick','twContracts','osContracts','twUnitFactor','osUnitFactor','twFx','osFx','twCost','osCost','otherCost'].forEach(id=>{const el=$('#'+id);if(el){el.oninput=calcCostLab;el.onchange=calcCostLab;el.addEventListener('blur',()=>{if(el.tagName==='INPUT'&&el.type==='number')el.value=fixedInput(el.value,10)})}});if($('#calcCostLab'))$('#calcCostLab').onclick=calcCostLab;if($('#resetCostLab'))$('#resetCostLab').onclick=()=>loadCostProductDefaults(true)}
-function initCostLab(){if(!DATA||!$('#costProduct'))return;costProductOptions();bindCostInputs();bindFuturesSpecCompare();loadCostProductDefaults(true);costInitialized=true}
+function initCostLab(){if(!DATA||!$('#futuresCompareA'))return;bindFuturesSpecCompare();costInitialized=true}
 function saveCustom(){localStorage.setItem(CUSTOM_KEY,JSON.stringify(customProducts))}
 function builtinProducts(){return catalogRows().flatMap(x=>[x.tw,x.os].map(q=>{const s=specFor(q.id);return{id:q.id,name:x.name,code:q.code,exchange:q.exchange,currency:s.currency,bid:q.bid,ask:q.ask,last:q.last,multiplier:s.multiplier,tick:s.tick,unitFactor:1,fx:fxToTwd(s.currency),cost:0,source:'built-in'}}))}
 function quoteMap(){return builtinProducts()}
