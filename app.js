@@ -135,7 +135,7 @@ const CONTRACT_SPECS={
   CME_6B:{code:'6B',multiplier:62500,tick:0.0001,currency:'USD',cycle:'quarter8',label:'GBP/USD',note:'GBP 62,500'},
   TAIFEX_XAF:{code:'XAF',multiplier:25000,tick:0.0001,currency:'USD',cycle:'quarter4',label:'AUD/USD',note:'AUD 25,000'},
   CME_6A:{code:'6A',multiplier:100000,tick:0.0001,currency:'USD',cycle:'quarter8',label:'AUD/USD',note:'AUD 100,000'},
-  TAIFEX_GDF:{code:'GDF',multiplier:100,tick:0.1,currency:'USD',cycle:'even6',label:'Gold USD',note:'display defaults; verify broker convention'},
+  TAIFEX_GDF:{code:'GDF',multiplier:1,tick:0.1,currency:'USD',cycle:'even6',label:'Gold USD',note:'1 troy ounce; USD 0.1 per tick'},
   COMEX_MGC:{code:'MGC',multiplier:10,tick:0.1,currency:'USD',cycle:'gold12',label:'Micro Gold',note:'10 troy oz'},
   TAIFEX_TGF:{code:'TGF',multiplier:1000,tick:1,currency:'TWD',cycle:'even6',label:'Gold TWD',note:'TWD gold contract'},
   COMEX_MGC_TWD:{code:'MGC',multiplier:10,tick:0.1,currency:'USD',cycle:'gold12',label:'Micro Gold + FX',note:'10 troy oz'},
