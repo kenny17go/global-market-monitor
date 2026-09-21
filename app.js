@@ -378,7 +378,7 @@ function futuresCompareUniverse(filter='all'){
     return row.category===filter;
   };
   catalogRows().forEach(row=>[row.tw,row.os].forEach(q=>{
-    if(!q?.id||seen.has(q.id)||!allow(row,q))return;seen.add(q.id);
+    if(!q?.id||q.id==='COMEX_MGC_TWD'||seen.has(q.id)||!allow(row,q))return;seen.add(q.id);
     const s=specFor(q.id),m=marginFor(q.id);
     const code=q.code||s.code;
     out.push({id:q.id,name:futuresProductDisplayName(q.id,s.label||row.name,code),code,exchange:q.exchange||'—',spec:s,margin:m,q,row});
