@@ -64,6 +64,43 @@ for (const code of TARGETS) {
   products[code] = { defaultMonth: defaultContract?.month || null, contracts };
 }
 
+const MARGIN_ENDPOINTS = [
+  'https://openapi.taifex.com.tw/v1/IndexFuturesAndOptionsMargining',
+  'https://openapi.taifex.com.tw/v1/GoldFuturesAndOptionsMargining',
+  'https://openapi.taifex.com.tw/v1/FXFuturesAndOptionsMargining'
+];
+const MARGIN_NAMES = {
+  TX:['臺股期貨','臺指期貨'], MTX:['小型臺指期貨'], TJF:['東證期貨'],
+  UDF:['美國道瓊期貨'], SPF:['美國標普500期貨'], UNF:['美國那斯達克100期貨'],
+  SXF:['美國費城半導體期貨'], F1F:['英國富時100期貨'],
+  RHF:['美元兌人民幣期貨'], XEF:['歐元兌美元期貨'], XJF:['美元兌日圓期貨'],
+  XBF:['英鎊兌美元期貨'], XAF:['澳幣兌美元期貨'],
+  GDF:['黃金期貨'], TGF:['臺幣黃金期貨'], BRF:['布蘭特原油期貨']
+};
+const marginRows=[];
+for (const url of MARGIN_ENDPOINTS) {
+  try {
+    const r=await fetch(url,{headers:{accept:'application/json','user-agent':'global-market-monitor/1.0'}});
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    const j=await r.json();
+    if(Array.isArray(j)) marginRows.push(...j);
+  } catch (e) {
+    console.warn('TAIFEX margin fetch failed:',url,e.message);
+  }
+}
+const field=(r,names)=>{for(const n of names)if(Object.prototype.hasOwnProperty.call(r,n))return r[n];return undefined};
+const cleanMargin=v=>num(v);
+const margins={};
+for(const [code,names] of Object.entries(MARGIN_NAMES)){
+  const row=marginRows.find(r=>names.includes(text(field(r,['商品別','商品名稱','Contract','ProductName','商品']))));
+  if(!row)continue;
+  const initial=cleanMargin(field(row,['原始保證金','原始保證金(A)','InitialMargin','Initial Margin']));
+  if(initial==null)continue;
+  const asOf=text(field(row,['更新日期','日期','Date','UpdateDate']))||null;
+  const currency=code==='GDF'||['XEF','XBF','XAF'].includes(code)?'USD':code==='XJF'?'JPY':code==='RHF'?'CNH':'TWD';
+  margins[code]={initial,currency,asOf,source:'TAIFEX OpenAPI'};
+}
+
 const out = {
   meta: {
     source: 'TAIFEX OpenAPI DailyMarketReportFut',
@@ -74,6 +111,7 @@ const out = {
     generatedAt: new Date().toISOString(),
     note: 'Official TAIFEX open data. Latest daily/session snapshot; not a streaming real-time feed.'
   },
+  margins,
   products
 };
 
