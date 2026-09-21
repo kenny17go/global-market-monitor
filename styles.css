@@ -45,3 +45,16 @@
 
 /* ust-yield-panel */
 .ust-yield-panel h3{gap:8px}.ust-yield-meta{padding:7px 10px 0;color:var(--muted);font-size:10px}.ust-yield-chart{height:205px;padding:8px 8px 0}.ust-yield-chart .chart-canvas{height:185px}.ust-yield-table-wrap{overflow-x:auto;padding:0 8px 8px}.ust-yield-table{table-layout:fixed;min-width:420px;border:1px solid var(--line);border-radius:7px;overflow:hidden}.ust-yield-table th,.ust-yield-table td{text-align:center!important;padding:6px 5px}.ust-yield-table th{position:static;background:#0d2134;color:#9fb7c9}.ust-yield-table td{font-weight:700;color:#dcecf8}.ust-yield-spreads{display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:0 8px 8px}.ust-yield-spreads>div{display:flex;justify-content:space-between;align-items:center;border:1px solid var(--line);border-radius:7px;background:#081827;padding:7px 9px}.ust-yield-spreads span{color:var(--muted);font-size:10px}.ust-yield-spreads b{font-size:12px;color:#cfe9fb}@media(max-width:800px){.ust-yield-chart{height:190px}.ust-yield-chart .chart-canvas{height:170px}}
+
+/* Futures comparison streamlined mobile layout */
+.futures-ab-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px}
+.futures-leg-card{border:1px solid #28506d;border-radius:10px;background:#081827;padding:12px;display:grid;gap:10px}
+.futures-leg-card>b{font-size:14px;color:#d9ebf8}
+.futures-leg-card label{display:grid;gap:6px;color:var(--muted);font-size:11px}
+.futures-leg-card select,.futures-leg-card input{width:100%;background:#061522;border:1px solid #2a4f6d;border-radius:8px;color:var(--text);padding:11px 12px;font-size:15px;min-height:46px}
+.futures-leg-card .futures-month-select{font-size:17px;font-weight:700;min-height:54px;padding:13px 14px}
+.futures-updated{padding:0 12px 10px}
+@media(max-width:700px){
+  .futures-ab-grid{grid-template-columns:1fr;gap:10px}
+  .futures-leg-card .futures-month-select{font-size:18px;min-height:58px}
+}
