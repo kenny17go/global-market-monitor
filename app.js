@@ -562,8 +562,6 @@ let customIndexLibrary=(()=>{try{return JSON.parse(localStorage.getItem(CIX_KEY)
 let editingCixId=null;
 
 const JPY_CIX_PRESETS=[
-  {id:'cix_jpytw01',name:'台日圓期貨相對估值－近月',symbol:'JPYTW01',description:'TAIFEX XJF 與 CME 6J 同到期日近月比較；CME 6J 為 USD/JPY 的反向報價（USD per JPY），倒數時 Bid/Ask 互換。',formula:'100 * (TAIFEX_XJF_NEAR.BID * CME_6J_NEAR.BID - 1)',mode:'percent',version:'1.0',watchMode:'alert',upper:0.3,lower:null,interval:15,freshness:20,skew:15,methodology:{expiryMatch:'same-expiry-only',premiumFormula:'100 * (TAIFEX_XJF_NEAR.BID * CME_6J_NEAR.BID - 1)',discountFormula:'100 * (1 / (CME_6J_NEAR.ASK * TAIFEX_XJF_NEAR.ASK) - 1)',premiumTrigger:'>= 0.30%',discountTrigger:'>= 0.30%',cmeSymbol:'6J',status:'WAITING_CME_6J_CONTRACT_MATCH'},createdAt:'2026-09-18T00:00:00.000Z',updatedAt:'2026-09-18T00:00:00.000Z'},
-  {id:'cix_jpytw02',name:'台日圓期貨相對估值－次月',symbol:'JPYTW02',description:'TAIFEX XJF 與 CME 6J 同到期日次月比較；若到期日不一致則不計算、不提醒。',formula:'100 * (TAIFEX_XJF_NEXT.BID * CME_6J_NEXT.BID - 1)',mode:'percent',version:'1.0',watchMode:'alert',upper:0.3,lower:null,interval:15,freshness:20,skew:15,methodology:{expiryMatch:'same-expiry-only',premiumFormula:'100 * (TAIFEX_XJF_NEXT.BID * CME_6J_NEXT.BID - 1)',discountFormula:'100 * (1 / (CME_6J_NEXT.ASK * TAIFEX_XJF_NEXT.ASK) - 1)',premiumTrigger:'>= 0.30%',discountTrigger:'>= 0.30%',cmeSymbol:'6J',status:'WAITING_CME_6J_CONTRACT_MATCH'},createdAt:'2026-09-18T00:00:00.000Z',updatedAt:'2026-09-18T00:00:00.000Z'}
 ];
 function ensureJpyCixPresets(){
   let changed=false;
