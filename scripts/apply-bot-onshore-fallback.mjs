@@ -39,6 +39,9 @@ if(Object.keys(data?.onshore?.curve||{}).length){
 try{
   const raw=await fetchText(BOT_TXT);
   const q=parseUsdLine(raw);
+  if(data?.spot?.bid==null||data?.spot?.ask==null){
+    data.spot={...(data.spot||{}),bid:q.spotBid,ask:q.spotAsk,mid:mid(q.spotBid,q.spotAsk),source:'Bank of Taiwan plain-text FX rates',mode:'BANK QUOTE',fallback:true};
+  }
   const mk=(tenor,days,fBid,fAsk)=>{
     const bid=fBid-q.spotBid, ask=fAsk-q.spotAsk;
     if(!fwdOk(bid,ask))throw new Error(`${tenor} invalid swap points ${bid}/${ask}`);
@@ -55,7 +58,7 @@ try{
   };
   data.meta=data.meta||{};
   data.meta.botFallback='PLAIN_TEXT';
-  data.meta.note='BOT fallback uses official plain-text quote file; exact 30D/90D/180D only.';
+  data.meta.note='BOT fallback uses official plain-text quote file for missing spot and exact 30D/90D/180D forwards only; Yahoo Finance remains the 1D/5m intraday trend source.';
   const tenors=['1W','1M','3M','6M','1Y'];
   data.spread=data.spread||{};
   for(const t of tenors){
