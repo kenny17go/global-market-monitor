@@ -333,6 +333,42 @@ function selectedCostRow(){return catalogRows()[Number($('#costProduct')?.value)
 function specFor(id){return CONTRACT_SPECS[id]||{multiplier:1,tick:1,currency:'TWD',cycle:'monthly18',code:id}}
 function marginFor(id){return INITIAL_MARGINS[id]||{initial:null,currency:specFor(id).currency,asOf:'dynamic',source:'交易所動態'}}
 function marginDisplay(m){return m?.initial==null?'動態':tidy(m.initial,2)+' '+m.currency}
+const FUTURES_ZH_NAMES={
+  TAIFEX_TX:'臺指期貨',
+  TAIFEX_MTX:'小型臺指期貨',
+  TAIFEX_SPF:'標普500期貨',
+  CME_MES:'微型E-mini標普500期貨',
+  TAIFEX_UNF:'那斯達克100期貨',
+  CME_MNQ:'微型E-mini那斯達克100期貨',
+  TAIFEX_UDF:'道瓊期貨',
+  CBOT_MYM:'微型E-mini道瓊期貨',
+  TAIFEX_SXF:'費城半導體期貨',
+  CME_SOX:'E-mini費城半導體期貨',
+  TAIFEX_TJF:'東證TOPIX期貨',
+  JPX_MINI_TOPIX:'小型TOPIX期貨',
+  JPX_NIKKEI225_MINI:'小型日經225期貨',
+  TAIFEX_F1F:'富櫃200期貨',
+  TAIFEX_RHF:'人民幣匯率期貨',
+  CME_CNH:'離岸人民幣期貨',
+  TAIFEX_XEF:'歐元兌美元期貨',
+  CME_6E:'歐元期貨',
+  TAIFEX_XJF:'美元兌日圓期貨',
+  CME_6J:'日圓期貨',
+  TAIFEX_XBF:'英鎊兌美元期貨',
+  CME_6B:'英鎊期貨',
+  TAIFEX_XAF:'澳幣兌美元期貨',
+  CME_6A:'澳幣期貨',
+  TAIFEX_GDF:'美元黃金期貨',
+  COMEX_MGC:'微型黃金期貨',
+  TAIFEX_TGF:'新臺幣黃金期貨',
+  COMEX_MGC_TWD:'微型黃金期貨＋匯率換算',
+  TAIFEX_BRF:'布蘭特原油期貨',
+  ICE_BRENT_MINI:'小型布蘭特原油期貨'
+};
+function futuresProductDisplayName(id,fallback,code){
+  const zh=FUTURES_ZH_NAMES[id]||fallback||code||id;
+  return code&&zh!==code?`${zh} ${code}`:zh;
+}
 function futuresCompareUniverse(filter='all'){
   const seen=new Set(),out=[];
   const allow=(row,q)=>{
@@ -344,7 +380,8 @@ function futuresCompareUniverse(filter='all'){
   catalogRows().forEach(row=>[row.tw,row.os].forEach(q=>{
     if(!q?.id||seen.has(q.id)||!allow(row,q))return;seen.add(q.id);
     const s=specFor(q.id),m=marginFor(q.id);
-    out.push({id:q.id,name:s.label||row.name,code:q.code||s.code,exchange:q.exchange||'—',spec:s,margin:m,q,row});
+    const code=q.code||s.code;
+    out.push({id:q.id,name:futuresProductDisplayName(q.id,s.label||row.name,code),code,exchange:q.exchange||'—',spec:s,margin:m,q,row});
   }));
   return out;
 }
