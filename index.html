@@ -98,33 +98,31 @@
         <article class="panel spread-table-panel"><h3>期貨商品比較 / Futures Products <small>跨市場 / 同標的</small></h3><div class="table-wrap spread-table-wrap"><table><thead><tr><th>分類</th><th>標的</th><th>台期所</th><th>Bid</th><th>Ask</th><th>Last</th><th>海外市場</th><th>商品</th><th>Bid</th><th>Ask</th><th>Last</th><th>比較注意</th></tr></thead><tbody id="catalogBody"></tbody></table></div></article>
 
         <section class="cost-lab panel">
-          <div class="formula-lab-head"><div><h3>期貨規格與保證金比較 / Contract Specs & Margin</h3><p>選擇商品後，比較交易所、合約乘數、幣別、最小跳動點、原始保證金與到期週期；需要時仍可進一步試算換算與交易成本。</p></div><button id="resetCostLab" class="secondary-btn">恢復官方預設</button></div>
-          <div class="futures-compare-picker"><label>比較 A<select id="futuresCompareA"></select></label><span class="futures-compare-vs">VS</span><label>比較 B<select id="futuresCompareB"></select></label></div>
-          <div id="futuresSpecCompare" class="table-wrap"></div>
-          <div id="contractSpecSummary" class="spec-summary"></div>
-          <div class="cost-grid">
-            <label>商品<select id="costProduct"></select></label>
-            <label>方向<select id="costDirection"><option value="sellTw">賣台期所 / 買海外</option><option value="sellOs">買台期所 / 賣海外</option></select></label>
-            <label>台期所月份<input id="twExpiry" value="自動"></label>
-            <label>海外月份<input id="osExpiry" value="自動"></label>
-            <label>台期所價格欄位<select id="twPriceField"><option value="BID">Bid</option><option value="ASK">Ask</option><option value="LAST">Last</option></select></label>
-            <label>海外價格欄位<select id="osPriceField"><option value="ASK">Ask</option><option value="BID">Bid</option><option value="LAST">Last</option></select></label>
-            <label>台期所乘數<input id="twMultiplier" type="number" step="any" value="1"></label>
-            <label>海外乘數<input id="osMultiplier" type="number" step="any" value="1"></label>
-            <label>台期所 Tick<input id="twTick" type="number" step="any" value="1"></label>
-            <label>海外 Tick<input id="osTick" type="number" step="any" value="1"></label>
-            <label>台期所口數<input id="twContracts" type="number" step="any" value="1"></label>
-            <label>海外口數<input id="osContracts" type="number" step="any" value="1"></label>
-            <label>台期所價格換算<input id="twUnitFactor" type="number" step="any" value="1"></label>
-            <label>海外價格換算<input id="osUnitFactor" type="number" step="any" value="1"></label>
-            <label>台期所名目 FX<input id="twFx" type="number" step="any" value="1"></label>
-            <label>海外名目 FX<input id="osFx" type="number" step="any" value="1"></label>
-            <label>台期所交易成本<input id="twCost" type="number" step="any" value="0"></label>
-            <label>海外交易成本<input id="osCost" type="number" step="any" value="0"></label>
-            <label>其他成本/稅/FX<input id="otherCost" type="number" step="any" value="0"></label>
+          <div class="formula-lab-head"><div><h3>期貨規格、保證金與換算比較 / Futures Compare</h3><p>先選 A、B 期貨與月份，直接比較規格、保證金與報價；輸入口數後即可計算換算後差額，並提供接近等值曝險的建議比例。</p></div><button id="resetFuturesCompare" class="secondary-btn">恢復預設</button></div>
+          <div class="futures-compare-picker">
+            <label>比較 A<select id="futuresCompareA"></select></label>
+            <span class="futures-compare-vs">VS</span>
+            <label>比較 B<select id="futuresCompareB"></select></label>
           </div>
-          <div class="cost-actions"><button id="calcCost">計算換算後價差</button><span class="source-note">成本欄位以各市場報價幣別輸入；若跨幣別比較，請設定 FX。</span></div>
-          <div id="costResults" class="cost-results"></div>
+          <div class="futures-compare-picker">
+            <label>A 到期月份<select id="futuresCompareAMonth"></select></label>
+            <span class="futures-compare-vs">↔</span>
+            <label>B 到期月份<select id="futuresCompareBMonth"></select></label>
+          </div>
+          <div id="futuresCompareUpdated" class="source-note">更新日期 —</div>
+          <div id="futuresSpecCompare" class="table-wrap"></div>
+          <div class="cost-grid futures-simple-calc">
+            <label>方向<select id="futuresCompareDirection"><option value="sellA">賣 A / 買 B</option><option value="sellB">買 A / 賣 B</option></select></label>
+            <label>A 期貨口數<input id="futuresCompareAQty" type="number" min="1" step="1" value="1"></label>
+            <label>B 期貨口數<input id="futuresCompareBQty" type="number" min="1" step="1" value="1"></label>
+            <label>其他成本 / 稅<input id="futuresCompareOtherCost" type="number" step="any" value="0"></label>
+          </div>
+          <div class="cost-actions">
+            <button id="applySuggestedRatio" class="secondary-btn">套用建議比例</button>
+            <button id="calcFuturesCompare">計算換算後差額</button>
+            <span id="futuresRatioHint" class="source-note">建議比例 —</span>
+          </div>
+          <div id="futuresCompareResults" class="cost-results"></div>
         </section>
 
         <section class="panel custom-products-wrap"><div class="custom-products-head"><div><h3>自訂商品 / Custom Products</h3><p>新增你自己的市場標的與報價欄位，供 Formula Lab 使用。</p></div><button id="addCustomProduct" class="secondary-btn">＋ 新增商品</button></div><div id="customProductEditor" class="custom-editor hidden"></div><div id="customProductList" class="custom-product-list"></div></section>
@@ -151,4 +149,4 @@
   });
   window.__gmmEmergencySwitch=emergencySwitch;
 })();
-</script><script src="config.example.js?v=20260918-fix1"></script><script src="providers.js?v=20260916-ndf3"></script><script src="app.js?v=20260921-speccompare1"></script><script src="tv-spark-widget.js?v=20260918-fix1"></script></body></html>
+</script><script src="config.example.js?v=20260918-fix1"></script><script src="providers.js?v=20260916-ndf3"></script><script src="app.js?v=20260921-integratedcompare1"></script><script src="tv-spark-widget.js?v=20260918-fix1"></script></body></html>
