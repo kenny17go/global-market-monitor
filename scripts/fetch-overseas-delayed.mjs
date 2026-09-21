@@ -169,7 +169,7 @@ const INDEX_TARGETS=[
   {id:'NDX',symbol:'^NDX',label:'Nasdaq-100',range:[1000,100000]},
   {id:'SOX',symbol:'^SOX',label:'SOX 費半',range:[100,20000]},
   {id:'NIKKEI',symbol:'^N225',label:'日經 225',range:[1000,100000]},
-  {id:'TOPIX',symbol:'^TOPX',label:'東證 TOPIX',range:[100,10000]}
+  {id:'TOPIX',symbol:'998405.T',label:'東證 TOPIX',range:[100,10000]}
 ];
 const indices={};for(const x of INDEX_TARGETS)indices[x.id]=await yahooIndexQuote(x.id,x.symbol,x.label,x.range);const yahooTaiex=await yahooIndexQuote('TAIEX','^TWII','台灣加權',[1000,100000]);indices.TAIEX=await twseTaiexQuote(yahooTaiex);
 const products={};for(const t of ROOTS)products[t.id]=await yahooRootProduct(t);
