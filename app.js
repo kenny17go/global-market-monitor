@@ -808,8 +808,14 @@ function insertCixQuoteField(field){
   ta.value+=(ta.value&&!ta.value.endsWith(' ')?' ':'')+token;ta.focus();updateCixFormulaPreview();
 }
 function cixModeLabel(v){return ({raw:'RAW',percent:'%',base100:'BASE 100',base1000:'BASE 1,000'})[v]||v}
+function syncCixEditButtons(){
+  const editing=!!editingCixId,save=$('#saveCustomIndex'),clear=$('#clearCustomIndex');
+  if(save)save.textContent=editing?'修改自訂指數':'儲存自訂指數';
+  if(clear)clear.textContent=editing?'取消修改':'清除';
+}
 function clearCixForm(){
   editingCixId=null;
+  syncCixEditButtons();
   const vals={cixName:'',cixSymbol:'',cixDescription:'',cixFormula:'',cixUpper:'',cixLower:''};
   Object.entries(vals).forEach(([id,v])=>{const e=document.getElementById(id);if(e)e.value=v});
   if($('#cixMode'))$('#cixMode').value='raw';if($('#cixVersion'))$('#cixVersion').value='1.0';if($('#cixWatchMode'))$('#cixWatchMode').value='watch';syncCixWatchMode();if($('#cixInterval'))$('#cixInterval').value='15';if($('#cixAlertCooldown'))$('#cixAlertCooldown').value='15';if($('#cixFreshness'))$('#cixFreshness').value='20';if($('#cixSkew'))$('#cixSkew').value='15';
@@ -1001,7 +1007,10 @@ function renderCixLibrary(){
   document.querySelectorAll('[data-cix-pin]').forEach(b=>b.onclick=()=>toggleCixPin(b.dataset.cixPin));document.querySelectorAll('[data-cix-move]').forEach(b=>b.onclick=()=>moveCix(b.dataset.cixMove,Number(b.dataset.dir)));document.querySelectorAll('[data-cix-edit]').forEach(b=>b.onclick=()=>editCix(b.dataset.cixEdit));document.querySelectorAll('[data-cix-delete]').forEach(b=>b.onclick=()=>deleteCix(b.dataset.cixDelete));
 }
 function editCix(id){
-  const x=customIndexLibrary.find(v=>v.id===id);if(!x)return;editingCixId=id;
+  const x=customIndexLibrary.find(v=>v.id===id);if(!x)return;
+  switchView('customindex');
+  editingCixId=id;
+  syncCixEditButtons();
   const map={cixName:x.name,cixSymbol:x.symbol,cixDescription:x.description,cixFormula:x.formula,cixMode:x.mode,cixVersion:x.version,cixWatchMode:x.watchMode,cixUpper:x.upper??'',cixLower:x.lower??'',cixInterval:String(x.interval||15),cixAlertCooldown:String(x.alertCooldown||15),cixFreshness:String(x.freshness),cixSkew:String(x.skew)};
   Object.entries(map).forEach(([id,v])=>{const e=document.getElementById(id);if(e)e.value=v});
   if($('#cixFormula')){if(x.secondaryFormula)$('#cixFormula').dataset.secondaryFormula=x.secondaryFormula;else delete $('#cixFormula').dataset.secondaryFormula}
@@ -1010,7 +1019,8 @@ function editCix(id){
     syncCixTemplateMode();
     if($('#cixTwoWayFormula'))$('#cixTwoWayFormula').value=x.formula;
   }
-  document.querySelector('.cix-builder')?.classList.remove('is-collapsed');syncCixWatchMode();if($('#cixPreview'))$('#cixPreview').textContent=x.formula?'已載入公式 · 儲存修改將保留 Methodology 設定':'等待輸入公式';window.scrollTo({top:0,behavior:'smooth'});
+  document.querySelector('.cix-builder')?.classList.remove('is-collapsed');syncCixWatchMode();if($('#cixPreview'))$('#cixPreview').textContent=x.formula?'已載入公式 · 儲存修改將保留 Methodology 設定':'等待輸入公式';
+  setTimeout(()=>document.querySelector('.cix-builder')?.scrollIntoView({behavior:'smooth',block:'start'}),80);
 }
 function deleteCix(id){customIndexLibrary=customIndexLibrary.filter(x=>x.id!==id);clearCixRuntime(id);saveCixLibrary();renderCixLibrary()}
 function saveCustomIndexV1(){
@@ -1081,7 +1091,9 @@ function bindCixUI(){
   if($('#cixImportFile'))$('#cixImportFile').onchange=async e=>{const f=e.target.files?.[0];if(f)await importCixBackup(f);e.target.value=''};
   if($('#newCustomIndex'))$('#newCustomIndex').onclick=()=>{document.querySelector('.cix-builder')?.classList.remove('is-collapsed');clearCixForm()};
   if($('#cancelCustomIndex'))$('#cancelCustomIndex').onclick=()=>document.querySelector('.cix-builder')?.classList.toggle('is-collapsed');
-  if($('#clearCustomIndex'))$('#clearCustomIndex').onclick=clearCixForm;if($('#saveCustomIndex'))$('#saveCustomIndex').onclick=saveCustomIndexV1;
+  if($('#clearCustomIndex'))$('#clearCustomIndex').onclick=()=>{const wasEditing=!!editingCixId;clearCixForm();if(wasEditing)document.querySelector('.cix-builder')?.classList.add('is-collapsed')};
+  if($('#saveCustomIndex'))$('#saveCustomIndex').onclick=saveCustomIndexV1;
+  syncCixEditButtons();
   if($('#cixFormula'))$('#cixFormula').oninput=()=>{delete $('#cixFormula').dataset.secondaryFormula;updateCixFormulaPreview()};if($('#cixWatchMode'))$('#cixWatchMode').onchange=syncCixWatchMode;syncCixWatchMode();
 }
 
