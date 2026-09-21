@@ -165,6 +165,43 @@ async function yahooJapanTopix(previous){
   }catch(e){console.warn('Yahoo Japan TOPIX fallback failed',e.message);return null}
 }
 
+
+async function mizuhoTopix(previous){
+  try{
+    const html=await fetchText('https://ot32.qhit.net/mizuhosc/page2/main/index.aspx?F=shihyo%2Fdetail&KEY1=151&MODE=1D');
+    const plain=stripHtml(html);
+    const anchor=plain.indexOf('主要指標 TOPIX');
+    const chunk=anchor>=0?plain.slice(anchor,anchor+5000):plain;
+    const current=chunk.match(/現在値\s*([0-9]{1,2},[0-9]{3}\.[0-9]{2})/);
+    const last=valid(current?.[1],[100,10000]);if(last==null)throw new Error('Mizuho TOPIX current value not found');
+    const pm=chunk.match(/前日比\s*([+\-−]?\s*[0-9,]+\.[0-9]{2})\s*\(([+\-−]?\s*[0-9.]+)％\)/);
+    const change=pm?num(pm[1].replace('−','-').replace(/\s/g,'')):null;
+    const pct=pm?num(pm[2].replace('−','-').replace(/\s/g,'')):null;
+    const bar=chunk.match(/5分足\s*(20\d{2})\/(\d{1,2})\/(\d{1,2})\s*(\d{1,2}:\d{2})/);
+    const now=tokyoNowParts();
+    const quoteDate=bar?`${bar[1]}-${String(Number(bar[2])).padStart(2,'0')}-${String(Number(bar[3])).padStart(2,'0')}`:now.date;
+    const hhmm=bar?.[4]||`${String(now.hour).padStart(2,'0')}:${String(now.minute).padStart(2,'0')}`;
+    const timestamp=new Date(`${quoteDate}T${hhmm}:00+09:00`).toISOString();
+    const old=previous?.indices?.TOPIX;
+    const sameSession=old?.seriesMeta?.session===quoteDate;
+    const series=sameSession&&Array.isArray(old?.series)?[...old.series]:[];
+    const seriesTimes=sameSession&&Array.isArray(old?.seriesTimes)?[...old.seriesTimes]:[];
+    const minutes=now.hour*60+now.minute;
+    const inSession=quoteDate===now.date&&((minutes>=540&&minutes<=690)||(minutes>=750&&minutes<=930));
+    if(inSession&&seriesTimes.at(-1)!==timestamp){
+      series.push(last);seriesTimes.push(timestamp);
+      while(series.length>90){series.shift();seriesTimes.shift()}
+    }
+    return {
+      id:'TOPIX',symbol:'TPX',label:'東證 TOPIX',
+      last,previousClose:change!=null?last-change:null,change,pct,timestamp,
+      source:'Mizuho Securities public TOPIX quote',mode:'PUBLIC WEB QUOTE',
+      series,seriesTimes,
+      seriesMeta:{range:'1D',interval:'5m',session:quoteDate,source:'Mizuho Securities TOPIX 5-minute snapshots',mode:'PUBLIC WEB QUOTE',timezone:'Asia/Tokyo',points:series.length,collection:'5-minute workflow snapshots'}
+    };
+  }catch(e){console.warn('Mizuho TOPIX fallback failed',e.message);return null}
+}
+
 async function nikkei225jpMini(){try{const plain=stripHtml(await fetchText('https://nikkei225jp.com/cme/'));const contracts=[];const re=/大証ミニ\s*(\d{2})年(\d{1,2})月限\s*([\d,]+)/g;let m;while((m=re.exec(plain))){const month=`20${m[1]}${String(m[2]).padStart(2,'0')}`,last=valid(m[3],[1000,100000]);if(last!=null)contracts.push({symbol:`OSE Nikkei225 mini ${month}`,month,bid:null,ask:null,last,timestamp:new Date().toISOString(),quoteType:'nikkei225jp public table',quoteMode:'DELAYED',delayMinutes:15})}return {defaultMonth:contracts[0]?.month||null,contracts,source:'nikkei225jp.com · OSE public quote fallback',mode:contracts.length?'DELAYED':'UNAVAILABLE',delayMinutes:15}}catch(e){console.warn('nikkei225jp fallback failed',e.message);return {defaultMonth:null,contracts:[],source:'nikkei225jp.com · OSE public quote fallback',mode:'UNAVAILABLE'}}}
 
 async function twseTaiexQuote(yahoo){
@@ -220,7 +257,7 @@ const INDEX_TARGETS=[
   {id:'NIKKEI',symbol:'^N225',label:'日經 225',range:[1000,100000]},
   {id:'TOPIX',symbol:'998405.T',label:'東證 TOPIX',range:[100,10000]}
 ];
-const previousOverseas=await readPreviousOverseas();const indices={};for(const x of INDEX_TARGETS)indices[x.id]=await yahooIndexQuote(x.id,x.symbol,x.label,x.range);if(indices.TOPIX?.last==null){const topix=await yahooJapanTopix(previousOverseas);if(topix)indices.TOPIX=topix}const yahooTaiex=await yahooIndexQuote('TAIEX','^TWII','台灣加權',[1000,100000]);indices.TAIEX=await twseTaiexQuote(yahooTaiex);
+const previousOverseas=await readPreviousOverseas();const indices={};for(const x of INDEX_TARGETS)indices[x.id]=await yahooIndexQuote(x.id,x.symbol,x.label,x.range);if(indices.TOPIX?.last==null){let topix=await yahooJapanTopix(previousOverseas);if(!topix)topix=await mizuhoTopix(previousOverseas);if(topix)indices.TOPIX=topix}const yahooTaiex=await yahooIndexQuote('TAIEX','^TWII','台灣加權',[1000,100000]);indices.TAIEX=await twseTaiexQuote(yahooTaiex);
 const products={};for(const t of ROOTS)products[t.id]=await yahooRootProduct(t);
 
 const [bcNikkei,bcTopix,bcMgc,bcBrent]=await Promise.all([
