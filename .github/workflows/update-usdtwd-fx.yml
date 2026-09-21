@@ -23,7 +23,8 @@ on:
       - 'scripts/patch-fx-v11.mjs'
       - '.github/workflows/update-usdtwd-fx.yml'
   schedule:
-    - cron: '3,18,33,48 * * * 1-5'
+    - cron: '3,18,33,48 0-17 * * 1-5'
+      timezone: "Asia/Taipei"
 
 permissions:
   contents: write
