@@ -5,24 +5,6 @@ on:
   push:
     paths:
       - 'scripts/fetch-taifex.mjs'
-      - 'scripts/install-taifex-official.mjs'
-      - 'scripts/patch-ui-target.mjs'
-      - 'scripts/apply-market-connections-safe.mjs'
-      - 'scripts/patch-source-status-ui.mjs'
-      - 'scripts/apply-fx-v1.mjs'
-      - 'scripts/patch-taifex-settlement-ndf.mjs'
-      - 'scripts/patch-ndf-runtime-cache.mjs'
-      - 'scripts/patch-ndf-formula-tokens.mjs'
-      - 'scripts/patch-formula-category-filter.mjs'
-      - 'scripts/patch-custom-indicators.mjs'
-      - 'scripts/patch-indicator-dashboard.mjs'
-      - 'scripts/patch-screen-lock.mjs'
-      - 'scripts/patch-overview-major-fx.mjs'
-      - 'scripts/patch-overview-equities.mjs'
-      - 'scripts/patch-overview-commodities.mjs'
-      - 'scripts/patch-overview-rates.mjs'
-      - 'scripts/patch-ust-yield-panel.mjs'
-      - 'scripts/fix-runtime-regressions.mjs'
       - '.github/workflows/update-taifex-data.yml'
   schedule:
     - cron: '35 7 * * 1-5'
@@ -43,95 +25,21 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Install official TAIFEX integration and fetch data
-        run: node scripts/install-taifex-official.mjs
-      - name: Apply UI target patch
-        run: node scripts/patch-ui-target.mjs
-      - name: Apply market connections
-        run: node scripts/apply-market-connections-safe.mjs
-      - name: Apply quote source status UI
-        run: node scripts/patch-source-status-ui.mjs
-      - name: Apply USD TWD FX V1
-        run: node scripts/apply-fx-v1.mjs
-      - name: Install TAIFEX settlement NDF panel
-        run: node scripts/patch-taifex-settlement-ndf.mjs
-      - name: Force-refresh NDF frontend assets
-        run: node scripts/patch-ndf-runtime-cache.mjs
-      - name: Install settlement NDF formula tokens
-        run: node scripts/patch-ndf-formula-tokens.mjs
-      - name: Install Formula Lab category filter
-        run: node scripts/patch-formula-category-filter.mjs
-      - name: Install named indicators and alerts
-        run: node scripts/patch-custom-indicators.mjs
-      - name: Install custom indicator dashboard
-        run: node scripts/patch-indicator-dashboard.mjs
-      - name: Install screen lock demo
-        run: node scripts/patch-screen-lock.mjs
-      - name: Restore overview FX market bridge
-        run: node scripts/patch-overview-major-fx.mjs
-      - name: Restore overview equity market bridge
-        run: node scripts/patch-overview-equities.mjs
-      - name: Restore overview commodity market bridge
-        run: node scripts/patch-overview-commodities.mjs
-      - name: Restore overview rates market bridge
-        run: node scripts/patch-overview-rates.mjs
-      - name: Restore UST yield chart and tenor table
-        run: node scripts/patch-ust-yield-panel.mjs
-      - name: Fix browser runtime regressions
-        run: node scripts/fix-runtime-regressions.mjs
-      - name: Validate JavaScript
+      - name: Fetch TAIFEX official data
+        run: node scripts/fetch-taifex.mjs
+      - name: Validate TAIFEX data
         run: |
-          node --check app.js
-          node --check providers.js
-          node --check scripts/patch-ui-target.mjs
-          node --check scripts/apply-market-connections-safe.mjs
-          node --check scripts/patch-source-status-ui.mjs
-          node --check scripts/apply-fx-v1.mjs
-          node --check scripts/patch-taifex-settlement-ndf.mjs
-          node --check scripts/patch-ndf-runtime-cache.mjs
-          node --check scripts/patch-ndf-formula-tokens.mjs
-          node --check scripts/patch-formula-category-filter.mjs
-          node --check scripts/patch-custom-indicators.mjs
-          node --check scripts/patch-indicator-dashboard.mjs
-          node --check scripts/patch-screen-lock.mjs
-          node --check scripts/patch-overview-major-fx.mjs
-          node --check scripts/patch-overview-equities.mjs
-          node --check scripts/patch-overview-commodities.mjs
-          node --check scripts/patch-overview-rates.mjs
-          node --check scripts/patch-ust-yield-panel.mjs
-          node --check scripts/fix-runtime-regressions.mjs
-          grep -q "function renderTaifexSettlementNdf" app.js
-          grep -q "TAIFEX settlement NDF render failed" app.js
-          grep -q "TGF_NEAR_NDF" app.js
-          grep -q "BRF_NEXT_NDF" app.js
-          grep -q "tokenCategory" index.html
-          grep -q "tokenCategory" app.js
-          grep -q "indicatorName" index.html
-          grep -q "renderCustomIndicators" app.js
-          grep -q "evaluateIndicatorAlerts" app.js
-          grep -q "indicatorsView" index.html
-          grep -q "renderIndicatorDashboard" app.js
-          grep -q "screenLock" index.html
-          grep -q "SCREEN_LOCK_PASS" app.js
-          grep -q "app.js?v=20260916-lockdemo1" index.html
-          grep -q "taifexSettlementNdf" index.html
-          grep -q "ustYieldValues" index.html
-          grep -q "ustYieldTenors" app.js
-          grep -q "ust-yield-panel" styles.css
-          grep -q "mergeMajorFx(base,majorFx)" providers.js
-          grep -q "mergeOverviewEquities(base,delayed,taifex)" providers.js
-          grep -q "mergeOverviewCommodities(base,commodityData)" providers.js
-          grep -q "mergeOverviewRates(base,ratesData)" providers.js
-          grep -q "commodities-latest.json" providers.js
-          grep -q "rates-latest.json" providers.js
-      - name: Commit integration/data changes
+          node --check scripts/fetch-taifex.mjs
+          node -e "const d=JSON.parse(require('fs').readFileSync('data/taifex-latest.json','utf8')); const need=['TX','MTX','SPF','UNF','UDF','SXF','TJF','F1F','RHF','XEF','XJF','XBF','XAF','GDF','TGF','BRF']; const ok=need.filter(k=>Array.isArray(d.products?.[k]?.contracts)&&d.products[k].contracts.length); if(ok.length<12) process.exit(1); console.log('TAIFEX products with contracts:',ok.length,'generated:',d.meta?.generatedAt);"
+      - name: Commit TAIFEX data only
         run: |
-          if git diff --quiet -- app.js providers.js config.example.js index.html styles.css data/latest.json data/taifex-latest.json scripts/fetch-overseas-delayed.mjs; then
-            echo "No changes"
+          git add data/taifex-latest.json
+          if git diff --cached --quiet; then
+            echo "No TAIFEX data changes"
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add app.js providers.js config.example.js index.html styles.css data/latest.json data/taifex-latest.json scripts/fetch-overseas-delayed.mjs
-          git commit -m "feat: refresh TAIFEX data and preserve overview market bridges"
+          git commit -m "data: refresh TAIFEX official data"
+          git pull --rebase origin main
           git push
