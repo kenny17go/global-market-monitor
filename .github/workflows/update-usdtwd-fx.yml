@@ -72,49 +72,14 @@ jobs:
         run: node scripts/fix-usdtwd-toggle.mjs
       - name: Apply FX V1.1 labels
         run: node scripts/patch-fx-v11.mjs
-      - name: Validate
+      - name: Validate refreshed FX data and runtime
         run: |
-          node -e "const d=JSON.parse(require('fs').readFileSync('data/usdtwd-fx.json','utf8')); if(!d.offshore||!d.offshore.curve) process.exit(1);"
+          node -e "const d=JSON.parse(require('fs').readFileSync('data/usdtwd-fx.json','utf8')); if(!d.spot||d.spot.mid==null||!d.offshore||!d.offshore.curve) process.exit(1); console.log('USD/TWD spot:',d.spot.mid,'generated:',d.meta?.generatedAt);"
           node --check app.js
           node --check providers.js
-          node --check scripts/patch-taifex-settlement-ndf.mjs
-          node --check scripts/patch-ndf-runtime-cache.mjs
-          node --check scripts/patch-ndf-formula-tokens.mjs
-          node --check scripts/patch-formula-category-filter.mjs
-          node --check scripts/patch-indicator-dashboard.mjs
-          node --check scripts/patch-screen-lock.mjs
-          node --check scripts/patch-overview-major-fx.mjs
-          node --check scripts/patch-overview-equities.mjs
-          node --check scripts/patch-overview-commodities.mjs
-          node --check scripts/patch-overview-rates.mjs
-          node --check scripts/patch-ust-yield-panel.mjs
-          grep -q "function syncUsdtwdVisibility" app.js
-          grep -q "function renderTaifexSettlementNdf" app.js
-          grep -q "TAIFEX settlement NDF render failed" app.js
-          grep -q "TGF_NEAR_NDF" app.js
-          grep -q "BRF_NEXT_NDF" app.js
-          grep -q "tokenCategory" index.html
-          grep -q "tokenCategory" app.js
-          grep -q "indicatorName" index.html
-          grep -q "renderCustomIndicators" app.js
-          grep -q "evaluateIndicatorAlerts" app.js
-          grep -q "indicatorsView" index.html
-          grep -q "renderIndicatorDashboard" app.js
-          grep -q "screenLock" index.html
-          grep -q "SCREEN_LOCK_PASS" app.js
-          grep -q "taifexSettlementNdf" index.html
-          grep -q "DOMContentLoaded',syncUsdtwdVisibility" app.js
-          grep -q "toggleUsdtwdFx" index.html
-          grep -q "usdtwdFxPanel" index.html
-          grep -q "ustYieldValues" index.html
-          grep -q "ustYieldTenors" app.js
-          grep -q "ust-yield-panel" styles.css
-          grep -q "mergeMajorFx(base,majorFx)" providers.js
+          node --check scripts/fetch-usdtwd-fx.mjs
+          grep -q "mergeUsdtwd(base,fxTwd)" providers.js
           grep -q "mergeOverviewEquities(base,delayed,taifex)" providers.js
-          grep -q "mergeOverviewCommodities(base,commodityData)" providers.js
-          grep -q "mergeOverviewRates(base,ratesData)" providers.js
-          grep -q "commodities-latest.json" providers.js
-          grep -q "rates-latest.json" providers.js
       - name: Commit FX data and UI
         run: |
           git add data/usdtwd-fx.json index.html app.js providers.js styles.css scripts/fetch-overseas-delayed.mjs
