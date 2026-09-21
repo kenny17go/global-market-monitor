@@ -373,7 +373,7 @@ function suggestedFuturesRatio(A,B,am,bm){
   const av=futuresCompareNotional(A,am),bv=futuresCompareNotional(B,bm);
   if(!(av>0&&bv>0))return{a:1,b:1,error:null};
   let best={a:1,b:1,error:Infinity};
-  for(let x=1;x<=20;x++)for(let y=1;y<=20;y++){
+  for(let x=1;x<=10;x++)for(let y=1;y<=10;y++){
     const va=x*av,vb=y*bv,err=Math.abs(va-vb)/Math.max(va,vb);
     if(err<best.error)best={a:x,b:y,error:err};
   }
@@ -404,7 +404,7 @@ function renderFuturesSpecCompare(resetMonths=false){
 function updateFuturesRatioHint(){
   const A=futuresCompareItem($('#futuresCompareA')?.value),B=futuresCompareItem($('#futuresCompareB')?.value);if(!A||!B)return;
   const r=suggestedFuturesRatio(A,B,$('#futuresCompareAMonth')?.value,$('#futuresCompareBMonth')?.value),el=$('#futuresRatioHint');
-  if(el)el.textContent=`建議比例 A:B = ${r.a}:${r.b}（依目前名目金額配對，差距約 ${tidy((r.error||0)*100,2)}%）`;
+  if(el)el.textContent=`建議比例 A:B = ${r.a}:${r.b}（1～10 口內依名目金額配對，差距約 ${tidy((r.error||0)*100,2)}%）`;
 }
 function applySuggestedFuturesRatio(){
   const A=futuresCompareItem($('#futuresCompareA')?.value),B=futuresCompareItem($('#futuresCompareB')?.value);if(!A||!B)return;
@@ -416,14 +416,14 @@ function applySuggestedFuturesRatio(){
 function calcFuturesIntegrated(){
   const A=futuresCompareItem($('#futuresCompareA')?.value),B=futuresCompareItem($('#futuresCompareB')?.value),out=$('#futuresCompareResults');if(!A||!B||!out)return;
   const aq=futuresCompareQuote(A,$('#futuresCompareAMonth')?.value),bq=futuresCompareQuote(B,$('#futuresCompareBMonth')?.value);
-  const dir=$('#futuresCompareDirection')?.value||'sellA',aQty=Math.max(1,Number($('#futuresCompareAQty')?.value)||1),bQty=Math.max(1,Number($('#futuresCompareBQty')?.value)||1),other=Number($('#futuresCompareOtherCost')?.value)||0;
-  const aField=dir==='sellA'?'bid':'ask',bField=dir==='sellA'?'ask':'bid',ap=Number(aq?.[aField]),bp=Number(bq?.[bField]);
-  const aFx=fxToTwd(A.spec.currency),bFx=fxToTwd(B.spec.currency);
-  const aNot=Number.isFinite(ap)?ap*Number(A.spec.multiplier||1)*aFx*aQty:null,bNot=Number.isFinite(bp)?bp*Number(B.spec.multiplier||1)*bFx*bQty:null;
-  const gross=aNot==null||bNot==null?null:(dir==='sellA'?aNot-bNot:bNot-aNot),net=gross==null?null:gross-other;
+  const aQty=Math.max(1,Number($('#futuresCompareAQty')?.value)||1),bQty=Math.max(1,Number($('#futuresCompareBQty')?.value)||1);
+  const price=q=>{const last=Number(q?.last);if(Number.isFinite(last)&&last>0)return last;const bid=Number(q?.bid),ask=Number(q?.ask);return Number.isFinite(bid)&&Number.isFinite(ask)?(bid+ask)/2:null};
+  const ap=price(aq),bp=price(bq),aFx=fxToTwd(A.spec.currency),bFx=fxToTwd(B.spec.currency);
+  const aNot=ap==null?null:ap*Number(A.spec.multiplier||1)*aFx*aQty,bNot=bp==null?null:bp*Number(B.spec.multiplier||1)*bFx*bQty;
+  const diff=aNot==null||bNot==null?null:aNot-bNot;
   const am=A.margin.initial==null?null:Number(A.margin.initial)*aQty*fxToTwd(A.margin.currency),bm=B.margin.initial==null?null:Number(B.margin.initial)*bQty*fxToTwd(B.margin.currency);
   const r=suggestedFuturesRatio(A,B,$('#futuresCompareAMonth')?.value,$('#futuresCompareBMonth')?.value);
-  out.innerHTML=`<div class="cost-metric"><span>A 執行價格</span><b>${Number.isFinite(ap)?qfmt(ap,A.code):'—'}</b><small>${A.code} ${aField.toUpperCase()} · ${aQty} 口</small></div><div class="cost-metric"><span>B 執行價格</span><b>${Number.isFinite(bp)?qfmt(bp,B.code):'—'}</b><small>${B.code} ${bField.toUpperCase()} · ${bQty} 口</small></div><div class="cost-metric"><span>A 名目金額</span><b>${aNot==null?'—':tidy(aNot,0)+' TWD'}</b><small>價格 × 乘數 × FX × 口數</small></div><div class="cost-metric"><span>B 名目金額</span><b>${bNot==null?'—':tidy(bNot,0)+' TWD'}</b><small>價格 × 乘數 × FX × 口數</small></div><div class="cost-metric"><span>換算後差額</span><b class="${net==null?'':cls(net)}">${net==null?'—':(net>=0?'+':'')+tidy(net,0)+' TWD'}</b><small>已扣除其他成本 / 稅</small></div><div class="cost-metric"><span>建議比例</span><b>${r.a} : ${r.b}</b><small>依目前名目金額最接近配對</small></div><div class="cost-metric"><span>A 原始保證金</span><b>${am==null?'動態':tidy(am,0)+' TWD'}</b><small>${A.margin.source}</small></div><div class="cost-metric"><span>B 原始保證金</span><b>${bm==null?'動態':tidy(bm,0)+' TWD'}</b><small>${B.margin.source}</small></div><div class="cost-warning">建議比例以目前報價、合約乘數與匯率做名目金額近似，不代表最佳避險比率。實際避險仍會受標的差異、Beta、相關性、基差與流動性影響。</div>`;
+  out.innerHTML=`<div class="cost-metric"><span>A 比較價格</span><b>${ap==null?'—':qfmt(ap,A.code)}</b><small>${A.code} · ${aQty} 口 · Last 優先</small></div><div class="cost-metric"><span>B 比較價格</span><b>${bp==null?'—':qfmt(bp,B.code)}</b><small>${B.code} · ${bQty} 口 · Last 優先</small></div><div class="cost-metric"><span>A 名目金額</span><b>${aNot==null?'—':tidy(aNot,0)+' TWD'}</b><small>價格 × 乘數 × FX × 口數</small></div><div class="cost-metric"><span>B 名目金額</span><b>${bNot==null?'—':tidy(bNot,0)+' TWD'}</b><small>價格 × 乘數 × FX × 口數</small></div><div class="cost-metric"><span>換算後差額 A − B</span><b class="${diff==null?'':cls(diff)}">${diff==null?'—':(diff>=0?'+':'')+tidy(diff,0)+' TWD'}</b><small>純比較用途，不代表買賣方向</small></div><div class="cost-metric"><span>建議比例</span><b>${r.a} : ${r.b}</b><small>1～10 口內名目金額最接近配對</small></div><div class="cost-metric"><span>A 原始保證金</span><b>${am==null?'動態':tidy(am,0)+' TWD'}</b><small>${A.margin.source}</small></div><div class="cost-metric"><span>B 原始保證金</span><b>${bm==null?'動態':tidy(bm,0)+' TWD'}</b><small>${B.margin.source}</small></div><div class="cost-warning">建議比例只依目前報價、合約乘數與匯率做名目金額近似，供規格比較參考；不同標的仍可能有 Beta、相關性與基差差異。</div>`;
 }
 function bindFuturesSpecCompare(){
   const a=$('#futuresCompareA'),b=$('#futuresCompareB'),am=$('#futuresCompareAMonth'),bm=$('#futuresCompareBMonth');
@@ -431,10 +431,10 @@ function bindFuturesSpecCompare(){
   if(b)b.onchange=()=>renderFuturesSpecCompare(true);
   if(am)am.onchange=()=>renderFuturesSpecCompare(false);
   if(bm)bm.onchange=()=>renderFuturesSpecCompare(false);
-  ['futuresCompareDirection','futuresCompareAQty','futuresCompareBQty','futuresCompareOtherCost'].forEach(id=>{const el=$('#'+id);if(el){el.oninput=calcFuturesIntegrated;el.onchange=calcFuturesIntegrated}});
+  ['futuresCompareAQty','futuresCompareBQty'].forEach(id=>{const el=$('#'+id);if(el){el.oninput=calcFuturesIntegrated;el.onchange=calcFuturesIntegrated}});
   if($('#applySuggestedRatio'))$('#applySuggestedRatio').onclick=applySuggestedFuturesRatio;
   if($('#calcFuturesCompare'))$('#calcFuturesCompare').onclick=calcFuturesIntegrated;
-  if($('#resetFuturesCompare'))$('#resetFuturesCompare').onclick=()=>{if(a)a.selectedIndex=0;if(b)b.selectedIndex=Math.min(1,b.options.length-1);if($('#futuresCompareAQty'))$('#futuresCompareAQty').value='1';if($('#futuresCompareBQty'))$('#futuresCompareBQty').value='1';if($('#futuresCompareOtherCost'))$('#futuresCompareOtherCost').value='0';renderFuturesSpecCompare(true)};
+  if($('#resetFuturesCompare'))$('#resetFuturesCompare').onclick=()=>{if(a)a.selectedIndex=0;if(b)b.selectedIndex=Math.min(1,b.options.length-1);if($('#futuresCompareAQty'))$('#futuresCompareAQty').value='1';if($('#futuresCompareBQty'))$('#futuresCompareBQty').value='1';renderFuturesSpecCompare(true)};
   renderFuturesSpecCompare(true);
 }
 function renderSpecSummary(row){const el=$('#contractSpecSummary');if(!el||!row)return;const a=specFor(row.tw.id),b=specFor(row.os.id),ma=marginFor(row.tw.id),mb=marginFor(row.os.id),target=row.underlying||row.name||'—';const card=(title,q,s,m)=>`<div class="spec-card"><div><b>${title} ${q.code}</b><span class="verified-badge">規格預設</span></div><div class="spec-line"><span>標的</span><strong>${target}</strong></div><div class="spec-line"><span>乘數</span><strong>${tidy(s.multiplier,6)}</strong></div><div class="spec-line"><span>Tick</span><strong>${fixedInput(s.tick,8)}</strong></div><div class="spec-line"><span>幣別</span><strong>${s.currency}</strong></div><div class="spec-line"><span>原始保證金</span><strong>${marginDisplay(m)}</strong></div><div class="source-note">${m.source}${m.asOf&&m.asOf!=='dynamic'?' · '+m.asOf:''}</div><div class="spec-line"><span>到期週期</span><strong>${s.cycle}</strong></div><div class="spec-source-block"><span>行情</span>${quoteMetaHtml(q)}</div></div>`;el.innerHTML=card(row.tw.exchange||'TAIFEX',row.tw,a,ma)+card(row.os.exchange,row.os,b,mb)}
