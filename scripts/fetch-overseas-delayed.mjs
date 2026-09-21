@@ -168,7 +168,10 @@ async function yahooJapanTopix(previous){
 
 async function mizuhoTopix(previous){
   try{
-    const html=await fetchText('https://ot32.qhit.net/mizuhosc/page2/main/index.aspx?F=shihyo%2Fdetail&KEY1=151&MODE=1D');
+    const res=await request('https://ot32.qhit.net/mizuhosc/page2/main/index.aspx?F=shihyo%2Fdetail&KEY1=151&MODE=1D');
+    const buf=await res.arrayBuffer();
+    const utf8=new TextDecoder('utf-8').decode(buf),sjis=new TextDecoder('shift_jis').decode(buf);
+    const html=[utf8,sjis].find(x=>x.includes('主要指標')||x.includes('現在値')||x.includes('TOPIX'))||utf8;
     const plain=stripHtml(html);
     const anchor=plain.indexOf('主要指標 TOPIX');
     const chunk=anchor>=0?plain.slice(anchor,anchor+5000):plain;
