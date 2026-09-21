@@ -48,5 +48,11 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -m "data: refresh real 1D 5m overview series and market data"
-          git pull --rebase origin main
-          git push
+          for attempt in 1 2 3 4; do
+            git pull --rebase origin main || exit 1
+            if git push; then exit 0; fi
+            echo "Push raced with another data workflow; retry $attempt/4"
+            sleep $((attempt * 2))
+          done
+          echo "Failed to push after retries"
+          exit 1
