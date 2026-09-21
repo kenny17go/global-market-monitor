@@ -81,9 +81,9 @@ const INITIAL_MARGINS={
   TAIFEX_TJF:{initial:49000,currency:'TWD',asOf:'2026-08-12',source:'TAIFEX'},
   TAIFEX_UDF:{initial:64000,currency:'TWD',asOf:'2026-08-12',source:'TAIFEX'},
   TAIFEX_SPF:{initial:103000,currency:'TWD',asOf:'2026-08-12',source:'TAIFEX'},
-  TAIFEX_UNF:{initial:98000,currency:'TWD',asOf:'2026-08-12',source:'TAIFEX'},
-  TAIFEX_SXF:{initial:88000,currency:'TWD',asOf:'2026-08-12',source:'TAIFEX'},
-  TAIFEX_F1F:{initial:29000,currency:'TWD',asOf:'2026-08-12',source:'TAIFEX'},
+  TAIFEX_UNF:{initial:88000,currency:'TWD',asOf:'2026-07-06',source:'TAIFEX fallback'},
+  TAIFEX_SXF:{initial:80000,currency:'TWD',asOf:'2026-07-06',source:'TAIFEX fallback'},
+  TAIFEX_F1F:{initial:29000,currency:'TWD',asOf:'2026-07-06',source:'TAIFEX fallback'},
   TAIFEX_RHF:{initial:14580,currency:'CNH',asOf:'2026-02-24',source:'TAIFEX'},
   TAIFEX_XEF:{initial:690,currency:'USD',asOf:'2026-02-24',source:'TAIFEX'},
   TAIFEX_XJF:{initial:102000,currency:'JPY',asOf:'2026-02-24',source:'TAIFEX'},
@@ -331,7 +331,7 @@ function fillMonths(sel,arr,value){if(!sel)return;sel.innerHTML=arr.map(v=>`<opt
 function fxToTwd(currency){const c=currency||'TWD';if(c==='TWD')return 1;const usd=Number(DATA?.twd?.spotBid)||1;if(c==='USD')return usd;const pair=p=>DATA?.fx?.find(x=>x.pair===p)?.bid;if(c==='JPY'){const u=pair('USD/JPY');return u?usd/u:1}if(c==='CNH'){const u=pair('USD/CNH');return u?usd/u:1}if(c==='GBP'){const g=pair('GBP/USD');return g?g*usd:1}if(c==='EUR'){const e=pair('EUR/USD');return e?e*usd:1}if(c==='AUD'){const a=pair('AUD/USD');return a?a*usd:1}return 1}
 function selectedCostRow(){return catalogRows()[Number($('#costProduct')?.value)||0]}
 function specFor(id){return CONTRACT_SPECS[id]||{multiplier:1,tick:1,currency:'TWD',cycle:'monthly18',code:id}}
-function marginFor(id){return INITIAL_MARGINS[id]||{initial:null,currency:specFor(id).currency,asOf:'dynamic',source:'交易所動態'}}
+function marginFor(id){const code=id?.startsWith('TAIFEX_')?id.slice(7):null;const live=code?DATA?.taifexMargins?.[code]:null;return live||INITIAL_MARGINS[id]||{initial:null,currency:specFor(id).currency,asOf:'dynamic',source:'交易所動態'}}
 function marginDisplay(m){return m?.initial==null?'動態':tidy(m.initial,2)+' '+m.currency}
 const FUTURES_ZH_NAMES={
   TAIFEX_TX:'臺指期貨',
