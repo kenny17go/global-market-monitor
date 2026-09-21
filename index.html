@@ -100,9 +100,15 @@
         <section class="cost-lab panel">
           <div class="formula-lab-head"><div><h3>期貨規格、保證金與換算比較 / Futures Compare</h3><p>先選 A、B 期貨、月份與口數，直接比較規格、保證金與換算後名目差額；並提供 1～10 口內最接近等值的建議比例。</p></div><button id="resetFuturesCompare" class="secondary-btn">恢復預設</button></div>
           <div class="futures-compare-picker futures-product-picker">
-            <label>比較 A<select id="futuresCompareA"></select></label>
+            <div class="futures-filter-product">
+              <label>A 分類<select id="futuresCompareACategory"><option value="all">全部</option><option value="台灣指數">台灣指數</option><option value="股價指數">海外股價指數</option><option value="外匯">匯率</option><option value="貴金屬">貴金屬</option><option value="能源">能源</option></select></label>
+              <label>比較 A<select id="futuresCompareA"></select></label>
+            </div>
             <span class="futures-compare-vs">VS</span>
-            <label>比較 B<select id="futuresCompareB"></select></label>
+            <div class="futures-filter-product">
+              <label>B 分類<select id="futuresCompareBCategory"><option value="all">全部</option><option value="台灣指數">台灣指數</option><option value="股價指數">海外股價指數</option><option value="外匯">匯率</option><option value="貴金屬">貴金屬</option><option value="能源">能源</option></select></label>
+              <label>比較 B<select id="futuresCompareB"></select></label>
+            </div>
           </div>
           <div class="futures-compare-picker futures-month-qty-picker">
             <div class="futures-month-qty">
@@ -149,4 +155,4 @@
   });
   window.__gmmEmergencySwitch=emergencySwitch;
 })();
-</script><script src="config.example.js?v=20260918-fix1"></script><script src="providers.js?v=20260916-ndf3"></script><script src="app.js?v=20260921-futuresdate5"></script><script src="tv-spark-widget.js?v=20260918-fix1"></script></body></html>
+</script><script src="config.example.js?v=20260918-fix1"></script><script src="providers.js?v=20260916-ndf3"></script><script src="app.js?v=20260921-futuresfilter6"></script><script src="tv-spark-widget.js?v=20260918-fix1"></script></body></html>
