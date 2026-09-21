@@ -118,7 +118,7 @@ async function yahooIndexQuote(id,symbol,label,range){
 
 async function nikkei225jpMini(){try{const plain=stripHtml(await fetchText('https://nikkei225jp.com/cme/'));const contracts=[];const re=/大証ミニ\s*(\d{2})年(\d{1,2})月限\s*([\d,]+)/g;let m;while((m=re.exec(plain))){const month=`20${m[1]}${String(m[2]).padStart(2,'0')}`,last=valid(m[3],[1000,100000]);if(last!=null)contracts.push({symbol:`OSE Nikkei225 mini ${month}`,month,bid:null,ask:null,last,timestamp:new Date().toISOString(),quoteType:'nikkei225jp public table',quoteMode:'DELAYED',delayMinutes:15})}return {defaultMonth:contracts[0]?.month||null,contracts,source:'nikkei225jp.com · OSE public quote fallback',mode:contracts.length?'DELAYED':'UNAVAILABLE',delayMinutes:15}}catch(e){console.warn('nikkei225jp fallback failed',e.message);return {defaultMonth:null,contracts:[],source:'nikkei225jp.com · OSE public quote fallback',mode:'UNAVAILABLE'}}}
 
-async function twseTaiexQuote(){
+async function twseTaiexQuote(yahoo){
   const now=new Date();
   for(let back=0;back<10;back++){
     const d=new Date(now.getTime()-back*86400000);
@@ -132,10 +132,36 @@ async function twseTaiexQuote(){
       if(!mth)continue;
       const last=Number(mth[1].replace(/,/g,'')),chg=Number(mth[3].replace(/,/g,''))*(/[\-－]/.test(mth[2])?-1:1),pct=Number(mth[4])*(/[\-－]/.test(mth[2])?-1:1);
       if(!Number.isFinite(last))continue;
-      return {id:'TAIEX',symbol:'TWSE:TAIEX',label:'台灣加權',last,previousClose:Number.isFinite(last-chg)?last-chg:null,change:chg,pct,timestamp:`${y}-${m}-${day}T13:30:00+08:00`,source:'TWSE 臺灣證券交易所',mode:'OFFICIAL DAILY',series:[],seriesTimes:[],seriesMeta:{range:'1D',interval:null,session:'OFFICIAL_CLOSE',source:'TWSE 臺灣證券交易所',mode:'OFFICIAL DAILY',timezone:'Asia/Taipei',points:0}};
+
+      const officialDate=`${y}-${m}-${day}`,series=[],seriesTimes=[];
+      if(Array.isArray(yahoo?.series)&&Array.isArray(yahoo?.seriesTimes)){
+        for(let i=0;i<Math.min(yahoo.series.length,yahoo.seriesTimes.length);i++){
+          const ts=String(yahoo.seriesTimes[i]||''),v=Number(yahoo.series[i]);
+          if(!Number.isFinite(v)||!ts)continue;
+          const dt=new Date(ts);
+          if(Number.isNaN(dt.getTime()))continue;
+          const local=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Taipei',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(dt);
+          const get=t=>local.find(x=>x.type===t)?.value||'';
+          const date=`${get('year')}-${get('month')}-${get('day')}`,mins=Number(get('hour'))*60+Number(get('minute'));
+          if(date!==officialDate||mins<540||mins>810)continue;
+          series.push(v);seriesTimes.push(ts);
+        }
+      }
+      if(series.length){
+        series[series.length-1]=last;
+        seriesTimes[seriesTimes.length-1]=`${officialDate}T05:30:00.000Z`;
+      }
+      return {
+        id:'TAIEX',symbol:'^TWII',label:'台灣加權',
+        last,previousClose:Number.isFinite(last-chg)?last-chg:null,change:chg,pct,
+        timestamp:`${officialDate}T13:30:00+08:00`,
+        source:'TWSE 官方收盤 + Yahoo Finance 盤中走勢',mode:'DELAYED',
+        series,seriesTimes,
+        seriesMeta:{range:'1D',interval:'5m',session:'LATEST_SESSION',source:'Yahoo Finance (^TWII) / TWSE close verified',mode:'DELAYED',timezone:'Asia/Taipei',points:series.length}
+      };
     }catch(e){console.warn('TWSE TAIEX fetch failed',key,e.message)}
   }
-  return {id:'TAIEX',symbol:'TWSE:TAIEX',label:'台灣加權',last:null,previousClose:null,change:null,pct:null,timestamp:null,source:'TWSE 臺灣證券交易所',mode:'UNAVAILABLE',series:[],seriesTimes:[],seriesMeta:{range:'1D',interval:null,session:'OFFICIAL_CLOSE',source:'TWSE 臺灣證券交易所',mode:'UNAVAILABLE',timezone:'Asia/Taipei',points:0}};
+  return yahoo||{id:'TAIEX',symbol:'^TWII',label:'台灣加權',last:null,previousClose:null,change:null,pct:null,timestamp:null,source:'Yahoo Finance',mode:'UNAVAILABLE',series:[],seriesTimes:[],seriesMeta:{range:'1D',interval:'5m',session:'LATEST_SESSION',source:'Yahoo Finance',mode:'UNAVAILABLE',points:0}};
 }
 
 const INDEX_TARGETS=[
@@ -145,7 +171,7 @@ const INDEX_TARGETS=[
   {id:'NIKKEI',symbol:'^N225',label:'日經 225',range:[1000,100000]},
   {id:'TOPIX',symbol:'^TOPX',label:'東證 TOPIX',range:[100,10000]}
 ];
-const indices={};for(const x of INDEX_TARGETS)indices[x.id]=await yahooIndexQuote(x.id,x.symbol,x.label,x.range);indices.TAIEX=await twseTaiexQuote();
+const indices={};for(const x of INDEX_TARGETS)indices[x.id]=await yahooIndexQuote(x.id,x.symbol,x.label,x.range);const yahooTaiex=await yahooIndexQuote('TAIEX','^TWII','台灣加權',[1000,100000]);indices.TAIEX=await twseTaiexQuote(yahooTaiex);
 const products={};for(const t of ROOTS)products[t.id]=await yahooRootProduct(t);
 
 const [bcNikkei,bcTopix,bcMgc,bcBrent]=await Promise.all([
