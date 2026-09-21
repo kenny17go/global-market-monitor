@@ -8,8 +8,8 @@ on:
       - 'scripts/fetch-overview-commodities.mjs'
       - '.github/workflows/update-overseas-delayed.yml'
   schedule:
-    - cron: '2,7,12,17,22,27,32 1-5 * * 1-5'
-      timezone: "Asia/Taipei"
+    - cron: '2,7,12,17,22,27,32 9-15 * * 1-5'
+      timezone: "Asia/Tokyo"
     - cron: '2,7,12,17,22,27,32 9-16 * * 1-5'
       timezone: "America/New_York"
 
