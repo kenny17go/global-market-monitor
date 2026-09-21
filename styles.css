@@ -37,3 +37,33 @@
 
 /* ust-yield-panel */
 .ust-yield-panel h3{gap:8px}.ust-yield-meta{padding:7px 10px 0;color:var(--muted);font-size:10px}.ust-yield-chart{height:205px;padding:8px 8px 0}.ust-yield-chart .chart-canvas{height:185px}.ust-yield-table-wrap{overflow-x:auto;padding:0 8px 8px}.ust-yield-table{table-layout:fixed;min-width:420px;border:1px solid var(--line);border-radius:7px;overflow:hidden}.ust-yield-table th,.ust-yield-table td{text-align:center!important;padding:6px 5px}.ust-yield-table th{position:static;background:#0d2134;color:#9fb7c9}.ust-yield-table td{font-weight:700;color:#dcecf8}.ust-yield-spreads{display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:0 8px 8px}.ust-yield-spreads>div{display:flex;justify-content:space-between;align-items:center;border:1px solid var(--line);border-radius:7px;background:#081827;padding:7px 9px}.ust-yield-spreads span{color:var(--muted);font-size:10px}.ust-yield-spreads b{font-size:12px;color:#cfe9fb}@media(max-width:800px){.ust-yield-chart{height:190px}.ust-yield-chart .chart-canvas{height:170px}}
+
+
+/* Futures comparison compact mobile layout */
+.futures-compare-picker{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:10px;align-items:end;padding:12px}
+.futures-compare-picker label{display:grid;gap:5px;color:var(--muted);font-size:11px;min-width:0}
+.futures-compare-picker select,.futures-compare-picker input{width:100%;max-width:100%;min-width:0;background:#061522;border:1px solid #2a4f6d;border-radius:8px;color:var(--text);padding:9px 11px;min-height:44px}
+.futures-compare-vs{align-self:center;color:#9fb7c9;font-weight:700;padding-top:18px}
+.futures-month-qty{display:grid;gap:8px;min-width:0}
+.futures-month-select{font-size:16px!important;font-weight:700;min-height:52px!important;padding:11px 13px!important}
+.futures-month-qty input{min-height:44px;font-size:15px}
+.futures-updated{padding:0 12px 10px}
+#spreadView,.cost-lab,.futures-product-picker,.futures-month-qty-picker,.cost-actions,.cost-results{min-width:0;max-width:100%}
+#futuresSpecCompare{width:100%;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+#futuresSpecCompare .futures-spec-table{width:100%;min-width:620px;border-collapse:collapse}
+#futuresSpecCompare .futures-spec-table th,
+#futuresSpecCompare .futures-spec-table td{white-space:nowrap}
+@media(max-width:700px){
+  #spreadView{overflow-x:hidden}
+  .cost-lab{overflow:hidden}
+  .futures-compare-picker{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:8px;padding:8px 10px}
+  .futures-product-picker{grid-template-columns:1fr}
+  .futures-product-picker .futures-compare-vs{display:none}
+  .futures-month-qty-picker{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr)}
+  .futures-month-select{font-size:17px!important;min-height:54px!important}
+  #futuresSpecCompare{margin:0;width:100%}
+  #futuresSpecCompare .futures-spec-table{min-width:600px}
+  .cost-results{grid-template-columns:1fr 1fr;min-width:0}
+  .cost-metric{min-width:0;overflow:hidden}
+  .cost-metric b,.cost-metric small{overflow-wrap:anywhere}
+}
