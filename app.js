@@ -333,10 +333,16 @@ function selectedCostRow(){return catalogRows()[Number($('#costProduct')?.value)
 function specFor(id){return CONTRACT_SPECS[id]||{multiplier:1,tick:1,currency:'TWD',cycle:'monthly18',code:id}}
 function marginFor(id){return INITIAL_MARGINS[id]||{initial:null,currency:specFor(id).currency,asOf:'dynamic',source:'交易所動態'}}
 function marginDisplay(m){return m?.initial==null?'動態':tidy(m.initial,2)+' '+m.currency}
-function futuresCompareUniverse(){
+function futuresCompareUniverse(filter='all'){
   const seen=new Set(),out=[];
+  const allow=(row,q)=>{
+    if(filter==='all')return true;
+    if(filter==='台灣指數')return row.category==='台灣指數'||(row.category==='股價指數'&&q===row.tw);
+    if(filter==='股價指數')return row.category==='股價指數'&&q===row.os;
+    return row.category===filter;
+  };
   catalogRows().forEach(row=>[row.tw,row.os].forEach(q=>{
-    if(!q?.id||seen.has(q.id))return;seen.add(q.id);
+    if(!q?.id||seen.has(q.id)||!allow(row,q))return;seen.add(q.id);
     const s=specFor(q.id),m=marginFor(q.id);
     out.push({id:q.id,name:s.label||row.name,code:q.code||s.code,exchange:q.exchange||'—',spec:s,margin:m,q,row});
   }));
@@ -383,11 +389,13 @@ function suggestedFuturesRatio(A,B,am,bm){
 }
 function renderFuturesSpecCompare(resetMonths=false){
   const aSel=$('#futuresCompareA'),bSel=$('#futuresCompareB'),box=$('#futuresSpecCompare');if(!aSel||!bSel||!box)return;
-  const list=futuresCompareUniverse(),opts=list.map(x=>`<option value="${x.id}">${x.name}｜${x.exchange} ${x.code}</option>`).join('');
+  const aFilter=$('#futuresCompareACategory')?.value||'all',bFilter=$('#futuresCompareBCategory')?.value||'all';
+  const aList=futuresCompareUniverse(aFilter),bList=futuresCompareUniverse(bFilter);
   const oldA=aSel.value,oldB=bSel.value;
-  aSel.innerHTML=opts;bSel.innerHTML=opts;
-  if(list.some(x=>x.id===oldA))aSel.value=oldA;else if(list.length)aSel.value=list[0].id;
-  if(list.some(x=>x.id===oldB))bSel.value=oldB;else if(list.length>1)bSel.value=list[1].id;
+  aSel.innerHTML=aList.map(x=>`<option value="${x.id}">${x.name}｜${x.exchange} ${x.code}</option>`).join('');
+  bSel.innerHTML=bList.map(x=>`<option value="${x.id}">${x.name}｜${x.exchange} ${x.code}</option>`).join('');
+  if(aList.some(x=>x.id===oldA))aSel.value=oldA;else if(aList.length)aSel.value=aList[0].id;
+  if(bList.some(x=>x.id===oldB))bSel.value=oldB;else if(bList.length)bSel.value=bList[0].id;
   const A=futuresCompareItem(aSel.value),B=futuresCompareItem(bSel.value);if(!A||!B)return;
   const am=$('#futuresCompareAMonth'),bm=$('#futuresCompareBMonth');
   const oldAm=resetMonths?'':am?.value,oldBm=resetMonths?'':bm?.value;
@@ -428,7 +436,9 @@ function calcFuturesIntegrated(){
   out.innerHTML=`<div class="cost-metric"><span>A 比較價格</span><b>${ap==null?'—':qfmt(ap,A.code)}</b><small>${A.code} · ${aQty} 口 · Last 優先</small></div><div class="cost-metric"><span>B 比較價格</span><b>${bp==null?'—':qfmt(bp,B.code)}</b><small>${B.code} · ${bQty} 口 · Last 優先</small></div><div class="cost-metric"><span>A 名目金額</span><b>${aNot==null?'—':tidy(aNot,0)+' TWD'}</b><small>價格 × 乘數 × FX × 口數</small></div><div class="cost-metric"><span>B 名目金額</span><b>${bNot==null?'—':tidy(bNot,0)+' TWD'}</b><small>價格 × 乘數 × FX × 口數</small></div><div class="cost-metric"><span>換算後差額 A − B</span><b class="${diff==null?'':cls(diff)}">${diff==null?'—':(diff>=0?'+':'')+tidy(diff,0)+' TWD'}</b><small>純比較用途，不代表買賣方向</small></div><div class="cost-metric"><span>建議比例</span><b>${r.a} : ${r.b}</b><small>1～10 口內名目金額最接近配對</small></div><div class="cost-metric"><span>A 原始保證金</span><b>${am==null?'動態':tidy(am,0)+' TWD'}</b><small>${A.margin.source}</small></div><div class="cost-metric"><span>B 原始保證金</span><b>${bm==null?'動態':tidy(bm,0)+' TWD'}</b><small>${B.margin.source}</small></div><div class="cost-warning">建議比例只依目前報價、合約乘數與匯率做名目金額近似，供規格比較參考；不同標的仍可能有 Beta、相關性與基差差異。</div>`;
 }
 function bindFuturesSpecCompare(){
-  const a=$('#futuresCompareA'),b=$('#futuresCompareB'),am=$('#futuresCompareAMonth'),bm=$('#futuresCompareBMonth');
+  const a=$('#futuresCompareA'),b=$('#futuresCompareB'),am=$('#futuresCompareAMonth'),bm=$('#futuresCompareBMonth'),ac=$('#futuresCompareACategory'),bc=$('#futuresCompareBCategory');
+  if(ac)ac.onchange=()=>renderFuturesSpecCompare(true);
+  if(bc)bc.onchange=()=>renderFuturesSpecCompare(true);
   if(a)a.onchange=()=>renderFuturesSpecCompare(true);
   if(b)b.onchange=()=>renderFuturesSpecCompare(true);
   if(am)am.onchange=()=>renderFuturesSpecCompare(false);
