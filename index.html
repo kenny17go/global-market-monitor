@@ -142,15 +142,7 @@
           <div id="indicatorDashboardGrid" class="custom-product-list"></div>
           <div id="indicatorDashboardAlerts" class="custom-product-list"></div>
         </section>
-        <section id="indicatorEditorPanel" class="panel">
-          <div class="formula-lab-head"><div><h3>指標編輯器 / Indicator Editor</h3><p>點上方「編輯公式」後，原本名稱與公式會帶入這裡。</p></div></div>
-          <div class="cix-form-grid">
-            <label>指標名稱<input id="indicatorName" placeholder="例如：台日圓期貨相對估值-近月"></label>
-            <label class="cix-wide">公式<textarea id="spreadFormula" rows="4" placeholder="例如：TAIFEX_TJF.BID / JPX_MINI_TOPIX.ASK"></textarea></label>
-          </div>
-          <div id="formulaResult" class="formula-result">等待輸入公式</div>
-          <div class="cix-actions"><button id="saveIndicator" class="cix-primary">儲存新指標</button><button id="cancelIndicatorEdit" class="secondary-btn">取消編輯</button></div>
-        </section>
+        
         <section class="panel"><div class="cix-library-head"><div><h3>Custom Index Library</h3><p>每個指數保留公式、Base/顯示方式、Methodology Version 與監控條件。</p></div></div><div class="cix-library-tools"><input id="cixSearch" type="search" placeholder="搜尋名稱、Symbol 或 Formula"><select id="cixFilter"><option value="all">全部指數</option><option value="pinned">★ 已置頂</option><option value="alert">Alert</option><option value="watch">Watch Only</option><option value="pass">PASS</option><option value="stale">STALE</option></select></div><div id="cixLibrary" class="cix-library"></div></section>
       </section>
 
@@ -172,4 +164,4 @@
   });
   window.__gmmEmergencySwitch=emergencySwitch;
 })();
-</script><script src="config.example.js?v=20260918-fix1"></script><script src="providers.js?v=20260916-ndf3"></script><script src="app.js?v=20260921-indicator-edit2"></script><script src="tv-spark-widget.js?v=20260918-fix1"></script></body></html>
+</script><script src="config.example.js?v=20260918-fix1"></script><script src="providers.js?v=20260916-ndf3"></script><script src="app.js?v=20260921-indicator-clean1"></script><script src="tv-spark-widget.js?v=20260918-fix1"></script></body></html>
