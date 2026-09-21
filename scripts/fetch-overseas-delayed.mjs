@@ -118,15 +118,34 @@ async function yahooIndexQuote(id,symbol,label,range){
 
 async function nikkei225jpMini(){try{const plain=stripHtml(await fetchText('https://nikkei225jp.com/cme/'));const contracts=[];const re=/大証ミニ\s*(\d{2})年(\d{1,2})月限\s*([\d,]+)/g;let m;while((m=re.exec(plain))){const month=`20${m[1]}${String(m[2]).padStart(2,'0')}`,last=valid(m[3],[1000,100000]);if(last!=null)contracts.push({symbol:`OSE Nikkei225 mini ${month}`,month,bid:null,ask:null,last,timestamp:new Date().toISOString(),quoteType:'nikkei225jp public table',quoteMode:'DELAYED',delayMinutes:15})}return {defaultMonth:contracts[0]?.month||null,contracts,source:'nikkei225jp.com · OSE public quote fallback',mode:contracts.length?'DELAYED':'UNAVAILABLE',delayMinutes:15}}catch(e){console.warn('nikkei225jp fallback failed',e.message);return {defaultMonth:null,contracts:[],source:'nikkei225jp.com · OSE public quote fallback',mode:'UNAVAILABLE'}}}
 
+async function twseTaiexQuote(){
+  const now=new Date();
+  for(let back=0;back<10;back++){
+    const d=new Date(now.getTime()-back*86400000);
+    const y=d.getUTCFullYear(),m=String(d.getUTCMonth()+1).padStart(2,'0'),day=String(d.getUTCDate()).padStart(2,'0');
+    const key=`${y}${m}${day}`;
+    try{
+      const html=await fetchText(`https://www.twse.com.tw/exchangeReport/MI_INDEX?response=html&type=ALLBUT0999&date=${key}`);
+      const plain=stripHtml(html).replace(/\u00a0/g,' ');
+      const re=/發行量加權股價指數\s*([\d,]+(?:\.\d+)?)\s*([+\-＋－])\s*([\d,]+(?:\.\d+)?)\s*([\d.]+)%?/;
+      const mth=plain.match(re);
+      if(!mth)continue;
+      const last=Number(mth[1].replace(/,/g,'')),chg=Number(mth[3].replace(/,/g,''))*(/[\-－]/.test(mth[2])?-1:1),pct=Number(mth[4])*(/[\-－]/.test(mth[2])?-1:1);
+      if(!Number.isFinite(last))continue;
+      return {id:'TAIEX',symbol:'TWSE:TAIEX',label:'台灣加權',last,previousClose:Number.isFinite(last-chg)?last-chg:null,change:chg,pct,timestamp:`${y}-${m}-${day}T13:30:00+08:00`,source:'TWSE 臺灣證券交易所',mode:'OFFICIAL DAILY',series:[],seriesTimes:[],seriesMeta:{range:'1D',interval:null,session:'OFFICIAL_CLOSE',source:'TWSE 臺灣證券交易所',mode:'OFFICIAL DAILY',timezone:'Asia/Taipei',points:0}};
+    }catch(e){console.warn('TWSE TAIEX fetch failed',key,e.message)}
+  }
+  return {id:'TAIEX',symbol:'TWSE:TAIEX',label:'台灣加權',last:null,previousClose:null,change:null,pct:null,timestamp:null,source:'TWSE 臺灣證券交易所',mode:'UNAVAILABLE',series:[],seriesTimes:[],seriesMeta:{range:'1D',interval:null,session:'OFFICIAL_CLOSE',source:'TWSE 臺灣證券交易所',mode:'UNAVAILABLE',timezone:'Asia/Taipei',points:0}};
+}
+
 const INDEX_TARGETS=[
   {id:'SPX',symbol:'^GSPC',label:'S&P 500',range:[100,20000]},
   {id:'NDX',symbol:'^NDX',label:'Nasdaq-100',range:[1000,100000]},
   {id:'SOX',symbol:'^SOX',label:'SOX 費半',range:[100,20000]},
-  {id:'TAIEX',symbol:'^TWII',label:'台灣加權',range:[1000,100000]},
   {id:'NIKKEI',symbol:'^N225',label:'日經 225',range:[1000,100000]},
   {id:'TOPIX',symbol:'^TOPX',label:'東證 TOPIX',range:[100,10000]}
 ];
-const indices={};for(const x of INDEX_TARGETS)indices[x.id]=await yahooIndexQuote(x.id,x.symbol,x.label,x.range);
+const indices={};for(const x of INDEX_TARGETS)indices[x.id]=await yahooIndexQuote(x.id,x.symbol,x.label,x.range);indices.TAIEX=await twseTaiexQuote();
 const products={};for(const t of ROOTS)products[t.id]=await yahooRootProduct(t);
 
 const [bcNikkei,bcTopix,bcMgc,bcBrent]=await Promise.all([
