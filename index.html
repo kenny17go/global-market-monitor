@@ -1,4 +1,4 @@
-<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#071422"><meta name="gmm-build" content="20260919-nolock-final3"><title>Global Market Monitor</title><link rel="stylesheet" href="styles.css?v=20260919-nolock-final3"><link rel="stylesheet" href="v1.4.css?v=20260919-nolock-final3"><link rel="stylesheet" href="v1.5.css?v=20260919-nolock-final3"><link rel="stylesheet" href="v1.6.css?v=20260920-singleformula1"><link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=20260917b"><link rel="icon" type="image/png" sizes="512x512" href="icon-512.png?v=20260917b"><link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon-v2.png"><link rel="manifest" href="manifest.webmanifest?v=20260917b"></head><body>
+<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#071422"><meta name="gmm-build" content="20260919-nolock-final3"><title>Global Market Monitor</title><link rel="stylesheet" href="styles.css?v=20260921-futuresclean2"><link rel="stylesheet" href="v1.4.css?v=20260919-nolock-final3"><link rel="stylesheet" href="v1.5.css?v=20260919-nolock-final3"><link rel="stylesheet" href="v1.6.css?v=20260920-singleformula1"><link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=20260917b"><link rel="icon" type="image/png" sizes="512x512" href="icon-512.png?v=20260917b"><link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon-v2.png"><link rel="manifest" href="manifest.webmanifest?v=20260917b"></head><body>
 <div class="app">
   <aside class="sidebar"><div class="brand">Global Market Monitor<small>Markets in One View</small></div><div class="nav">
     <button class="active" data-view="dashboard">⌂ 首頁 Dashboard</button><button data-view="customindex">◈ 我的指數 Custom Index</button><button data-view="spread">⇄ 期貨比較 Futures</button><button data-view="indicators">◆ 自訂指標 Indicators</button><button>◉ 外匯 FX</button><button>▥ 股市 Equity</button><button>◫ 商品 Commodities</button><button>≋ 利率 Rates</button><button>▦ 經濟數據 Macro</button><button>☆ 自選 Watchlist</button><button>♢ 我的警示 Alerts</button><div class="spacer"></div><button data-view="connections">⚙ 行情連線 Connections</button><button>ⓘ 關於 About</button>
@@ -98,25 +98,23 @@
         <article class="panel spread-table-panel"><h3>期貨商品比較 / Futures Products <small>跨市場 / 同標的</small></h3><div class="table-wrap spread-table-wrap"><table><thead><tr><th>分類</th><th>標的</th><th>台期所</th><th>Bid</th><th>Ask</th><th>Last</th><th>海外市場</th><th>商品</th><th>Bid</th><th>Ask</th><th>Last</th><th>比較注意</th></tr></thead><tbody id="catalogBody"></tbody></table></div></article>
 
         <section class="cost-lab panel">
-          <div class="formula-lab-head"><div><h3>期貨規格、保證金與換算比較 / Futures Compare</h3><p>先選 A、B 期貨與月份，直接比較規格、保證金與報價；輸入口數後即可計算換算後差額，並提供接近等值曝險的建議比例。</p></div><button id="resetFuturesCompare" class="secondary-btn">恢復預設</button></div>
-          <div class="futures-compare-picker">
-            <label>比較 A<select id="futuresCompareA"></select></label>
-            <span class="futures-compare-vs">VS</span>
-            <label>比較 B<select id="futuresCompareB"></select></label>
+          <div class="formula-lab-head"><div><h3>期貨規格、保證金與換算比較 / Futures Compare</h3><p>先選 A、B 期貨、月份與口數，直接比較規格、保證金與換算後名目差額；並提供 1～10 口內最接近等值的建議比例。</p></div><button id="resetFuturesCompare" class="secondary-btn">恢復預設</button></div>
+          <div class="futures-ab-grid">
+            <div class="futures-leg-card">
+              <b>比較 A</b>
+              <label>期貨<select id="futuresCompareA"></select></label>
+              <label>到期月份<select id="futuresCompareAMonth" class="futures-month-select"></select></label>
+              <label>口數<input id="futuresCompareAQty" type="number" min="1" step="1" value="1"></label>
+            </div>
+            <div class="futures-leg-card">
+              <b>比較 B</b>
+              <label>期貨<select id="futuresCompareB"></select></label>
+              <label>到期月份<select id="futuresCompareBMonth" class="futures-month-select"></select></label>
+              <label>口數<input id="futuresCompareBQty" type="number" min="1" step="1" value="1"></label>
+            </div>
           </div>
-          <div class="futures-compare-picker">
-            <label>A 到期月份<select id="futuresCompareAMonth"></select></label>
-            <span class="futures-compare-vs">↔</span>
-            <label>B 到期月份<select id="futuresCompareBMonth"></select></label>
-          </div>
-          <div id="futuresCompareUpdated" class="source-note">更新日期 —</div>
+          <div id="futuresCompareUpdated" class="source-note futures-updated">更新日期 —</div>
           <div id="futuresSpecCompare" class="table-wrap"></div>
-          <div class="cost-grid futures-simple-calc">
-            <label>方向<select id="futuresCompareDirection"><option value="sellA">賣 A / 買 B</option><option value="sellB">買 A / 賣 B</option></select></label>
-            <label>A 期貨口數<input id="futuresCompareAQty" type="number" min="1" step="1" value="1"></label>
-            <label>B 期貨口數<input id="futuresCompareBQty" type="number" min="1" step="1" value="1"></label>
-            <label>其他成本 / 稅<input id="futuresCompareOtherCost" type="number" step="any" value="0"></label>
-          </div>
           <div class="cost-actions">
             <button id="applySuggestedRatio" class="secondary-btn">套用建議比例</button>
             <button id="calcFuturesCompare">計算換算後差額</button>
@@ -149,4 +147,4 @@
   });
   window.__gmmEmergencySwitch=emergencySwitch;
 })();
-</script><script src="config.example.js?v=20260918-fix1"></script><script src="providers.js?v=20260916-ndf3"></script><script src="app.js?v=20260921-integratedcompare1"></script><script src="tv-spark-widget.js?v=20260918-fix1"></script></body></html>
+</script><script src="config.example.js?v=20260918-fix1"></script><script src="providers.js?v=20260916-ndf3"></script><script src="app.js?v=20260921-futuresclean2"></script><script src="tv-spark-widget.js?v=20260918-fix1"></script></body></html>
