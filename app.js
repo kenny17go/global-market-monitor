@@ -193,26 +193,6 @@ function catalogRows(){return DATA?.crossMarketCatalog||[]}
 
 
 
-const SCREEN_LOCK_PASS='GMM2026';
-function initScreenLock(){
-  const lock=document.getElementById('screenLock');
-  if(!lock)return;
-  const input=document.getElementById('screenLockPassword');
-  const btn=document.getElementById('screenLockSubmit');
-  const err=document.getElementById('screenLockError');
-  const unlocked=sessionStorage.getItem('gmmScreenUnlocked')==='1';
-  document.body.classList.toggle('screen-locked',!unlocked);
-  lock.classList.toggle('is-unlocked',unlocked);
-  if(unlocked)return;
-  setTimeout(()=>input?.focus(),120);
-  const submit=()=>{
-    if(input?.value===SCREEN_LOCK_PASS){sessionStorage.setItem('gmmScreenUnlocked','1');document.body.classList.remove('screen-locked');lock.classList.add('is-unlocked');if(err)err.textContent='';}
-    else{if(err)err.textContent='密碼錯誤，請再試一次';if(input){input.value='';input.focus();}}
-  };
-  if(btn)btn.onclick=submit;
-  if(input)input.addEventListener('keydown',e=>{if(e.key==='Enter')submit()});
-}
-
 function quoteDecimals(code){return DISPLAY_DECIMALS[code]??2}
 function qfmt(v,code){return tidy(v,quoteDecimals(code),quoteDecimals(code))}
 const SETTLEMENT_NDF_FORMULA_TOKENS={TGF_NEAR_NDF:null,TGF_NEXT_NDF:null,BRF_NEAR_NDF:null,BRF_NEXT_NDF:null};
