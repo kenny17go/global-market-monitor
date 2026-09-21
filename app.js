@@ -353,10 +353,12 @@ function futuresCompareQuote(item,month){
   return c||item.q||null;
 }
 function futuresCompareDate(q){
-  const raw=q?.quoteTimestamp||q?.quoteDate||q?.updatedAt||'';
+  const raw=q?.quoteTimestamp||q?.timestamp||q?.quoteDate||q?.date||q?.updatedAt||'';
   if(!raw)return '—';
-  if(/^\d{8}$/.test(String(raw)))return String(raw).slice(0,4)+'/'+String(raw).slice(4,6)+'/'+String(raw).slice(6,8);
-  const d=new Date(raw);return Number.isNaN(d.getTime())?String(raw):d.toLocaleString('zh-TW',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false});
+  const s=String(raw);
+  if(/^\d{8}$/.test(s))return s.slice(0,4)+'/'+s.slice(4,6)+'/'+s.slice(6,8);
+  if(/^\d{4}[-\/]\d{2}[-\/]\d{2}$/.test(s))return s.replace(/-/g,'/');
+  const d=new Date(raw);return Number.isNaN(d.getTime())?s:d.toLocaleString('zh-TW',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false});
 }
 function fillFuturesCompareMonths(sel,item,preferred){
   if(!sel||!item)return;
