@@ -135,7 +135,24 @@
         <section class="panel custom-compare"><div class="custom-products-head"><div><h3>自訂比較 / Custom Compare</h3><p>選兩個商品與欄位快速比較。</p></div></div><div id="customCompareGrid" class="custom-compare-grid"></div><div class="custom-compare-actions"><button id="calcCustomCompare">計算</button></div><div id="customCompareResults" class="custom-compare-results"></div></section>
       </section>
 
-      <section id="indicatorsView" class="view"><section class="panel"><div class="formula-lab-head"><div><h3>自訂指標 / Indicators</h3><p>集中查看 Formula Lab 指標與「我的指數」建立的 Custom Index。</p></div></div><div id="indicatorDashboardSummary" class="spread-kpis"></div><div id="indicatorDashboardGrid" class="custom-product-list"></div><div id="indicatorDashboardAlerts" class="custom-product-list"></div></section>        <section class="panel"><div class="cix-library-head"><div><h3>Custom Index Library</h3><p>每個指數保留公式、Base/顯示方式、Methodology Version 與監控條件。</p></div></div><div class="cix-library-tools"><input id="cixSearch" type="search" placeholder="搜尋名稱、Symbol 或 Formula"><select id="cixFilter"><option value="all">全部指數</option><option value="pinned">★ 已置頂</option><option value="alert">Alert</option><option value="watch">Watch Only</option><option value="pass">PASS</option><option value="stale">STALE</option></select></div><div id="cixLibrary" class="cix-library"></div></section></section>
+      <section id="indicatorsView" class="view">
+        <section class="panel">
+          <div class="formula-lab-head"><div><h3>自訂指標 / Indicators</h3><p>集中查看與編輯已儲存的自訂指標。</p></div></div>
+          <div id="indicatorDashboardSummary" class="spread-kpis"></div>
+          <div id="indicatorDashboardGrid" class="custom-product-list"></div>
+          <div id="indicatorDashboardAlerts" class="custom-product-list"></div>
+        </section>
+        <section id="indicatorEditorPanel" class="panel">
+          <div class="formula-lab-head"><div><h3>指標編輯器 / Indicator Editor</h3><p>點上方「編輯公式」後，原本名稱與公式會帶入這裡。</p></div></div>
+          <div class="cix-form-grid">
+            <label>指標名稱<input id="indicatorName" placeholder="例如：台日圓期貨相對估值-近月"></label>
+            <label class="cix-wide">公式<textarea id="spreadFormula" rows="4" placeholder="例如：TAIFEX_TJF.BID / JPX_MINI_TOPIX.ASK"></textarea></label>
+          </div>
+          <div id="formulaResult" class="formula-result">等待輸入公式</div>
+          <div class="cix-actions"><button id="saveIndicator" class="cix-primary">儲存新指標</button><button id="cancelIndicatorEdit" class="secondary-btn">取消編輯</button></div>
+        </section>
+        <section class="panel"><div class="cix-library-head"><div><h3>Custom Index Library</h3><p>每個指數保留公式、Base/顯示方式、Methodology Version 與監控條件。</p></div></div><div class="cix-library-tools"><input id="cixSearch" type="search" placeholder="搜尋名稱、Symbol 或 Formula"><select id="cixFilter"><option value="all">全部指數</option><option value="pinned">★ 已置頂</option><option value="alert">Alert</option><option value="watch">Watch Only</option><option value="pass">PASS</option><option value="stale">STALE</option></select></div><div id="cixLibrary" class="cix-library"></div></section>
+      </section>
 
       <section id="connectionsView" class="view"><section class="connections-hero panel"><div><h2>行情連線 / Connections</h2><p>免費來源與官方延遲資料作為預設；若你有券商或行情權限，可透過私人 Gateway 切換 LIVE。</p></div><div class="connection-mode-box"><label><input id="preferLive" type="checkbox"> 優先使用 LIVE Gateway</label><span id="activeConnectionStatus" class="connection-status">免費延遲 / 官方模式</span></div></section><section class="market-source-grid" id="marketSourceGrid"></section><article class="panel connections-panel"><div class="connections-head"><div><h3>國內券商</h3><p>主要用於 TAIFEX 即時行情。連線需透過使用者自己的本機 Bridge 或私人後端。</p></div></div><div class="broker-grid" id="domesticBrokerGrid"></div></article><article class="panel connections-panel"><div class="connections-head"><div><h3>國外券商 / 行情服務</h3><p>可用於 CME、JPX / OSE、ICE 等海外期貨；實際可用市場取決於帳戶行情訂閱。</p></div></div><div class="broker-grid" id="overseasBrokerGrid"></div></article><article class="panel gateway-panel"><div class="connections-head"><div><h3>連線設定</h3><p>只填 Gateway URL，不在此頁輸入券商密碼或 API Secret。憑證應存放在 Local Bridge / Private Backend。</p></div></div><div class="gateway-form"><label>目前選擇<select id="brokerSelect"></select></label><label>Gateway URL<input id="brokerEndpoint" placeholder="例：http://127.0.0.1:8787/quotes"></label><label>備註<input id="brokerNote" placeholder="例如：家用 Mac mini / Private Worker"></label></div><div class="gateway-actions"><button id="saveBrokerConnection">儲存設定</button><button id="testBrokerConnection" class="secondary-btn">測試連線</button><button id="disconnectBroker" class="secondary-btn">停用 LIVE</button><span id="brokerTestResult" class="source-note">尚未測試</span></div><div class="connection-warning">安全原則：不要把券商密碼、API Secret、憑證檔或 session token 寫入 GitHub、LocalStorage 或前端 JavaScript。網站只保存 Gateway URL、偏好與非敏感備註。</div></article></section>
 
@@ -155,4 +172,4 @@
   });
   window.__gmmEmergencySwitch=emergencySwitch;
 })();
-</script><script src="config.example.js?v=20260918-fix1"></script><script src="providers.js?v=20260916-ndf3"></script><script src="app.js?v=20260917-indicator-flow2"></script><script src="tv-spark-widget.js?v=20260918-fix1"></script></body></html>
+</script><script src="config.example.js?v=20260918-fix1"></script><script src="providers.js?v=20260916-ndf3"></script><script src="app.js?v=20260921-indicator-edit2"></script><script src="tv-spark-widget.js?v=20260918-fix1"></script></body></html>
