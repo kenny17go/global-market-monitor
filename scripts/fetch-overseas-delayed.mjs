@@ -126,7 +126,7 @@ function tokyoNowParts(d=new Date()){
   return {year:Number(get('year')),month:Number(get('month')),day:Number(get('day')),hour:Number(get('hour')),minute:Number(get('minute')),date:`${get('year')}-${get('month')}-${get('day')}`};
 }
 function topixQuoteDateFromPage(plain,nowParts){
-  const m=plain.match(/リアルタイム株価\s*(?:(\d{1,2})\/(\d{1,2}))?/);
+  const m=plain.match(/リアルタイム株価\s*(?:(\d{1,2})\/(\d{1,2}))?/)||plain.match(/始値\s*(\d{1,2})\/(\d{1,2})/)||plain.match(/高値\s*(\d{1,2})\/(\d{1,2})/);
   if(!m?.[1]||!m?.[2])return nowParts.date;
   let y=nowParts.year,mo=Number(m[1]),d=Number(m[2]);
   if(mo-nowParts.month>6)y--;else if(nowParts.month-mo>6)y++;
