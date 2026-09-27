@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generatedAt": "2026-09-27T19:43:00.152Z",
+    "generatedAt": "2026-09-27T22:35:51.509Z",
     "realtime": false,
     "spotValidated": false,
     "sourcePolicy": "Offshore = NetDania; fallback whole curve to Barchart. Onshore = Investing.com; fallback whole curve to Cbonds; final fallback to Bank of Taiwan exact-tenor forwards minus same-bank spot.",
@@ -610,9 +610,9 @@
     "quoteType": "FORWARD POINTS",
     "curve": {
       "1W": {
-        "bid": -0.02,
-        "ask": -0.02,
-        "mid": -0.02,
+        "bid": 0.06,
+        "ask": -0.01,
+        "mid": 0.024999999999999998,
         "outrightBid": null,
         "outrightAsk": null,
         "outrightMid": null
@@ -650,7 +650,7 @@
         "outrightMid": null
       }
     },
-    "rawRow": "USD/TWD -0.02 -0.02 -0.09 -0.08 -0.23 -0.22 -0.44 -0.42 -0.78 -0.76"
+    "rawRow": "USD/TWD 0.06 -0.01 -0.09 -0.08 -0.23 -0.22 -0.44 -0.42 -0.78 -0.76"
   },
   "spread": {
     "1W": {
