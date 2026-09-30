@@ -1,5 +1,4 @@
 const URL = 'https://openapi.taifex.com.tw/v1/DailyMarketReportFut';
-const TAS_URL = 'https://openapi.taifex.com.tw/v1/TimeAndSalesData';
 const TARGETS = ['TX','MTX','SPF','UNF','UDF','SXF','TJF','F1F','RHF','XEF','XJF','XBF','XAF','GDF','TGF','BRF'];
 
 const nullish = new Set(['','-','--','---','null','NULL','N/A']);
@@ -102,36 +101,6 @@ for(const [code,names] of Object.entries(MARGIN_NAMES)){
   margins[code]={initial,currency,asOf,source:'TAIFEX OpenAPI'};
 }
 
-// During an active session, try the official TAIFEX Time & Sales feed first.
-let intraday = { source:'TAIFEX OpenAPI TimeAndSalesData', sourceUrl:TAS_URL, generatedAt:new Date().toISOString(), products:{} };
-try {
-  const tr=await fetch(TAS_URL,{headers:{accept:'application/json','user-agent':'global-market-monitor/1.0'}});
-  if(tr.ok){
-    const tj=await tr.json();
-    if(Array.isArray(tj)){
-      intraday.sampleKeys=tj[0]?Object.keys(tj[0]):[];
-      intraday.rowCount=tj.length;
-      for(const code of ['MTX','SPF']){
-        const list=tj.filter(r=>contractOf(r)===code&&validMonth(monthOf(r)));
-        intraday.products[code+'_matchedRows']=list.length;
-        const byMonth={};
-        for(const r of list){
-          const month=monthOf(r), price=num(get(r,'Price','成交價格','成交價','TradePrice')), tm=text(get(r,'Time','成交時間','TradeTime')), date=dateOf(r);
-          if(price==null)continue;
-          const prev=byMonth[month];
-          if(!prev||String(tm)>=String(prev.time))byMonth[month]={month,last:price,date,time:tm,quoteTimestamp:null};
-        }
-        for(const q of Object.values(byMonth)){
-          const d=String(q.date||'').replace(/\//g,'').replace(/-/g,'');
-          const t=String(q.time||'').replace(/:/g,'').padStart(6,'0');
-          if(/^\d{8}$/.test(d)&&/^\d{6}$/.test(t))q.quoteTimestamp=`${d.slice(0,4)}-${d.slice(4,6)}-${d.slice(6,8)}T${t.slice(0,2)}:${t.slice(2,4)}:${t.slice(4,6)}+08:00`;
-        }
-        intraday.products[code]=Object.values(byMonth);
-      }
-    }
-  }
-} catch(e){ console.warn('TAIFEX time-and-sales fetch failed:',e.message); }
-
 const out = {
   meta: {
     source: 'TAIFEX OpenAPI DailyMarketReportFut',
@@ -143,8 +112,7 @@ const out = {
     note: 'Official TAIFEX open data. Latest daily/session snapshot; not a streaming real-time feed.'
   },
   margins,
-  products,
-  intraday
+  products
 };
 
 const fs = await import('node:fs/promises');
