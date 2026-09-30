@@ -555,7 +555,7 @@ function render(){if(!DATA)return;renderUsdtwdFx();
   $('#rateBody').innerHTML=DATA.rates.map(x=>`<tr><td>${x.name}<div class="source-note">${x.source||''}</div></td><td>${x.displayRate||((Number.isFinite(Number(x.rate))?fmt(x.rate):'—')+'%')}</td><td>${x.next||'—'}</td></tr>`).join('');
   renderYield();renderAlerts();renderCatalog();
   try{renderUsdtwdFx();renderConnectionSources()}catch(e){console.warn('Optional overview panels failed',e)}
-  try{renderCixTokenOptions();renderCixTemplateOptions();updateCixFormulaPreview();renderCixLibrary();renderCustomIndicators();renderIndicatorAlertControls();renderIndicatorDashboard();evaluateAlerts();evaluateIndicatorAlerts()}catch(e){console.warn('Optional indicator UI failed',e)}
+  try{renderCixTokenOptions();renderCixTemplateOptions();updateCixFormulaPreview();renderCixLibrary();renderCustomIndicators();renderIndicatorAlertControls();renderIndicatorDashboard();evaluateAlerts();evaluateIndicatorAlerts();evaluateCixAlerts()}catch(e){console.warn('Optional indicator UI failed',e)}
 }
 
 
@@ -609,6 +609,52 @@ function cixFindCycle(symbol,formula){
     return null;
   };
   return walk(target,[]);
+}
+const CIX_ALERT_STATE_KEY='gmmCixAlertStateV1';
+let cixAlertState=(()=>{try{const v=JSON.parse(localStorage.getItem(CIX_ALERT_STATE_KEY)||'{}');return v&&typeof v==='object'?v:{}}catch{return {}}})();
+function saveCixAlertState(){try{localStorage.setItem(CIX_ALERT_STATE_KEY,JSON.stringify(cixAlertState))}catch(e){}}
+function cixAlertFreshness(x){
+  const details=cixLeafFormulaTokens(x.formula).map(cixTokenDetail).filter(Boolean);
+  const times=details.map(d=>d.time).filter(Boolean).map(t=>new Date(t).getTime()).filter(Number.isFinite);
+  const ages=times.map(t=>(Date.now()-t)/60000),maxAge=ages.length?Math.max(...ages):null,skew=times.length>1?(Math.max(...times)-Math.min(...times))/60000:0;
+  const fresh=details.length>0&&times.length===details.length&&maxAge<=Number(x.freshness||20)&&skew<=Number(x.skew||15);
+  return {fresh,maxAge,skew,details};
+}
+function cixAlertCondition(x,value){
+  if(x?.watchMode!=='alert'||!Number.isFinite(Number(value)))return null;
+  const v=Number(value);
+  if(x.upper!=null&&v>=Number(x.upper))return {side:'upper',label:'≥ 上限',threshold:Number(x.upper)};
+  if(x.lower!=null&&v<=Number(x.lower))return {side:'lower',label:'≤ 下限',threshold:Number(x.lower)};
+  return null;
+}
+function fireCixNotification(x,condition,value){
+  if(!('Notification'in window)||Notification.permission!=='granted')return false;
+  try{
+    new Notification('我的指數警示',{body:`${x.name}（${x.symbol}） ${condition.label} ${condition.threshold}｜目前 ${tidy(Number(value),8)}`});
+    return true;
+  }catch(e){console.warn('Custom index notification failed',e);return false}
+}
+function evaluateCixAlerts(){
+  let changed=false;const now=Date.now();
+  for(const x of customIndexLibrary){
+    if(['JPYTW01','JPYTW02'].includes(x?.symbol))continue;
+    const key=String(x.id||x.symbol||''),prev=cixAlertState[key]||{};
+    if(x.watchMode!=='alert'){if(prev.active||prev.lastHit){cixAlertState[key]={active:false,lastHit:prev.lastHit||0,lastSide:null};changed=true}continue}
+    const r=cixScheduledEval(x),value=r.ok&&r.type==='number'&&Number.isFinite(Number(r.value))?Number(r.value):null;
+    const freshness=cixAlertFreshness(x),condition=cixAlertCondition(x,value);
+    if(!freshness.fresh||!condition){
+      if(prev.active||prev.lastSide){cixAlertState[key]={...prev,active:false,lastSide:null};changed=true}
+      continue;
+    }
+    const cooldown=Math.max(0,Number(x.alertCooldown||15))*60000;
+    const sameActive=prev.active&&prev.lastSide===condition.side;
+    const withinCooldown=prev.lastHit&&cooldown&&now-Number(prev.lastHit)<cooldown;
+    if(sameActive&&withinCooldown)continue;
+    const notified=fireCixNotification(x,condition,value);
+    cixAlertState[key]={active:true,lastSide:condition.side,lastHit:now,lastValue:value,notified};
+    changed=true;
+  }
+  if(changed)saveCixAlertState();
 }
 const CIX_RUNTIME_KEY='gmmCixRuntimeV1';
 let cixRuntime=(()=>{try{const v=JSON.parse(localStorage.getItem(CIX_RUNTIME_KEY)||'{}');return v&&typeof v==='object'?v:{}}catch{return {}}})();
@@ -954,7 +1000,7 @@ function cixGeneralInfo(x){
   const ages=times.map(t=>(now-t)/60000),maxAge=ages.length?Math.max(...ages):null,skew=times.length>1?(Math.max(...times)-Math.min(...times))/60000:0;
   const fresh=details.length>0&&times.length===details.length&&maxAge<=Number(x.freshness||20)&&skew<=Number(x.skew||15);
   const value=r.ok&&r.type==='number'&&Number.isFinite(Number(r.value))?Number(r.value):null;
-  let signal='WATCH ONLY';if(x.watchMode==='alert'&&value!=null){if(x.upper!=null&&value>=Number(x.upper))signal='≥ 上方門檻';else if(x.lower!=null&&value<=Number(x.lower))signal='≤ 下方門檻';else signal='門檻內'}
+  let signal='WATCH ONLY';if(x.watchMode==='alert'&&value!=null){const condition=cixAlertCondition(x,value);signal=condition?(fresh?condition.label:'STALE · 不提醒'):'門檻內'}
   const rows=details.map(d=>`<span><strong>${d.token}</strong> · ${d.label}｜${d.field||'MID'} ${d.value!=null?tidy(d.value,8):'—'}｜Bid ${d.bid!=null?tidy(d.bid,8):'—'} / Ask ${d.ask!=null?tidy(d.ask,8):'—'}${d.time?'｜'+new Date(d.time).toLocaleString('zh-TW',{hour12:false}):''}</span>`).join('');
   return `<div class="cix-hedge"><b>即時指數資訊</b><strong>目前值：${value!=null?tidy(value,8):'—'}</strong>${rows||'<span>尚無可辨識的行情成分。</span>'}<span>資料品質：<strong>${fresh?'PASS':'STALE'}</strong>｜最舊報價 ${maxAge!=null?tidy(maxAge,1)+'m':'—'}｜成分時間差 ${times.length>1?tidy(skew,1)+'m':'—'}</span><span>監控狀態：<strong>${signal}</strong>${x.upper!=null?'｜上限 '+x.upper:''}${x.lower!=null?'｜下限 '+x.lower:''}</span></div>`;
 }
@@ -972,11 +1018,9 @@ function moveCix(id,dir){
 }
 function cixCardSnapshot(x){
   const r=cixScheduledEval(x);let value=r.ok&&r.type==='number'&&Number.isFinite(Number(r.value))?tidy(Number(r.value),8):'—',valueLabel='目前值';const jpy=['JPYTW01','JPYTW02'].includes(x?.symbol)?jpyExecutableValuation(x):null;if(jpy){valueLabel='雙邊估值';value=jpy.executable?`高 ${tidy(jpy.premium,3)}% / 低 ${tidy(jpy.discount,3)}%`:(jpy.reference!=null?`Last ${tidy(jpy.reference,3)}%`:'—')}else if(x?.valuationType==='two-way'&&x?.secondaryFormula){const hi=evalCixFormula(x.formula),lo=evalCixFormula(x.secondaryFormula);valueLabel='雙邊估值';value=`高 ${hi.ok&&Number.isFinite(Number(hi.value))?tidy(hi.value,3)+'%':'—'} / 低 ${lo.ok&&Number.isFinite(Number(lo.value))?tidy(lo.value,3)+'%':'—'}`}
-  const details=cixLeafFormulaTokens(x.formula).map(cixTokenDetail).filter(Boolean),times=details.map(d=>d.time).filter(Boolean).map(t=>new Date(t).getTime()).filter(Number.isFinite);
-  const ages=times.map(t=>(Date.now()-t)/60000),maxAge=ages.length?Math.max(...ages):null,skew=times.length>1?(Math.max(...times)-Math.min(...times))/60000:0;
-  const fresh=details.length>0&&times.length===details.length&&maxAge<=Number(x.freshness||20)&&skew<=Number(x.skew||15);
+  const freshness=cixAlertFreshness(x),fresh=freshness.fresh;
   let signal=x.watchMode==='alert'?'ALERT':'WATCH';
-  if(x.watchMode==='alert'&&r.ok&&r.type==='number'){const v=Number(r.value);if(x.upper!=null&&v>=Number(x.upper))signal='≥ 上限';else if(x.lower!=null&&v<=Number(x.lower))signal='≤ 下限';else signal='門檻內'}
+  if(x.watchMode==='alert'&&r.ok&&r.type==='number'){const condition=cixAlertCondition(x,Number(r.value));signal=condition?(fresh?condition.label:'STALE · 不提醒'):'門檻內'}
   return {value,valueLabel,fresh,signal};
 }
 function filteredCixLibrary(){
@@ -1067,6 +1111,7 @@ function syncCixWatchMode(){
 }
 function bindCixUI(){
   if(!$('#customindexView'))return;ensureJpyCixPresets();renderCixLibrary();renderCixTokenOptions();renderCixTemplateOptions();
+  if($('#cixNotifyBtn'))$('#cixNotifyBtn').onclick=async()=>{if(!('Notification'in window))return alert('此瀏覽器不支援通知');const p=await Notification.requestPermission();alert(p==='granted'?'我的指數通知已啟用':'通知未啟用')};
   if($('#cixSearch'))$('#cixSearch').oninput=renderCixLibrary;if($('#cixFilter'))$('#cixFilter').onchange=renderCixLibrary;
   if($('#applyCixTemplate'))$('#applyCixTemplate').onclick=applyCixTemplate;
   if($('#cixTemplate'))$('#cixTemplate').onchange=syncCixTemplateMode;
