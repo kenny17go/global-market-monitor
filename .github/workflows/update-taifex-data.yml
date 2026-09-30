@@ -2,15 +2,13 @@ name: Update TAIFEX official data
 
 on:
   workflow_dispatch:
-  repository_dispatch:
-    types: [gmm-taifex-refresh]
   push:
     paths:
       - 'scripts/fetch-taifex.mjs'
       - '.github/workflows/update-taifex-data.yml'
   schedule:
-    # Every 10 minutes; fetcher remains data-only. Intraday freshness is validated by quote timestamps.
-    - cron: '2,12,22,32,42,52 * * * 1-5'
+    - cron: '35 7 * * 1-5'
+    - cron: '35 21 * * 1-5'
 
 permissions:
   contents: write
