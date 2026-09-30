@@ -591,7 +591,7 @@ function ensureJpyCixPresets(){
   if(changed)saveCixLibrary();
 }
 
-function saveCixLibrary(){localStorage.setItem(CIX_KEY,JSON.stringify(customIndexLibrary))}
+function saveCixLibrary(){localStorage.setItem(CIX_KEY,JSON.stringify(customIndexLibrary));setTimeout(()=>syncCixAlertsToCloud(),0)}
 function cixEscRe(s){return String(s)}
 function cixIndexBySymbol(symbol){return customIndexLibrary.find(x=>String(x.symbol||'').toUpperCase()===String(symbol||'').toUpperCase())||null}
 function cixReferencedSymbols(formula){
@@ -1125,7 +1125,7 @@ function syncCixWatchMode(){
 }
 function bindCixUI(){
   if(!$('#customindexView'))return;ensureJpyCixPresets();renderCixLibrary();renderCixTokenOptions();renderCixTemplateOptions();
-  if($('#cixNotifyBtn'))$('#cixNotifyBtn').onclick=async()=>{if(!('Notification'in window))return alert('此瀏覽器不支援通知');const p=await Notification.requestPermission();alert(p==='granted'?'我的指數通知已啟用':'通知未啟用')};
+  if($('#cixNotifyBtn'))$('#cixNotifyBtn').onclick=async()=>{if(!('Notification'in window))return alert('此瀏覽器不支援通知');const p=await Notification.requestPermission();if(p==='granted'){await syncCixAlertsToCloud();alert('通知權限已啟用；背景推播訂閱下一階段啟用')}else alert('通知未啟用')};
   if($('#cixSearch'))$('#cixSearch').oninput=renderCixLibrary;if($('#cixFilter'))$('#cixFilter').onchange=renderCixLibrary;
   if($('#applyCixTemplate'))$('#applyCixTemplate').onclick=applyCixTemplate;
   if($('#cixTemplate'))$('#cixTemplate').onchange=syncCixTemplateMode;
