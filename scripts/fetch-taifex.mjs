@@ -109,8 +109,11 @@ try {
   if(tr.ok){
     const tj=await tr.json();
     if(Array.isArray(tj)){
+      intraday.sampleKeys=tj[0]?Object.keys(tj[0]):[];
+      intraday.rowCount=tj.length;
       for(const code of ['MTX','SPF']){
         const list=tj.filter(r=>contractOf(r)===code&&validMonth(monthOf(r)));
+        intraday.products[code+'_matchedRows']=list.length;
         const byMonth={};
         for(const r of list){
           const month=monthOf(r), price=num(get(r,'Price','成交價格','成交價','TradePrice')), tm=text(get(r,'Time','成交時間','TradeTime')), date=dateOf(r);
