@@ -66,6 +66,16 @@ async function gmmPushApi(action,extra={}){
 async function syncCixAlertsToCloud(){
   try{return await gmmPushApi('sync-alerts',{alerts:customIndexLibrary})}catch(e){console.warn('GMM alert cloud sync failed',e);return null}
 }
+function gmmUrlBase64ToUint8Array(base64String){const padding='='.repeat((4-base64String.length%4)%4),base64=(base64String+padding).replace(/-/g,'+').replace(/_/g,'/'),raw=atob(base64);return Uint8Array.from([...raw].map(c=>c.charCodeAt(0)))}
+async function enableGmmBackgroundPush(){
+  if(!('serviceWorker'in navigator)||!('PushManager'in window)||!('Notification'in window))throw new Error('此裝置不支援 Web Push');
+  const permission=await Notification.requestPermission();if(permission!=='granted')throw new Error('通知權限未開啟');
+  const reg=await navigator.serviceWorker.register('./sw.js?v=20260930-push1',{scope:'./'});await navigator.serviceWorker.ready;
+  let sub=await reg.pushManager.getSubscription();
+  if(!sub){const key=await gmmPushApi('public-key');sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:gmmUrlBase64ToUint8Array(key.publicKey)})}
+  const raw=sub.toJSON();await gmmPushApi('save-subscription',{subscription:raw});await syncCixAlertsToCloud();return gmmPushApi('test-push');
+}
+
 const CONNECTION_KEY='gmmMarketConnectionsV1';
 const BROKERS={
   fubon:{name:'富邦證券 Neo',group:'domestic',markets:['TAIFEX'],mode:'Local Bridge',note:'國內期貨行情 connector 模板'},
@@ -1125,7 +1135,7 @@ function syncCixWatchMode(){
 }
 function bindCixUI(){
   if(!$('#customindexView'))return;ensureJpyCixPresets();renderCixLibrary();renderCixTokenOptions();renderCixTemplateOptions();
-  if($('#cixNotifyBtn'))$('#cixNotifyBtn').onclick=async()=>{if(!('Notification'in window))return alert('此瀏覽器不支援通知');const p=await Notification.requestPermission();if(p==='granted'){await syncCixAlertsToCloud();alert('通知權限已啟用；背景推播訂閱下一階段啟用')}else alert('通知未啟用')};
+  if($('#cixNotifyBtn'))$('#cixNotifyBtn').onclick=async()=>{const b=$('#cixNotifyBtn');try{b.disabled=true;b.textContent='啟用中…';const r=await enableGmmBackgroundPush();b.textContent='背景通知已啟用';alert(r?.sent>0?'背景推播已啟用，測試通知已送出':'背景推播已啟用；等待第一個警示')}catch(e){console.error(e);b.textContent='啟用通知';alert('通知啟用失敗：'+(e?.message||e))}finally{b.disabled=false}};
   if($('#cixSearch'))$('#cixSearch').oninput=renderCixLibrary;if($('#cixFilter'))$('#cixFilter').onchange=renderCixLibrary;
   if($('#applyCixTemplate'))$('#applyCixTemplate').onclick=applyCixTemplate;
   if($('#cixTemplate'))$('#cixTemplate').onchange=syncCixTemplateMode;
