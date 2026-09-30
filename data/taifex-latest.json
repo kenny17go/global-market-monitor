@@ -5,7 +5,7 @@
     "mode": "OFFICIAL_DAILY",
     "realtime": false,
     "preferredSession": "一般",
-    "generatedAt": "2026-09-30T14:50:29.198Z",
+    "generatedAt": "2026-09-30T14:55:21.934Z",
     "note": "Official TAIFEX open data. Latest daily/session snapshot; not a streaming real-time feed."
   },
   "margins": {
@@ -1008,15 +1008,6 @@
           "openInterest": 0
         }
       ]
-    }
-  },
-  "intraday": {
-    "source": "TAIFEX OpenAPI TimeAndSalesData",
-    "sourceUrl": "https://openapi.taifex.com.tw/v1/TimeAndSalesData",
-    "generatedAt": "2026-09-30T14:50:24.668Z",
-    "products": {
-      "MTX": [],
-      "SPF": []
     }
   }
 }
