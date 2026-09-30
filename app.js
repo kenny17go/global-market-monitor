@@ -52,6 +52,20 @@ let customIndicators=(()=>{try{return JSON.parse(localStorage.getItem(INDICATOR_
 let editingIndicatorId=null;
 let indicatorAlerts=(()=>{try{return JSON.parse(localStorage.getItem(INDICATOR_ALERT_KEY)||'[]')}catch{return []}})();
 
+const GMM_PUSH_API='https://nbenkxcjljbmthuuyhwn.supabase.co/functions/v1/gmm-push-api';
+const GMM_DEVICE_KEY='gmmPushDeviceV1';
+function gmmRandomId(bytes=24){const a=new Uint8Array(bytes);crypto.getRandomValues(a);return Array.from(a,b=>b.toString(16).padStart(2,'0')).join('')}
+function gmmDeviceCredentials(){
+  try{const old=JSON.parse(localStorage.getItem(GMM_DEVICE_KEY)||'null');if(old?.deviceId&&old?.syncToken)return old}catch(e){}
+  const v={deviceId:'gmm-'+gmmRandomId(12),syncToken:gmmRandomId(32)};localStorage.setItem(GMM_DEVICE_KEY,JSON.stringify(v));return v;
+}
+async function gmmPushApi(action,extra={}){
+  const creds=gmmDeviceCredentials(),r=await fetch(GMM_PUSH_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action,...creds,...extra})});
+  const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j?.error||('HTTP '+r.status));return j;
+}
+async function syncCixAlertsToCloud(){
+  try{return await gmmPushApi('sync-alerts',{alerts:customIndexLibrary})}catch(e){console.warn('GMM alert cloud sync failed',e);return null}
+}
 const CONNECTION_KEY='gmmMarketConnectionsV1';
 const BROKERS={
   fubon:{name:'富邦證券 Neo',group:'domestic',markets:['TAIFEX'],mode:'Local Bridge',note:'國內期貨行情 connector 模板'},
