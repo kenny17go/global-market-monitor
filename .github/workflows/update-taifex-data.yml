@@ -2,6 +2,8 @@ name: Update TAIFEX official data
 
 on:
   workflow_dispatch:
+  repository_dispatch:
+    types: [gmm-taifex-refresh]
   push:
     paths:
       - 'scripts/fetch-taifex.mjs'
