@@ -71,8 +71,15 @@ async function enableGmmBackgroundPush(){
   if(!('serviceWorker'in navigator)||!('PushManager'in window)||!('Notification'in window))throw new Error('此裝置不支援 Web Push');
   const permission=await Notification.requestPermission();if(permission!=='granted')throw new Error('通知權限未開啟');
   const reg=await navigator.serviceWorker.register('./sw.js?v=20260930-push1',{scope:'./'});await navigator.serviceWorker.ready;
+  const key=await gmmPushApi('public-key');
+  const applicationServerKey=gmmUrlBase64ToUint8Array(key.publicKey);
   let sub=await reg.pushManager.getSubscription();
-  if(!sub){const key=await gmmPushApi('public-key');sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:gmmUrlBase64ToUint8Array(key.publicKey)})}
+  if(sub){
+    let currentKey='';
+    try{const k=sub.options?.applicationServerKey;if(k){const bytes=new Uint8Array(k),raw=String.fromCharCode(...bytes);currentKey=btoa(raw).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')}}catch(e){}
+    if(currentKey!==key.publicKey){try{await gmmPushApi('remove-subscription',{endpoint:sub.endpoint})}catch(e){}await sub.unsubscribe();sub=null}
+  }
+  if(!sub)sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey});
   const raw=sub.toJSON();await gmmPushApi('save-subscription',{subscription:raw});await syncCixAlertsToCloud();return gmmPushApi('test-push');
 }
 
