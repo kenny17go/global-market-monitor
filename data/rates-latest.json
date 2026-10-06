@@ -3,8 +3,8 @@
     "source": "Official central banks + U.S. Department of the Treasury",
     "mode": "OFFICIAL / OFFICIAL DAILY",
     "realtime": false,
-    "asOf": "2026-10-05T00:00:00",
-    "generatedAt": "2026-10-06T16:49:11.018Z",
+    "asOf": "2026-10-06T00:00:00",
+    "generatedAt": "2026-10-06T21:37:07.189Z",
     "treasuryEndpoint": "https://home.treasury.gov/resource-center/data-chart-center/interest-rates/pages/xml?data=daily_treasury_yield_curve&field_tdr_date_value=2026",
     "note": "Policy rates are refreshed from official central-bank/public pages when parsable; conservative last-known official values are retained if a source page is temporarily unavailable. Fed is shown as the target range; ECB uses the deposit facility; CBC uses the discount rate; PBOC uses 1Y LPR."
   },
@@ -55,11 +55,12 @@
     },
     {
       "name": "香港 HKMA",
-      "rate": null,
-      "displayRate": "—",
+      "rate": 4.25,
+      "displayRate": "4.25%",
       "next": "依 Fed 調整",
       "source": "HKMA · Base Rate",
-      "mode": "OFFICIAL"
+      "mode": "OFFICIAL",
+      "asOf": "2026-09-30"
     },
     {
       "name": "中國 PBOC",
@@ -73,35 +74,35 @@
   "ust": [
     {
       "tenor": "1M",
-      "yield": 4.05
+      "yield": 4.06
     },
     {
       "tenor": "3M",
-      "yield": 4.22
+      "yield": 4.21
     },
     {
       "tenor": "6M",
-      "yield": 4.3
+      "yield": 4.28
     },
     {
       "tenor": "1Y",
-      "yield": 4.47
+      "yield": 4.46
     },
     {
       "tenor": "2Y",
-      "yield": 4.84
+      "yield": 4.79
     },
     {
       "tenor": "5Y",
-      "yield": 5.06
+      "yield": 5.03
     },
     {
       "tenor": "10Y",
-      "yield": 5.31
+      "yield": 5.27
     },
     {
       "tenor": "30Y",
-      "yield": 5.66
+      "yield": 5.64
     }
   ]
 }
