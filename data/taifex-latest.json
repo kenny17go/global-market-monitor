@@ -5,68 +5,68 @@
     "mode": "OFFICIAL_DAILY",
     "realtime": false,
     "preferredSession": "一般",
-    "generatedAt": "2026-10-06T14:24:06.353Z",
+    "generatedAt": "2026-10-07T00:56:32.475Z",
     "note": "Official TAIFEX open data. Latest daily/session snapshot; not a streaming real-time feed."
   },
   "margins": {
     "TX": {
       "initial": 701000,
       "currency": "TWD",
-      "asOf": "20261005",
+      "asOf": "20261006",
       "source": "TAIFEX OpenAPI"
     },
     "TJF": {
       "initial": 49000,
       "currency": "TWD",
-      "asOf": "20261005",
+      "asOf": "20261006",
       "source": "TAIFEX OpenAPI"
     },
     "UDF": {
       "initial": 64000,
       "currency": "TWD",
-      "asOf": "20261005",
+      "asOf": "20261006",
       "source": "TAIFEX OpenAPI"
     },
     "SPF": {
       "initial": 103000,
       "currency": "TWD",
-      "asOf": "20261005",
+      "asOf": "20261006",
       "source": "TAIFEX OpenAPI"
     },
     "UNF": {
       "initial": 98000,
       "currency": "TWD",
-      "asOf": "20261005",
+      "asOf": "20261006",
       "source": "TAIFEX OpenAPI"
     },
     "SXF": {
       "initial": 88000,
       "currency": "TWD",
-      "asOf": "20261005",
+      "asOf": "20261006",
       "source": "TAIFEX OpenAPI"
     },
     "F1F": {
       "initial": 29000,
       "currency": "TWD",
-      "asOf": "20261005",
+      "asOf": "20261006",
       "source": "TAIFEX OpenAPI"
     },
     "GDF": {
       "initial": 560,
       "currency": "USD",
-      "asOf": "20261005",
+      "asOf": "20261006",
       "source": "TAIFEX OpenAPI"
     },
     "TGF": {
       "initial": 22000,
       "currency": "TWD",
-      "asOf": "20261005",
+      "asOf": "20261006",
       "source": "TAIFEX OpenAPI"
     },
     "BRF": {
       "initial": 87000,
       "currency": "TWD",
-      "asOf": "20261005",
+      "asOf": "20261006",
       "source": "TAIFEX OpenAPI"
     }
   },
@@ -76,69 +76,69 @@
       "contracts": [
         {
           "month": "202610",
-          "date": "20261005",
+          "date": "20261006",
           "session": "一般",
-          "bid": 49944,
-          "ask": 49951,
-          "last": 49949,
-          "settlement": 49944,
-          "volume": 41858,
-          "openInterest": 108339
+          "bid": 50061,
+          "ask": 50068,
+          "last": 50060,
+          "settlement": 50082,
+          "volume": 33143,
+          "openInterest": 108230
         },
         {
           "month": "202611",
-          "date": "20261005",
+          "date": "20261006",
           "session": "一般",
-          "bid": 50116,
-          "ask": 50130,
-          "last": 50125,
-          "settlement": 50096,
-          "volume": 423,
-          "openInterest": 1566
+          "bid": 50244,
+          "ask": 50257,
+          "last": 50244,
+          "settlement": 50292,
+          "volume": 604,
+          "openInterest": 2040
         },
         {
           "month": "202612",
-          "date": "20261005",
+          "date": "20261006",
           "session": "一般",
-          "bid": 50257,
-          "ask": 50266,
-          "last": 50225,
-          "settlement": 50261,
-          "volume": 39,
-          "openInterest": 807
+          "bid": 50397,
+          "ask": 50412,
+          "last": 50438,
+          "settlement": 50404,
+          "volume": 27,
+          "openInterest": 824
         },
         {
           "month": "202703",
-          "date": "20261005",
+          "date": "20261006",
           "session": "一般",
-          "bid": 50736,
-          "ask": 50758,
-          "last": 50690,
-          "settlement": 50695,
-          "volume": 7,
-          "openInterest": 118
+          "bid": 50884,
+          "ask": 50902,
+          "last": 50940,
+          "settlement": 50940,
+          "volume": 5,
+          "openInterest": 122
         },
         {
           "month": "202706",
-          "date": "20261005",
+          "date": "20261006",
           "session": "一般",
-          "bid": 51225,
-          "ask": 51254,
-          "last": 51200,
-          "settlement": 51239,
-          "volume": 9,
+          "bid": 51402,
+          "ask": 51431,
+          "last": null,
+          "settlement": 51416,
+          "volume": 0,
           "openInterest": 77
         },
         {
           "month": "202709",
-          "date": "20261005",
+          "date": "20261006",
           "session": "一般",
-          "bid": 51356,
-          "ask": 51381,
-          "last": 51314,
-          "settlement": 51368,
-          "volume": 2,
-          "openInterest": 30
+          "bid": 51475,
+          "ask": 51500,
+          "last": 51316,
+          "settlement": 51487,
+          "volume": 1,
+          "openInterest": 31
         }
       ]
     },
@@ -147,69 +147,69 @@
       "contracts": [
         {
           "month": "202610",
-          "date": "20261005",
+          "date": "20261006",
           "session": "一般",
-          "bid": 49946,
-          "ask": 49953,
-          "last": 49953,
-          "settlement": 49944,
-          "volume": 91294,
-          "openInterest": 35690
+          "bid": 50064,
+          "ask": 50078,
+          "last": 50064,
+          "settlement": 50082,
+          "volume": 74663,
+          "openInterest": 33688
         },
         {
           "month": "202611",
-          "date": "20261005",
+          "date": "20261006",
           "session": "一般",
-          "bid": 50120,
-          "ask": 50132,
-          "last": 50133,
-          "settlement": 50096,
-          "volume": 2234,
-          "openInterest": 2854
+          "bid": 50247,
+          "ask": 50268,
+          "last": 50250,
+          "settlement": 50292,
+          "volume": 1446,
+          "openInterest": 3089
         },
         {
           "month": "202612",
-          "date": "20261005",
+          "date": "20261006",
           "session": "一般",
-          "bid": 50259,
-          "ask": 50273,
-          "last": 50270,
-          "settlement": 50261,
-          "volume": 287,
-          "openInterest": 1351
+          "bid": 50400,
+          "ask": 50421,
+          "last": 50400,
+          "settlement": 50404,
+          "volume": 211,
+          "openInterest": 1402
         },
         {
           "month": "202703",
-          "date": "20261005",
+          "date": "20261006",
           "session": "一般",
-          "bid": 50737,
-          "ask": 50757,
-          "last": 50704,
-          "settlement": 50695,
-          "volume": 44,
-          "openInterest": 445
+          "bid": 50885,
+          "ask": 50912,
+          "last": 50950,
+          "settlement": 50940,
+          "volume": 22,
+          "openInterest": 453
         },
         {
           "month": "202706",
-          "date": "20261005",
+          "date": "20261006",
           "session": "一般",
-          "bid": 51230,
-          "ask": 51256,
-          "last": 51133,
-          "settlement": 51239,
-          "volume": 30,
-          "openInterest": 157
+          "bid": 51407,
+          "ask": 51440,
+          "last": 51427,
+          "settlement": 51416,
+          "volume": 21,
+          "openInterest": 167
         },
         {
           "month": "202709",
-          "date": "20261005",
+          "date": "20261006",
           "session": "一般",
-          "bid": 51358,
-          "ask": 51383,
-          "last": 51249,
-          "settlement": 51368,
-          "volume": 34,
-          "openInterest": 228
+          "bid": 51479,
+          "ask": 51511,
+          "last": 51432,
+          "settlement": 51487,
+          "volume": 15,
+          "openInterest": 232
         }
       ]
     },
@@ -218,56 +218,56 @@
       "contracts": [
         {
           "month": "202612",
-          "date": "20261005",
+          "date": "20261006",
           "session": "盤後",
-          "bid": 7767,
+          "bid": null,
           "ask": null,
-          "last": 7776.75,
+          "last": 7778.25,
           "settlement": null,
-          "volume": 11,
+          "volume": 1,
           "openInterest": null
         },
         {
           "month": "202703",
-          "date": "20261005",
-          "session": "盤後",
-          "bid": 7831,
-          "ask": null,
-          "last": null,
-          "settlement": null,
-          "volume": 0,
-          "openInterest": null
-        },
-        {
-          "month": "202706",
-          "date": "20261005",
+          "date": "20261006",
           "session": "一般",
           "bid": null,
           "ask": null,
           "last": null,
-          "settlement": 7938.5,
+          "settlement": 7913.5,
+          "volume": 0,
+          "openInterest": 0
+        },
+        {
+          "month": "202706",
+          "date": "20261006",
+          "session": "一般",
+          "bid": null,
+          "ask": null,
+          "last": null,
+          "settlement": 7986,
           "volume": 0,
           "openInterest": 0
         },
         {
           "month": "202709",
-          "date": "20261005",
+          "date": "20261006",
           "session": "一般",
           "bid": null,
           "ask": null,
           "last": null,
-          "settlement": 8025.75,
+          "settlement": 8072,
           "volume": 0,
           "openInterest": 0
         },
         {
           "month": "202712",
-          "date": "20261005",
+          "date": "20261006",
           "session": "一般",
           "bid": null,
           "ask": null,
           "last": null,
-          "settlement": 8112.5,
+          "settlement": 8162.5,
           "volume": 0,
           "openInterest": 0
         }
@@ -278,56 +278,56 @@
       "contracts": [
         {
           "month": "202612",
-          "date": "20261005",
+          "date": "20261006",
           "session": "一般",
-          "bid": 31053,
-          "ask": 31070,
-          "last": 31063,
-          "settlement": 31062,
-          "volume": 1163,
-          "openInterest": 620
+          "bid": 31346,
+          "ask": 31397,
+          "last": 31388,
+          "settlement": 31388,
+          "volume": 48,
+          "openInterest": 623
         },
         {
           "month": "202703",
-          "date": "20261005",
+          "date": "20261006",
           "session": "一般",
-          "bid": 31421,
-          "ask": 31454,
-          "last": 31490,
-          "settlement": 31437,
-          "volume": 54,
-          "openInterest": 11
+          "bid": 31712,
+          "ask": 31789,
+          "last": 31753,
+          "settlement": 31753,
+          "volume": 4,
+          "openInterest": 21
         },
         {
           "month": "202706",
-          "date": "20261005",
-          "session": "一般",
-          "bid": null,
+          "date": "20261006",
+          "session": "盤後",
+          "bid": 31201,
           "ask": null,
           "last": null,
-          "settlement": 31603,
+          "settlement": null,
           "volume": 0,
-          "openInterest": 0
+          "openInterest": null
         },
         {
           "month": "202709",
-          "date": "20261005",
+          "date": "20261006",
           "session": "一般",
           "bid": null,
           "ask": null,
           "last": null,
-          "settlement": 31787,
+          "settlement": 32113,
           "volume": 0,
           "openInterest": 0
         },
         {
           "month": "202712",
-          "date": "20261005",
+          "date": "20261006",
           "session": "一般",
           "bid": null,
           "ask": null,
           "last": null,
-          "settlement": 32243,
+          "settlement": 32569,
           "volume": 0,
           "openInterest": 0
         }
@@ -338,45 +338,45 @@
       "contracts": [
         {
           "month": "202612",
-          "date": "20261005",
+          "date": "20261006",
           "session": "一般",
-          "bid": 51401,
-          "ask": 51629,
-          "last": 51433,
-          "settlement": 51433,
-          "volume": 26,
-          "openInterest": 272
+          "bid": 51560,
+          "ask": 51689,
+          "last": 51640,
+          "settlement": 51640,
+          "volume": 37,
+          "openInterest": 294
         },
         {
           "month": "202703",
-          "date": "20261005",
+          "date": "20261006",
           "session": "一般",
-          "bid": 51873,
-          "ask": 52137,
-          "last": null,
-          "settlement": 51906,
-          "volume": 0,
-          "openInterest": 32
+          "bid": 52047,
+          "ask": 52197,
+          "last": 52135,
+          "settlement": 52135,
+          "volume": 3,
+          "openInterest": 44
         },
         {
           "month": "202706",
-          "date": "20261005",
+          "date": "20261006",
           "session": "一般",
           "bid": null,
           "ask": null,
           "last": null,
-          "settlement": 52483,
+          "settlement": 52690,
           "volume": 0,
           "openInterest": 0
         },
         {
           "month": "202709",
-          "date": "20261005",
+          "date": "20261006",
           "session": "一般",
           "bid": null,
           "ask": null,
           "last": null,
-          "settlement": 52931,
+          "settlement": 53138,
           "volume": 0,
           "openInterest": 0
         }
@@ -387,45 +387,45 @@
       "contracts": [
         {
           "month": "202612",
-          "date": "20261005",
+          "date": "20261006",
           "session": "一般",
-          "bid": 13250,
-          "ask": 13309.5,
-          "last": 13262.5,
-          "settlement": 13262.5,
-          "volume": 34,
-          "openInterest": 348
+          "bid": 13272,
+          "ask": 13277,
+          "last": 13225,
+          "settlement": 13274.5,
+          "volume": 9,
+          "openInterest": 357
         },
         {
           "month": "202703",
-          "date": "20261005",
+          "date": "20261006",
           "session": "一般",
-          "bid": 13378,
-          "ask": 13438,
-          "last": 13455.5,
-          "settlement": 13408,
-          "volume": 2,
-          "openInterest": 18
+          "bid": 13402,
+          "ask": 13407,
+          "last": null,
+          "settlement": 13404.5,
+          "volume": 0,
+          "openInterest": 16
         },
         {
           "month": "202706",
-          "date": "20261005",
+          "date": "20261006",
           "session": "一般",
           "bid": null,
           "ask": null,
           "last": null,
-          "settlement": 13391.5,
+          "settlement": 13403.5,
           "volume": 0,
           "openInterest": 0
         },
         {
           "month": "202709",
-          "date": "20261005",
+          "date": "20261006",
           "session": "一般",
           "bid": null,
           "ask": null,
           "last": null,
-          "settlement": 13566,
+          "settlement": 13578,
           "volume": 0,
           "openInterest": 0
         }
@@ -436,56 +436,56 @@
       "contracts": [
         {
           "month": "202610",
-          "date": "20261005",
+          "date": "20261006",
           "session": "一般",
-          "bid": 4149.25,
-          "ask": 4185.75,
-          "last": 4163.5,
-          "settlement": 4163.5,
-          "volume": 313,
-          "openInterest": 129
+          "bid": 4165.5,
+          "ask": 4213,
+          "last": 4181.5,
+          "settlement": 4181.5,
+          "volume": 192,
+          "openInterest": 75
         },
         {
           "month": "202611",
-          "date": "20261005",
+          "date": "20261006",
           "session": "一般",
-          "bid": 4153.25,
-          "ask": 4187.75,
-          "last": 4167,
-          "settlement": 4167,
-          "volume": 47,
-          "openInterest": 57
+          "bid": 4169.5,
+          "ask": 4217,
+          "last": 4195.5,
+          "settlement": 4195.5,
+          "volume": 58,
+          "openInterest": 83
         },
         {
           "month": "202612",
-          "date": "20261005",
+          "date": "20261006",
           "session": "一般",
-          "bid": 4120,
-          "ask": 4455,
+          "bid": 4155,
+          "ask": 4509,
           "last": null,
-          "settlement": 4175.25,
+          "settlement": 4193.25,
           "volume": 0,
           "openInterest": 1
         },
         {
           "month": "202703",
-          "date": "20261005",
+          "date": "20261006",
           "session": "一般",
-          "bid": 3802,
-          "ask": 4462,
+          "bid": 3848,
+          "ask": 4516,
           "last": null,
-          "settlement": 4181.75,
+          "settlement": 4199.75,
           "volume": 0,
           "openInterest": 0
         },
         {
           "month": "202706",
-          "date": "20261005",
+          "date": "20261006",
           "session": "一般",
-          "bid": 3780,
-          "ask": 4436,
+          "bid": 3826,
+          "ask": 4490,
           "last": null,
-          "settlement": 4157.75,
+          "settlement": 4175.75,
           "volume": 0,
           "openInterest": 0
         }
@@ -496,45 +496,45 @@
       "contracts": [
         {
           "month": "202612",
-          "date": "20261005",
+          "date": "20261006",
           "session": "一般",
           "bid": null,
           "ask": 10733,
-          "last": 10535,
-          "settlement": 10535,
-          "volume": 18,
-          "openInterest": 91
+          "last": 10570,
+          "settlement": 10570,
+          "volume": 8,
+          "openInterest": 155
         },
         {
           "month": "202703",
-          "date": "20261005",
-          "session": "一般",
+          "date": "20261006",
+          "session": "盤後",
           "bid": null,
-          "ask": 10769,
-          "last": 10582,
-          "settlement": 10568,
-          "volume": 10,
-          "openInterest": 32
+          "ask": 10771,
+          "last": 10591,
+          "settlement": null,
+          "volume": 38,
+          "openInterest": null
         },
         {
           "month": "202706",
-          "date": "20261005",
+          "date": "20261006",
           "session": "一般",
           "bid": null,
           "ask": null,
           "last": null,
-          "settlement": 10566,
+          "settlement": 10601,
           "volume": 0,
           "openInterest": 0
         },
         {
           "month": "202709",
-          "date": "20261005",
+          "date": "20261006",
           "session": "一般",
           "bid": null,
           "ask": null,
           "last": null,
-          "settlement": 10608,
+          "settlement": 10643,
           "volume": 0,
           "openInterest": 0
         }
@@ -545,67 +545,67 @@
       "contracts": [
         {
           "month": "202610",
-          "date": "20261005",
+          "date": "20261006",
           "session": "一般",
-          "bid": 6.7025,
-          "ask": 6.7033,
+          "bid": 6.6951,
+          "ask": 6.6959,
           "last": null,
-          "settlement": 6.7029,
+          "settlement": 6.6955,
           "volume": 0,
           "openInterest": 27
         },
         {
           "month": "202611",
-          "date": "20261005",
+          "date": "20261006",
           "session": "一般",
-          "bid": 6.6888,
-          "ask": 6.6896,
+          "bid": 6.6814,
+          "ask": 6.6822,
           "last": null,
-          "settlement": 6.6892,
+          "settlement": 6.6818,
           "volume": 0,
           "openInterest": 0
         },
         {
           "month": "202612",
-          "date": "20261005",
+          "date": "20261006",
           "session": "一般",
-          "bid": 6.6741,
-          "ask": 6.6755,
+          "bid": 6.6667,
+          "ask": 6.6681,
           "last": null,
-          "settlement": 6.6748,
+          "settlement": 6.6674,
           "volume": 0,
           "openInterest": 0
         },
         {
           "month": "202703",
-          "date": "20261005",
+          "date": "20261006",
           "session": "一般",
-          "bid": 6.6244,
-          "ask": 6.6266,
-          "last": null,
-          "settlement": 6.6255,
-          "volume": 0,
-          "openInterest": 30
+          "bid": 6.6171,
+          "ask": 6.6193,
+          "last": 6.62,
+          "settlement": 6.6182,
+          "volume": 10,
+          "openInterest": 20
         },
         {
           "month": "202706",
-          "date": "20261005",
+          "date": "20261006",
           "session": "一般",
-          "bid": 6.5703,
-          "ask": 6.5743,
+          "bid": 6.5622,
+          "ask": 6.5662,
           "last": null,
-          "settlement": 6.5723,
+          "settlement": 6.5642,
           "volume": 0,
           "openInterest": 0
         },
         {
           "month": "202709",
-          "date": "20261005",
+          "date": "20261006",
           "session": "一般",
-          "bid": 6.516,
-          "ask": 6.52,
+          "bid": 6.5072,
+          "ask": 6.5112,
           "last": null,
-          "settlement": 6.518,
+          "settlement": 6.5092,
           "volume": 0,
           "openInterest": 0
         }
@@ -616,45 +616,45 @@
       "contracts": [
         {
           "month": "202612",
-          "date": "20261005",
+          "date": "20261006",
           "session": "一般",
-          "bid": 1.1178,
-          "ask": 1.1294,
-          "last": 1.1199,
-          "settlement": 1.1236,
-          "volume": 54,
-          "openInterest": 41
+          "bid": null,
+          "ask": 1.1324,
+          "last": 1.1255,
+          "settlement": 1.1255,
+          "volume": 1,
+          "openInterest": 42
         },
         {
           "month": "202703",
-          "date": "20261005",
+          "date": "20261006",
           "session": "一般",
           "bid": null,
           "ask": null,
           "last": null,
-          "settlement": 1.128,
+          "settlement": 1.1299,
           "volume": 0,
           "openInterest": 40
         },
         {
           "month": "202706",
-          "date": "20261005",
+          "date": "20261006",
           "session": "一般",
           "bid": null,
           "ask": null,
           "last": null,
-          "settlement": 1.1327,
+          "settlement": 1.1346,
           "volume": 0,
           "openInterest": 0
         },
         {
           "month": "202709",
-          "date": "20261005",
+          "date": "20261006",
           "session": "一般",
           "bid": null,
           "ask": null,
           "last": null,
-          "settlement": 1.1375,
+          "settlement": 1.1394,
           "volume": 0,
           "openInterest": 0
         }
@@ -665,45 +665,45 @@
       "contracts": [
         {
           "month": "202612",
-          "date": "20261005",
+          "date": "20261006",
           "session": "一般",
-          "bid": 156.08,
-          "ask": 156.85,
-          "last": 156.77,
-          "settlement": 156.77,
-          "volume": 26,
-          "openInterest": 341
+          "bid": 156.8,
+          "ask": 157.31,
+          "last": 157.17,
+          "settlement": 157.17,
+          "volume": 75,
+          "openInterest": 358
         },
         {
           "month": "202703",
-          "date": "20261005",
+          "date": "20261006",
           "session": "一般",
           "bid": null,
           "ask": null,
-          "last": 155.73,
-          "settlement": 155.73,
-          "volume": 55,
+          "last": 156.05,
+          "settlement": 156.05,
+          "volume": 16,
           "openInterest": 133
         },
         {
           "month": "202706",
-          "date": "20261005",
+          "date": "20261006",
           "session": "一般",
           "bid": null,
           "ask": null,
           "last": null,
-          "settlement": 154.27,
+          "settlement": 154.67,
           "volume": 0,
           "openInterest": 0
         },
         {
           "month": "202709",
-          "date": "20261005",
+          "date": "20261006",
           "session": "一般",
           "bid": null,
           "ask": null,
           "last": null,
-          "settlement": 153.31,
+          "settlement": 153.71,
           "volume": 0,
           "openInterest": 0
         }
@@ -714,45 +714,45 @@
       "contracts": [
         {
           "month": "202612",
-          "date": "20261005",
+          "date": "20261006",
           "session": "一般",
           "bid": null,
           "ask": null,
-          "last": 1.3215,
-          "settlement": 1.3215,
-          "volume": 55,
+          "last": 1.3208,
+          "settlement": 1.3208,
+          "volume": 1,
           "openInterest": 6
         },
         {
           "month": "202703",
-          "date": "20261005",
-          "session": "一般",
-          "bid": null,
-          "ask": null,
-          "last": 1.3227,
-          "settlement": 1.3227,
-          "volume": 50,
-          "openInterest": 0
-        },
-        {
-          "month": "202706",
-          "date": "20261005",
+          "date": "20261006",
           "session": "一般",
           "bid": null,
           "ask": null,
           "last": null,
-          "settlement": 1.3224,
+          "settlement": 1.322,
+          "volume": 0,
+          "openInterest": 0
+        },
+        {
+          "month": "202706",
+          "date": "20261006",
+          "session": "一般",
+          "bid": null,
+          "ask": null,
+          "last": null,
+          "settlement": 1.3217,
           "volume": 0,
           "openInterest": 0
         },
         {
           "month": "202709",
-          "date": "20261005",
+          "date": "20261006",
           "session": "一般",
           "bid": null,
           "ask": null,
           "last": null,
-          "settlement": 1.3228,
+          "settlement": 1.3221,
           "volume": 0,
           "openInterest": 0
         }
@@ -763,45 +763,45 @@
       "contracts": [
         {
           "month": "202612",
-          "date": "20261005",
+          "date": "20261006",
           "session": "一般",
-          "bid": 0.6926,
-          "ask": 0.6985,
+          "bid": null,
+          "ask": 0.7,
           "last": null,
-          "settlement": 0.6955,
+          "settlement": 0.6969,
           "volume": 0,
           "openInterest": 11
         },
         {
           "month": "202703",
-          "date": "20261005",
+          "date": "20261006",
           "session": "一般",
           "bid": null,
           "ask": null,
           "last": null,
-          "settlement": 0.6948,
+          "settlement": 0.6962,
           "volume": 0,
           "openInterest": 40
         },
         {
           "month": "202706",
-          "date": "20261005",
+          "date": "20261006",
           "session": "一般",
           "bid": null,
           "ask": null,
           "last": null,
-          "settlement": 0.6942,
+          "settlement": 0.6957,
           "volume": 0,
           "openInterest": 0
         },
         {
           "month": "202709",
-          "date": "20261005",
+          "date": "20261006",
           "session": "一般",
           "bid": null,
           "ask": null,
           "last": null,
-          "settlement": 0.6939,
+          "settlement": 0.6954,
           "volume": 0,
           "openInterest": 0
         }
@@ -812,67 +812,67 @@
       "contracts": [
         {
           "month": "202610",
-          "date": "20261005",
+          "date": "20261006",
           "session": "一般",
-          "bid": 4140,
-          "ask": 4244,
-          "last": 4149,
-          "settlement": 4149,
-          "volume": 31,
-          "openInterest": 311
+          "bid": 4118,
+          "ask": 4194,
+          "last": 4142.8,
+          "settlement": 4142.8,
+          "volume": 115,
+          "openInterest": 286
         },
         {
           "month": "202612",
-          "date": "20261005",
+          "date": "20261006",
           "session": "一般",
-          "bid": 4178,
-          "ask": 4282,
-          "last": null,
-          "settlement": 4178,
-          "volume": 0,
-          "openInterest": 15
+          "bid": 4143,
+          "ask": 4232,
+          "last": 4179.5,
+          "settlement": 4179.5,
+          "volume": 144,
+          "openInterest": 53
         },
         {
           "month": "202702",
-          "date": "20261005",
+          "date": "20261006",
           "session": "一般",
           "bid": null,
           "ask": null,
           "last": null,
-          "settlement": 4195.1,
+          "settlement": 4188.9,
           "volume": 0,
           "openInterest": 0
         },
         {
           "month": "202704",
-          "date": "20261005",
+          "date": "20261006",
           "session": "一般",
           "bid": null,
           "ask": null,
           "last": null,
-          "settlement": 4217.3,
+          "settlement": 4211.1,
           "volume": 0,
           "openInterest": 0
         },
         {
           "month": "202706",
-          "date": "20261005",
+          "date": "20261006",
           "session": "一般",
           "bid": null,
           "ask": null,
           "last": null,
-          "settlement": 4252.4,
+          "settlement": 4246.2,
           "volume": 0,
           "openInterest": 0
         },
         {
           "month": "202708",
-          "date": "20261005",
+          "date": "20261006",
           "session": "一般",
           "bid": null,
           "ask": null,
           "last": null,
-          "settlement": 4298.9,
+          "settlement": 4292.7,
           "volume": 0,
           "openInterest": 0
         }
@@ -883,67 +883,67 @@
       "contracts": [
         {
           "month": "202610",
-          "date": "20261005",
+          "date": "20261006",
           "session": "一般",
-          "bid": 16021.5,
-          "ask": 16288,
-          "last": 16112.5,
-          "settlement": 16112.5,
-          "volume": 70,
-          "openInterest": 1703
+          "bid": 15915.5,
+          "ask": 16086,
+          "last": 16050,
+          "settlement": 16050,
+          "volume": 212,
+          "openInterest": 1701
         },
         {
           "month": "202612",
-          "date": "20261005",
+          "date": "20261006",
           "session": "一般",
-          "bid": 16150,
-          "ask": 16416.5,
-          "last": 16232.5,
-          "settlement": 16232.5,
-          "volume": 219,
-          "openInterest": 645
+          "bid": 16050,
+          "ask": 16220.5,
+          "last": 16145,
+          "settlement": 16145,
+          "volume": 4,
+          "openInterest": 650
         },
         {
           "month": "202702",
-          "date": "20261005",
+          "date": "20261006",
           "session": "一般",
-          "bid": 16230,
-          "ask": 17256,
+          "bid": 15458,
+          "ask": 17084,
           "last": null,
-          "settlement": 16271,
+          "settlement": 16208.5,
           "volume": 0,
           "openInterest": 0
         },
         {
           "month": "202704",
-          "date": "20261005",
+          "date": "20261006",
           "session": "一般",
           "bid": null,
           "ask": null,
           "last": null,
-          "settlement": 16423,
+          "settlement": 16360.5,
           "volume": 0,
           "openInterest": 0
         },
         {
           "month": "202706",
-          "date": "20261005",
+          "date": "20261006",
           "session": "一般",
           "bid": null,
           "ask": null,
           "last": null,
-          "settlement": 16318.5,
+          "settlement": 16256,
           "volume": 0,
           "openInterest": 0
         },
         {
           "month": "202708",
-          "date": "20261005",
+          "date": "20261006",
           "session": "一般",
           "bid": null,
           "ask": null,
           "last": null,
-          "settlement": 16643.5,
+          "settlement": 16581,
           "volume": 0,
           "openInterest": 0
         }
@@ -954,56 +954,56 @@
       "contracts": [
         {
           "month": "202612",
-          "date": "20261005",
+          "date": "20261006",
           "session": "一般",
-          "bid": 3100.5,
-          "ask": 3299.5,
-          "last": 3228,
-          "settlement": 3228,
-          "volume": 3,
-          "openInterest": 84
+          "bid": 3201,
+          "ask": 3209.5,
+          "last": 3209,
+          "settlement": 3209,
+          "volume": 5,
+          "openInterest": 89
         },
         {
           "month": "202701",
-          "date": "20261005",
+          "date": "20261006",
           "session": "一般",
-          "bid": 2918,
-          "ask": 3299.5,
+          "bid": 3109,
+          "ask": 3117.5,
           "last": 3113,
           "settlement": 3113,
-          "volume": 4,
-          "openInterest": 13
+          "volume": 6,
+          "openInterest": 8
         },
         {
           "month": "202702",
-          "date": "20261005",
+          "date": "20261006",
           "session": "一般",
           "bid": null,
           "ask": null,
           "last": null,
-          "settlement": 3029.5,
+          "settlement": 3010.5,
           "volume": 0,
           "openInterest": 0
         },
         {
           "month": "202706",
-          "date": "20261005",
+          "date": "20261006",
           "session": "一般",
           "bid": null,
           "ask": null,
           "last": null,
-          "settlement": 2806,
+          "settlement": 2787,
           "volume": 0,
           "openInterest": 0
         },
         {
           "month": "202712",
-          "date": "20261005",
+          "date": "20261006",
           "session": "一般",
           "bid": null,
           "ask": null,
           "last": null,
-          "settlement": 2600,
+          "settlement": 2581,
           "volume": 0,
           "openInterest": 0
         }
