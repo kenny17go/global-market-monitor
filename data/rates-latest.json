@@ -3,8 +3,8 @@
     "source": "Official central banks + U.S. Department of the Treasury",
     "mode": "OFFICIAL / OFFICIAL DAILY",
     "realtime": false,
-    "asOf": "2026-11-04T00:00:00",
-    "generatedAt": "2026-11-05T20:00:13.374Z",
+    "asOf": "2026-11-05T00:00:00",
+    "generatedAt": "2026-11-06T00:57:18.013Z",
     "treasuryEndpoint": "https://home.treasury.gov/resource-center/data-chart-center/interest-rates/pages/xml?data=daily_treasury_yield_curve&field_tdr_date_value=2026",
     "note": "Policy rates are refreshed from official central-bank/public pages when parsable; conservative last-known official values are retained if a source page is temporarily unavailable. Fed is shown as the target range; ECB uses the deposit facility; CBC uses the discount rate; PBOC uses 1Y LPR."
   },
@@ -25,7 +25,7 @@
       "next": "2026-12-17",
       "source": "ECB · Deposit Facility",
       "mode": "OFFICIAL",
-      "asOf": "2026-11-05"
+      "asOf": "2026-11-06"
     },
     {
       "name": "日本 BOJ",
@@ -39,10 +39,10 @@
       "name": "英國 BOE",
       "rate": 4,
       "displayRate": "4.00%",
-      "next": "2026-11-05",
+      "next": "2026-12-17",
       "source": "Bank of England",
       "mode": "OFFICIAL",
-      "asOf": "2026-11-05"
+      "asOf": "2026-11-06"
     },
     {
       "name": "台灣 CBC",
@@ -51,7 +51,7 @@
       "next": "2026-12-17",
       "source": "CBC Taiwan · Discount Rate",
       "mode": "OFFICIAL",
-      "asOf": "2026-11-05"
+      "asOf": "2026-11-06"
     },
     {
       "name": "香港 HKMA",
@@ -74,35 +74,35 @@
   "ust": [
     {
       "tenor": "1M",
-      "yield": 4.01
+      "yield": 4.03
     },
     {
       "tenor": "3M",
-      "yield": 4.21
+      "yield": 4.17
     },
     {
       "tenor": "6M",
-      "yield": 4.25
+      "yield": 4.19
     },
     {
       "tenor": "1Y",
-      "yield": 4.39
+      "yield": 4.28
     },
     {
       "tenor": "2Y",
-      "yield": 4.58
+      "yield": 4.46
     },
     {
       "tenor": "5Y",
-      "yield": 4.69
+      "yield": 4.59
     },
     {
       "tenor": "10Y",
-      "yield": 4.9
+      "yield": 4.84
     },
     {
       "tenor": "30Y",
-      "yield": 5.28
+      "yield": 5.25
     }
   ]
 }
