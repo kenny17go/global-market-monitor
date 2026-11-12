@@ -3,8 +3,8 @@
     "source": "Official central banks + U.S. Department of the Treasury",
     "mode": "OFFICIAL / OFFICIAL DAILY",
     "realtime": false,
-    "asOf": "2026-11-10T00:00:00",
-    "generatedAt": "2026-11-12T18:16:38.438Z",
+    "asOf": "2026-11-12T00:00:00",
+    "generatedAt": "2026-11-12T23:40:20.007Z",
     "treasuryEndpoint": "https://home.treasury.gov/resource-center/data-chart-center/interest-rates/pages/xml?data=daily_treasury_yield_curve&field_tdr_date_value=2026",
     "note": "Policy rates are refreshed from official central-bank/public pages when parsable; conservative last-known official values are retained if a source page is temporarily unavailable. Fed is shown as the target range; ECB uses the deposit facility; CBC uses the discount rate; PBOC uses 1Y LPR."
   },
@@ -74,35 +74,35 @@
   "ust": [
     {
       "tenor": "1M",
-      "yield": 4.05
+      "yield": 4.12
     },
     {
       "tenor": "3M",
-      "yield": 4.3
+      "yield": 4.32
     },
     {
       "tenor": "6M",
-      "yield": 4.38
+      "yield": 4.42
     },
     {
       "tenor": "1Y",
-      "yield": 4.56
+      "yield": 4.65
     },
     {
       "tenor": "2Y",
-      "yield": 4.73
+      "yield": 4.86
     },
     {
       "tenor": "5Y",
-      "yield": 4.81
+      "yield": 4.95
     },
     {
       "tenor": "10Y",
-      "yield": 4.98
+      "yield": 5.1
     },
     {
       "tenor": "30Y",
-      "yield": 5.35
+      "yield": 5.43
     }
   ]
 }
